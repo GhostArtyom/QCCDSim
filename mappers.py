@@ -49,6 +49,9 @@ class QubitMapGreedy:
         # if it does, then it is a 2 qubit gate
         # if not, then continue
         for g in self.parse_obj.gate_graph:
+            # 只处理存在于 cx_gate_map 中的门（CX门）
+            if g not in self.parse_obj.cx_gate_map:
+                continue  # 跳过非CX门
             g_qubits = self.parse_obj.cx_gate_map[g]
             tup = self.gate_tuple(g_qubits)
             if tup in edge_weights:
@@ -149,6 +152,9 @@ class QubitMapLPFS:
             for g in path:
                 if len(qubit_set) >= cap-1:
                     break
+                # 只处理CX门，跳过非CX门
+                if g not in self.parse_obj.cx_gate_map:
+                    continue
                 g_qubits = self.parse_obj.cx_gate_map[g]
                 if g == 992:
                     print(g_qubits)

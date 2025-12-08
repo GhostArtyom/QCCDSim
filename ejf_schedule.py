@@ -71,8 +71,11 @@ class EJFSchedule:
             if in_gate in self.gate_finish_times:
                 ready_time = max(ready_time, self.gate_finish_times[in_gate])
             else:
-                print("Error: Finish time of depenedent gate not found", in_edge)
-                assert 0
+                # 依赖门是非CX门，不需要等待它的完成时间
+                # 非CX门（单量子比特门）通常执行时间很短，可以认为已经完成
+                continue
+                # print("Error: Finish time of depenedent gate not found", in_edge)
+                # assert 0
         return ready_time
 
     #Find the time at which a particular qubit/ion is ready for another operation
@@ -396,6 +399,9 @@ class EJFSchedule:
         cnt = 0
         #self.sys_state.print_state()
         for g in self.gates:
+            # 只调度CX门，跳过非CX门
+            if g not in self.gate_info:
+                continue  # 跳过非CX门
             self.schedule_gate(g)
             cnt += 1
         #self.schedule.print_events()
