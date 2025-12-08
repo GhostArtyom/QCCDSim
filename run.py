@@ -82,7 +82,7 @@ ip.visualize_graph("visualize_graph_2.gexf") # dumps parser graph into file
 
 qc = QuantumCircuit.from_qasm_file(openqasm_file_name)
 dag = circuit_to_dag(qc)
-dag_drawer(dag)
+dag_drawer(dag, filename=f"{openqasm_file_name[:-5]}.svg")
 
 print("parse object map:")
 print(ip.cx_gate_map)
