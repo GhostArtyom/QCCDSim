@@ -1,20 +1,22 @@
-'''
+"""
 This class is used to represent a snapshot of machine state and manipulate that state
 Machine state at a given point is
 which qubits are sitting in which traps --> self.trap_ions
 which qubits are sitting in which segments --> self.seg_ions
-'''
+"""
+
 from utils import *
+
 
 class MachineState:
     def __init__(self, ts, trap_ions, seg_ions):
-        self.ts = ts #timestamp
+        self.ts = ts  # timestamp
         self.trap_ions = trap_ions
         self.seg_ions = seg_ions
 
-    #Given a trap and a connected segment, and a set of ions in this trap,
-    #remove ions from the trap and add it to the segment
-    #analogous operations in merge and move
+    # Given a trap and a connected segment, and a set of ions in this trap,
+    # remove ions from the trap and add it to the segment
+    # analogous operations in merge and move
     def process_split(self, trap, seg, ions):
         if not seg in self.seg_ions:
             self.seg_ions[seg] = []
@@ -52,5 +54,5 @@ class MachineState:
         print("Machine State")
         for t in self.trap_ions.keys():
             print(trap_name(t), len(self.trap_ions[t]), self.trap_ions[t])
-        #for s in self.seg_ions.keys():
+        # for s in self.seg_ions.keys():
         #    print(seg_name(s), len(self.seg_ions[s]), self.seg_ions[s])

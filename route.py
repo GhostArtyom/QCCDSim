@@ -6,6 +6,7 @@ from utils import *
 from machine_state import MachineState
 from machine import Trap, Segment, Junction
 
+
 class BasicRoute:
     def __init__(self, machine):
         self.machine = machine
@@ -17,13 +18,14 @@ class BasicRoute:
         path = nx.shortest_path(graph, source=tsrc, target=tdest)
         return path
 
+
 class FreeTrapRoute:
     def __init__(self, machine, sys_state):
         self.machine = machine
         self.ss = sys_state
 
     def find_route(self, source_trap, dest_trap):
-        #print("Check route:", source_trap, dest_trap)
+        # print("Check route:", source_trap, dest_trap)
         m = self.machine
         ss = self.ss
         edge_states = {}
@@ -38,7 +40,7 @@ class FreeTrapRoute:
                 e0 = v
                 e1 = u
             elif type(u) == Junction and type(v) == Junction:
-                #TODO: set zero weight
+                # TODO: set zero weight
                 edge_states[(u, v)] = 0
                 edge_states[(v, u)] = 0
                 continue
@@ -50,18 +52,18 @@ class FreeTrapRoute:
                 edge_states[(e0, e1)] = 0
                 edge_states[(e1, e0)] = 0
 
-        nx.set_edge_attributes(m.graph, edge_states, 'block_status')
-        ret = nx.shortest_path(m.graph, source=m.traps[source_trap], target=m.traps[dest_trap], weight='block_status')
+        nx.set_edge_attributes(m.graph, edge_states, "block_status")
+        ret = nx.shortest_path(m.graph, source=m.traps[source_trap], target=m.traps[dest_trap], weight="block_status")
         cost = 0
-        for i in range(len(ret)-1):
+        for i in range(len(ret) - 1):
             u = ret[i]
-            v = ret[i+1]
-            if (u,v) in edge_states:
+            v = ret[i + 1]
+            if (u, v) in edge_states:
                 cost += edge_states[(u, v)]
-            elif (v,u) in edge_states:
+            elif (v, u) in edge_states:
                 cost += edge_states[(v, u)]
         if cost > 1:
-            '''
+            """
             for item in edge_states:
                 u = item[0]
                 v = item[1]
@@ -74,10 +76,11 @@ class FreeTrapRoute:
                 else:
                     print(item)
             print("")
-            '''
+            """
             return 1, ret
         else:
             return 0, ret
+
 
 class RouteAlgorithm:
     def __init__(self, machine):
@@ -105,25 +108,25 @@ class RouteAlgorithm:
         routing_graph = self.routing_graph
         for t in machine_obj.traps:
             if t.end1_segment != None:
-                my_weight = (machine_obj.segments[t.end1_segment].length)/2
-                routing_graph[trap_name(t.id)][seg_name(t.end1_segment)]['weight'] = my_weight
+                my_weight = (machine_obj.segments[t.end1_segment].length) / 2
+                routing_graph[trap_name(t.id)][seg_name(t.end1_segment)]["weight"] = my_weight
             if t.end2_segment != None:
-                my_weight = (machine_obj.segments[t.end2_segment].length)/2
-                routing_graph[trap_name(t.id)][seg_name(t.end2_segment)]['weight'] = my_weight
+                my_weight = (machine_obj.segments[t.end2_segment].length) / 2
+                routing_graph[trap_name(t.id)][seg_name(t.end2_segment)]["weight"] = my_weight
         for s in machine_obj.segments:
             for s2 in s.seg_edges:
-                my_weight = (s.length + machine_obj.segments[s2].length)/2
-                routing_graph[seg_name(s.id)][seg_name(s2)]['weight'] = my_weight
+                my_weight = (s.length + machine_obj.segments[s2].length) / 2
+                routing_graph[seg_name(s.id)][seg_name(s2)]["weight"] = my_weight
 
     def setup_routing(self):
-        #if self.machine_state.check_ion_in_a_trap(self.ion1) == 0 or self.machine_state.check_ion_in_a_trap(self.ion2) == 0:
+        # if self.machine_state.check_ion_in_a_trap(self.ion1) == 0 or self.machine_state.check_ion_in_a_trap(self.ion2) == 0:
         #    return -1
         self.routing_graph = nx.Graph()
         self.create_routing_graph()
         self.add_routing_graph_weights()
-        #source_trap = self.machine_state.find_trap_id_by_ion(self.ion1)
-        #dest_trap = self.machine_state.find_trap_id_by_ion(self.ion2)
+        # source_trap = self.machine_state.find_trap_id_by_ion(self.ion1)
+        # dest_trap = self.machine_state.find_trap_id_by_ion(self.ion2)
 
     def find_route(self, source_trap, dest_trap):
-        path = nx.shortest_path(self.routing_graph, source=trap_name(source_trap), target=trap_name(dest_trap), weight='weight')
+        path = nx.shortest_path(self.routing_graph, source=trap_name(source_trap), target=trap_name(dest_trap), weight="weight")
         return path

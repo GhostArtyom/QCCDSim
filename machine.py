@@ -1,8 +1,9 @@
-'''
+"""
 Machine class definition
-'''
+"""
+
 import networkx as nx
-import numpy as np
+
 
 class Trap:
     def __init__(self, idx, capacity):
@@ -12,7 +13,8 @@ class Trap:
         self.orientation = {}
 
     def show(self):
-        return "T"+str(self.id)
+        return "T" + str(self.id)
+
 
 class Segment:
     def __init__(self, idx, capacity, length):
@@ -21,22 +23,26 @@ class Segment:
         self.length = length
         self.ions = []
 
+
 class Junction:
     def __init__(self, idx):
         self.id = idx
         self.objs = []
 
     def show(self):
-        return "J"+str(self.id)
+        return "J" + str(self.id)
 
-'''
+
+"""
 Machine has a set of traps, segmenents and junctions
 graph object represents the machine topology
-'''
+"""
+
 
 class MachineParams:
     def __init__(self):
         return
+
 
 class Machine:
     def __init__(self, mparams):
@@ -58,15 +64,15 @@ class Machine:
         self.graph.add_node(new_junct)
         return new_junct
 
-    def add_segment(self, idx, obj1, obj2, orientation='L'):
+    def add_segment(self, idx, obj1, obj2, orientation="L"):
         new_seg = Segment(idx, 16, 10)
         self.segments.append(new_seg)
         if type(obj1) == Trap:
             obj1.orientation[new_seg.id] = orientation
-            #Note: orientation is indexed by the segment object, not junction
+            # Note: orientation is indexed by the segment object, not junction
         if type(obj1) == Junction and type(obj2) == Trap:
             print("Unsupported API: add_segment junction,trap not allowed")
-            assert(0)
+            assert 0
         self.graph.add_edge(obj1, obj2, seg=new_seg)
 
     def add_comm_capacity(self, val):
@@ -82,21 +88,23 @@ class Machine:
         mp = self.mparams
         p1 = sys_state.trap_ions[trap_id].index(ion1)
         p2 = sys_state.trap_ions[trap_id].index(ion2)
-        d_const = 1 #um
-        ion_dist = abs(p1-p2)*d_const
+        d_const = 1  # um
+        ion_dist = abs(p1 - p2) * d_const
         if mp.gate_type == "Duan":
-            t = -22 + 100*ion_dist
+            t = -22 + 100 * ion_dist
         elif mp.gate_type == "Trout":
-            t = 10 + 38*ion_dist
+            t = 10 + 38 * ion_dist
         elif mp.gate_type == "FM":
             trap_capacity = self.traps[0].capacity
-            t = max(100, 13.33*trap_capacity-54)
+            t = max(100, 13.33 * trap_capacity - 54)
         elif mp.gate_type == "PM":
-            t = 160 + 5*ion_dist
+            t = 160 + 5 * ion_dist
         else:
             assert 0
         t = max(t, 1)
-        return int(t)
+
+        # return int(t) 文献55的设置
+        return 40  # MUSS设置固定为40ns
 
     def split_time(self, sys_state, trap_id, seg_id, ion1):
         t = self.traps[trap_id]
@@ -106,10 +114,10 @@ class Machine:
         split_swap_hops = 0
         i1 = 0
         i2 = 0
-        if t.orientation[seg_id] == 'L':
-            ion2 = sys_state.trap_ions[trap_id][0] #Swap to left end
+        if t.orientation[seg_id] == "L":
+            ion2 = sys_state.trap_ions[trap_id][0]  # Swap to left end
         else:
-            ion2 = sys_state.trap_ions[trap_id][-1] #Swap to right end
+            ion2 = sys_state.trap_ions[trap_id][-1]  # Swap to right end
         if ion1 == ion2:
             split_estimate = self.mparams.split_merge_time
             split_swap_count = 0
@@ -117,24 +125,24 @@ class Machine:
         else:
             mp = self.mparams
             if mp.swap_type == "GateSwap":
-                swap_est = 3*self.gate_time(sys_state, trap_id, ion1, ion2)
+                swap_est = 3 * self.gate_time(sys_state, trap_id, ion1, ion2)
                 split_estimate = swap_est + self.mparams.split_merge_time
                 p1 = sys_state.trap_ions[trap_id].index(ion1)
                 p2 = sys_state.trap_ions[trap_id].index(ion2)
                 split_swap_count = 1
-                split_swap_hops = abs(p1-p2)
+                split_swap_hops = abs(p1 - p2)
                 i1 = ion1
                 i2 = ion2
             elif mp.swap_type == "IonSwap":
                 p1 = sys_state.trap_ions[trap_id].index(ion1)
                 p2 = sys_state.trap_ions[trap_id].index(ion2)
-                num_hops = abs(p1-p2)
-                swap_est = num_hops*self.mparams.split_merge_time #n splits
-                swap_est += (num_hops-1)*self.mparams.split_merge_time #n-1 merges
-                swap_est += self.mparams.ion_swap_time*num_hops #n moves
+                num_hops = abs(p1 - p2)
+                swap_est = num_hops * self.mparams.split_merge_time  # n splits
+                swap_est += (num_hops - 1) * self.mparams.split_merge_time  # n-1 merges
+                swap_est += self.mparams.ion_swap_time * num_hops  # n moves
                 split_estimate = swap_est
                 ion_swap_hops = num_hops
-        #print("SWAP", trap_id, seg_id, sys_state.trap_ions[trap_id], ion1, ion2, t.orientation, swap_est)
+        # print("SWAP", trap_id, seg_id, sys_state.trap_ions[trap_id], ion1, ion2, t.orientation, swap_est)
         return int(split_estimate), split_swap_count, split_swap_hops, i1, i2, ion_swap_hops
 
     def merge_time(self, trap_id):
@@ -144,7 +152,7 @@ class Machine:
         return int(self.mparams.shuttle_time)
 
     def junction_cross_time(self, junct):
-        #find junction type
+        # find junction type
         deg = self.graph.degree(junct)
         if deg == 2:
             return self.mparams.junction2_cross_time
@@ -156,3 +164,36 @@ class Machine:
             print("Junction degree", deg, " not supported.")
             assert 0
         return 0
+
+    # 在 Machine 类中添加
+    def single_qubit_gate_time(self, gate_type):
+        # 根据 gate_type 返回时间
+        # MUSS-TI 论文中单比特门通常假设很快，或者你可以给一个固定值
+        # 假设单比特门耗时 5us
+        return 5
+
+    def precompute_distances(self):
+        self.dist_cache = {}
+        # 建立 ID 到 Trap 对象的映射
+        id_map = {t.id: t for t in self.traps}
+
+        # 使用 NetworkX 计算所有节点对之间的最短路径长度 (BFS)
+        # 这里计算的是跳数 (Hops)，即经过的 Segment 数量
+        try:
+            all_paths = dict(nx.all_pairs_shortest_path_length(self.graph))
+        except Exception as e:
+            print("Warning: Failed to compute distances:", e)
+            all_paths = {}
+
+        # 将结果存入 dist_cache，键为 (id1, id2)
+        for id1 in id_map:
+            for id2 in id_map:
+                t1 = id_map[id1]
+                t2 = id_map[id2]
+
+                if t1 == t2:
+                    self.dist_cache[(id1, id2)] = 0
+                elif t1 in all_paths and t2 in all_paths[t1]:
+                    self.dist_cache[(id1, id2)] = all_paths[t1][t2]
+                else:
+                    self.dist_cache[(id1, id2)] = 1000  # 不可达时的惩罚值

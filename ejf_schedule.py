@@ -1,4 +1,4 @@
-'''
+"""
 Schedules gates in topologically sorted order
 Policy is called EJF Earliest Job First, because its similar to the famous job scheduling policy
 
@@ -6,7 +6,7 @@ done - handle case where both traps are full
 done - handle junction traffic flow
 todo - skip - handle preemption??
 todo - skip - handle traffic based routing
-'''
+"""
 
 import networkx as nx
 import numpy as np
@@ -17,38 +17,39 @@ from schedule import *
 from machine import Trap, Segment, Junction
 from rebalance import *
 
+
 class EJFSchedule:
-    #Inputs are
-    #1. gate dependency graph - IR
-    #2. gate_info = what are the qubits used by a two-qubit gate?
-    #3. M = machine object
-    #4. init_map = initial qubit mapping
+    # Inputs are
+    # 1. gate dependency graph - IR
+    # 2. gate_info = what are the qubits used by a two-qubit gate?
+    # 3. M = machine object
+    # 4. init_map = initial qubit mapping
     def __init__(self, ir, gate_info, M, init_map, serial_trap_ops, serial_comm, global_serial_lock):
         self.ir = ir
         self.gate_info = gate_info
         self.machine = M
         self.init_map = init_map
 
-        #Setup scheduler
+        # Setup scheduler
         self.machine.add_comm_capacity(2)
-        #Add space for 2 extra ions in each trap
-        self.SerialTrapOps = serial_trap_ops # ---> serializes operations on a single trap zone
-        self.SerialCommunication = serial_comm # ---> serializes all split/merge/move ops
-        self.GlobalSerialLock = global_serial_lock #---> serialize gates and comm
+        # Add space for 2 extra ions in each trap
+        self.SerialTrapOps = serial_trap_ops  # ---> serializes operations on a single trap zone
+        self.SerialCommunication = serial_comm  # ---> serializes all split/merge/move ops
+        self.GlobalSerialLock = global_serial_lock  # ---> serialize gates and comm
 
-        #SerialTrapOps enforces that all operations in a trap are serialized
-        #i.e., no parallel gates in a single ion chain/region
+        # SerialTrapOps enforces that all operations in a trap are serialized
+        # i.e., no parallel gates in a single ion chain/region
         self.schedule = Schedule(M)
         self.router = BasicRoute(M)
         self.gate_finish_times = {}
 
-        #Some scheduling statistics
-        #Count the number of times we had to clear some traps because of traffic blocks
+        # Some scheduling statistics
+        # Count the number of times we had to clear some traps because of traffic blocks
         self.count_rebalance = 0
         self.split_swap_counter = 0
 
-        #Create the sys_stage object which is used to track system state
-        #from the perspective of the scheduler
+        # Create the sys_stage object which is used to track system state
+        # from the perspective of the scheduler
         trap_ions = {}
         seg_ions = {}
         for i in M.traps:
@@ -59,14 +60,14 @@ class EJFSchedule:
         for i in M.segments:
             seg_ions[i.id] = []
         self.sys_state = MachineState(0, trap_ions, seg_ions)
-        #self.sys_state.print_state()
+        # self.sys_state.print_state()
 
-    #Find the earliest time at which a gate can be scheduled
-    #Earliest time = max(dependent gate times)
+    # Find the earliest time at which a gate can be scheduled
+    # Earliest time = max(dependent gate times)
     def gate_ready_time(self, gate):
         ready_time = 0
         for in_edge in self.ir.in_edges(gate):
-            #Each in edge is of the form (in_gate_id, this_gate_id)
+            # Each in edge is of the form (in_gate_id, this_gate_id)
             in_gate = in_edge[0]
             if in_gate in self.gate_finish_times:
                 ready_time = max(ready_time, self.gate_finish_times[in_gate])
@@ -74,26 +75,24 @@ class EJFSchedule:
                 # 依赖门是非CX门，不需要等待它的完成时间
                 # 非CX门（单量子比特门）通常执行时间很短，可以认为已经完成
                 continue
-                # print("Error: Finish time of depenedent gate not found", in_edge)
-                # assert 0
         return ready_time
 
-    #Find the time at which a particular qubit/ion is ready for another operation
+    # Find the time at which a particular qubit/ion is ready for another operation
     def ion_ready_info(self, ion_id):
         s = self.schedule
         this_ion_ops = s.filter_by_ion(s.events, ion_id)
         this_ion_last_op_time = 0
         this_ion_trap = None
-        #If there is some operation that has happened for this ion:
+        # If there is some operation that has happened for this ion:
         if len(this_ion_ops):
-            #The last operation on an ion is either a gate or a merge in a trap
+            # The last operation on an ion is either a gate or a merge in a trap
             assert (this_ion_ops[-1][1] == Schedule.Gate) or (this_ion_ops[-1][1] == Schedule.Merge)
-            #Pick up the time and location of last operation
+            # Pick up the time and location of last operation
             this_ion_last_op_time = this_ion_ops[-1][3]
-            this_ion_trap = this_ion_ops[-1][4]['trap']
+            this_ion_trap = this_ion_ops[-1][4]["trap"]
         else:
-            #Find which trap originally held this ion
-            #It shouldn't have changed because no ops have happened for this ion
+            # Find which trap originally held this ion
+            # It shouldn't have changed because no ops have happened for this ion
             did_not_find = True
             for trap_id in self.init_map.keys():
                 if ion_id in self.init_map[trap_id]:
@@ -102,16 +101,16 @@ class EJFSchedule:
                     break
             if did_not_find:
                 print("Did not find:", ion_id)
-            assert (did_not_find == False)
+            assert did_not_find == False
 
-        #Double checking ion location from sys_state object
+        # Double checking ion location from sys_state object
         if this_ion_trap != self.sys_state.find_trap_id_by_ion(ion_id):
             print(ion_id, this_ion_trap, self.sys_state.find_trap_id_by_ion(ion_id))
             self.sys_state.print_state()
             assert 0
         return this_ion_last_op_time, this_ion_trap
 
-    #Add a split operation to the current schedule
+    # Add a split operation to the current schedule
     def add_split_op(self, clk, src_trap, dest_seg, ion):
         m = self.machine
         if self.SerialTrapOps == 1:
@@ -133,7 +132,7 @@ class EJFSchedule:
         self.schedule.add_split_or_merge(split_start, split_end, [ion], src_trap.id, dest_seg.id, Schedule.Split, split_swap_count, split_swap_hops, i1, i2, ion_swap_hops)
         return split_end
 
-    #Add a merge operation to the current schedule
+    # Add a merge operation to the current schedule
     def add_merge_op(self, clk, dest_trap, src_seg, ion):
         m = self.machine
         if self.SerialTrapOps == 1:
@@ -153,8 +152,8 @@ class EJFSchedule:
         self.schedule.add_split_or_merge(merge_start, merge_end, [ion], dest_trap.id, src_seg.id, Schedule.Merge, 0, 0, 0, 0, 0)
         return merge_end
 
-    #Add a move operation to the current schedule
-    #This is one segment to segment move i.e., move ion from src_seg to dest_seg
+    # Add a move operation to the current schedule
+    # This is one segment to segment move i.e., move ion from src_seg to dest_seg
     def add_move_op(self, clk, src_seg, dest_seg, junct, ion):
         m = self.machine
         move_start = clk
@@ -171,7 +170,7 @@ class EJFSchedule:
         self.schedule.add_move(move_start, move_end, [ion], src_seg.id, dest_seg.id)
         return move_end
 
-    #Add a gate operation to the current schedule
+    # Add a gate operation to the current schedule
     def add_gate_op(self, clk, trap_id, gate, ion1, ion2):
         fire_time = clk
         if self.SerialTrapOps == 1:
@@ -186,16 +185,16 @@ class EJFSchedule:
         self.gate_finish_times[gate] = fire_time + gate_duration
         return fire_time + gate_duration
 
-    #Heuristic to determine direction of shuttling for two traps
+    # Heuristic to determine direction of shuttling for two traps
     def shuttling_direction(self, ion1_trap, ion2_trap):
-        #Other Possible policies: lookahead, traffic/path based
+        # Other Possible policies: lookahead, traffic/path based
         m = self.machine
         ss = self.sys_state
         excess_cap1 = m.traps[ion1_trap].capacity - len(ss.trap_ions[ion1_trap])
         excess_cap2 = m.traps[ion2_trap].capacity - len(ss.trap_ions[ion2_trap])
-        #both excess capacities can be 0 if the traps are full
-        frac_empty = float(excess_cap1)/m.traps[ion1_trap].capacity
-        #Whichever trap has more excess capacity choose that as the destination
+        # both excess capacities can be 0 if the traps are full
+        frac_empty = float(excess_cap1) / m.traps[ion1_trap].capacity
+        # Whichever trap has more excess capacity choose that as the destination
         if excess_cap1 > excess_cap2:
             dest_trap = ion1_trap
             source_trap = ion2_trap
@@ -206,121 +205,166 @@ class EJFSchedule:
         if excess_cap1 <= 0 and excess_cap2 <= 0:
             print(ion1_trap, ion2_trap)
             print(ss.trap_ions)
-            print("Both traps full", ion1_trap, m.traps[ion1_trap].capacity,  ss.trap_ions[ion1_trap])
+            print("Both traps full", ion1_trap, m.traps[ion1_trap].capacity, ss.trap_ions[ion1_trap])
             assert 0
         return source_trap, dest_trap
 
-    #Fire an end-to-end shuttle operation from src_trap to dest_trap
+    # Fire an end-to-end shuttle operation from src_trap to dest_trap
     def fire_shuttle(self, src_trap, dest_trap, ion, gate_fire_time, route=[]):
         s = self.schedule
         m = self.machine
-        #If route is not specified in the function args, find a route using
-        #the router object passed to the scheduler
+        # If route is not specified in the function args, find a route using
+        # the router object passed to the scheduler
         if len(route):
             rpath = route
         else:
             rpath = self.router.find_route(src_trap, dest_trap)
 
-        #Find the time that it will take to do this entire shuttle
-        #This is required to find a feasible time for scheduling this shuttle
+        # Find the time that it will take to do this entire shuttle
+        # This is required to find a feasible time for scheduling this shuttle
         t_est = 0
-        for i in range(len(rpath)-1):
+        for i in range(len(rpath) - 1):
             src = rpath[i]
-            dest = rpath[i+1]
+            dest = rpath[i + 1]
             if type(src) == Trap and type(dest) == Junction:
-                my_seg = m.graph[src][dest]['seg']
+                my_seg = m.graph[src][dest]["seg"]
                 t_est += m.mparams.split_merge_time
-                #split_time(self.sys_state, src.id, my_seg.id, ion)
+                # split_time(self.sys_state, src.id, my_seg.id, ion)
             elif type(src) == Junction and type(dest) == Junction:
                 t_est += m.move_time(src.id, dest.id)
             elif type(src) == Junction and type(dest) == Trap:
                 t_est += m.merge_time(dest.id)
 
-        #This is the traffic-unaware/conservative version where we wait for the full path to be available
+        # This is the traffic-unaware/conservative version where we wait for the full path to be available
         clk = self.schedule.identify_start_time(rpath, gate_fire_time, t_est)
 
-        #Add the shuttling operations to the schedule based on the identified start time
+        # Add the shuttling operations to the schedule based on the identified start time
         clk = self._add_shuttle_ops(rpath, ion, clk)
 
-        #self.sys_state.trap_ions[src_trap].remove(ion)
-        #self.sys_state.trap_ions[dest_trap].append(ion)
+        # self.sys_state.trap_ions[src_trap].remove(ion)
+        # self.sys_state.trap_ions[dest_trap].append(ion)
         return clk
 
-    #Helper function to implement a shuttle
+    # Helper function to implement a shuttle
     def _add_shuttle_ops(self, spath, ion, clk):
-        #Decompose into trap-trap paths
-        #For each trap to trap path call a split-move*-merge sequence
+        # Decompose into trap-trap paths
+        # For each trap to trap path call a split-move*-merge sequence
         trap_pos = []
         for i in range(len(spath)):
             if type(spath[i]) == Trap:
                 trap_pos.append(i)
-        for i in range(len(trap_pos)-1):
+        for i in range(len(trap_pos) - 1):
             idx0 = trap_pos[i]
-            idx1 = trap_pos[i+1]+1
+            idx1 = trap_pos[i + 1] + 1
             clk = self._add_partial_shuttle_ops(spath[idx0:idx1], ion, clk)
             self.sys_state.trap_ions[spath[trap_pos[i]].id].remove(ion)
-            last_junct = spath[trap_pos[i+1]-1]
-            dest_trap = spath[trap_pos[i+1]]
-            last_seg = self.machine.graph[last_junct][dest_trap]['seg']
+            last_junct = spath[trap_pos[i + 1] - 1]
+            dest_trap = spath[trap_pos[i + 1]]
+            last_seg = self.machine.graph[last_junct][dest_trap]["seg"]
             orient = dest_trap.orientation[last_seg.id]
-            if orient == 'R':
-                self.sys_state.trap_ions[spath[trap_pos[i+1]].id].append(ion)
+            if orient == "R":
+                self.sys_state.trap_ions[spath[trap_pos[i + 1]].id].append(ion)
             else:
-                self.sys_state.trap_ions[spath[trap_pos[i+1]].id].insert(0, ion)
+                self.sys_state.trap_ions[spath[trap_pos[i + 1]].id].insert(0, ion)
         return clk
 
-    #Helper function to implement a shuttle
+    # Helper function to implement a shuttle
     def _add_partial_shuttle_ops(self, spath, ion, clk):
         assert len([item for item in spath if type(item) == Trap]) == 2
         seg_list = []
-        for i in range(len(spath)-1):
+        for i in range(len(spath) - 1):
             u = spath[i]
-            v = spath[i+1]
-            seg_list.append(self.machine.graph[u][v]['seg'])
+            v = spath[i + 1]
+            seg_list.append(self.machine.graph[u][v]["seg"])
         clk = self.add_split_op(clk, spath[0], seg_list[0], ion)
-        for i in range(len(seg_list)-1):
+        for i in range(len(seg_list) - 1):
             u = seg_list[i]
-            v = seg_list[i+1]
-            junct = spath[1+i]
+            v = seg_list[i + 1]
+            junct = spath[1 + i]
             clk = self.add_move_op(clk, u, v, junct, ion)
         clk = self.add_merge_op(clk, spath[-1], seg_list[-1], ion)
         return clk
 
-    #Main scheduling function for a gate
+    # Main scheduling function for a gate
+    # === EJFSchedule 中的 schedule_gate 修改版 ===
     def schedule_gate(self, gate, specified_time=0):
-        s = self.schedule
-        #Find time at which the gate can be fired
-        ready = self.gate_ready_time(gate)
-        ion1 = self.gate_info[gate][0]
-        ion2 = self.gate_info[gate][1]
-        #Find time at which ions are ready
-        ion1_time, ion1_trap = self.ion_ready_info(ion1)
-        ion2_time, ion2_trap = self.ion_ready_info(ion2)
-        fire_time = max(ready, ion1_time, ion2_time)
-        fire_time = max(fire_time, specified_time)
+        # 1. 获取门信息 (适配 parse.py 修改后的结构)
+        if gate not in self.gate_info:
+            # 兼容性处理：如果 gate_info 还没更新，或者这是个未记录的门
+            # (如果你已经改了 parse.py，这里理论上不应发生)
+            return
 
-        #print("Gate", gate, "I1", ion1, "I2", ion2, "IT1", ion1_trap, "IT2", ion2_trap, "Ready", ready, "FireTime:", fire_time)
+        gate_data = self.gate_info[gate]
 
-        if ion1_trap == ion2_trap:
-            #Ions are co-located in a trap, no shuttling required
-            self.add_gate_op(fire_time, ion1_trap, gate, ion1, ion2)
+        # 兼容旧版本 parse.py (如果 gate_info 直接是 list)
+        if isinstance(gate_data, list):
+            qubits = gate_data
         else:
-            #Check if there is at least one path to shuttle from src to dest trap
-            #rebalances the machine if needed i.e., clear traffic blocks
-            rebal_flag, new_fin_time = self.rebalance_traps(focus_traps=[ion1_trap, ion2_trap], fire_time=fire_time)
-            if not rebal_flag:
-                source_trap, dest_trap = self.shuttling_direction(ion1_trap, ion2_trap)
-                if source_trap == ion1_trap:
-                    moving_ion = ion1
-                else:
-                    moving_ion = ion2
-                clk = self.fire_shuttle(source_trap, dest_trap, moving_ion, fire_time)
-                self.add_gate_op(clk, dest_trap, gate, ion1, ion2)
-            else:
-                #This is for the rebalancing case, trap_ids compute till this point may be stale
-                self.schedule_gate(gate, specified_time=new_fin_time)
+            qubits = gate_data["qubits"]
 
-    #Checks and rebalances the machine if necessary using MCMF
+        # 2. 判断门的类型
+        if len(qubits) == 1:
+            # ==============================
+            # Case A: 单量子比特门 (如 H, RZ)
+            # ==============================
+            ion1 = qubits[0]
+
+            # 计算就绪时间
+            ready = self.gate_ready_time(gate)
+            ion1_time, ion1_trap = self.ion_ready_info(ion1)
+
+            fire_time = max(ready, ion1_time, specified_time)
+
+            # === 关键修改：单比特门时间 ===
+            # 不要调用 self.machine.gate_time (它不支持单离子)
+            # 如果你在 machine.py 加了 single_qubit_gate_time，就用那个
+            # 否则这里给一个固定值，例如 10us
+            duration = 5
+            if hasattr(self.machine, "single_qubit_gate_time"):
+                duration = self.machine.single_qubit_gate_time(gate_data.get("type", "u3"))
+
+            # 记录到 Schedule
+            self.schedule.add_gate(fire_time, fire_time + duration, [ion1], ion1_trap)
+
+            # 更新该门的完成时间
+            self.gate_finish_times[gate] = fire_time + duration
+
+        elif len(qubits) == 2:
+            # ==============================
+            # Case B: 双量子比特门 (如 CX)
+            # ==============================
+            ion1 = qubits[0]
+            ion2 = qubits[1]
+
+            ready = self.gate_ready_time(gate)
+            ion1_time, ion1_trap = self.ion_ready_info(ion1)
+            ion2_time, ion2_trap = self.ion_ready_info(ion2)
+
+            fire_time = max(ready, ion1_time, ion2_time, specified_time)
+
+            if ion1_trap == ion2_trap:
+                # 同 Trap 执行
+                # 这里的调用是安全的，因为 ion1 != ion2
+                gate_duration = self.machine.gate_time(self.sys_state, ion1_trap, ion1, ion2)
+                self.schedule.add_gate(fire_time, fire_time + gate_duration, [ion1, ion2], ion1_trap)
+                self.gate_finish_times[gate] = fire_time + gate_duration
+            else:
+                # 穿梭逻辑 (保持原样)
+                rebal_flag, new_fin_time = self.rebalance_traps(focus_traps=[ion1_trap, ion2_trap], fire_time=fire_time)
+
+                if not rebal_flag:
+                    source_trap, dest_trap = self.shuttling_direction(ion1_trap, ion2_trap)
+                    moving_ion = ion1 if source_trap == ion1_trap else ion2
+
+                    clk = self.fire_shuttle(source_trap, dest_trap, moving_ion, fire_time)
+
+                    gate_duration = self.machine.gate_time(self.sys_state, dest_trap, ion1, ion2)
+                    self.schedule.add_gate(clk, clk + gate_duration, [ion1, ion2], dest_trap)
+                    self.gate_finish_times[gate] = clk + gate_duration
+                else:
+                    self.schedule_gate(gate, specified_time=new_fin_time)
+
+    # Checks and rebalances the machine if necessary using MCMF
     def rebalance_traps(self, focus_traps, fire_time):
         m = self.machine
         ss = self.sys_state
@@ -334,17 +378,17 @@ class EJFSchedule:
         status12, route12 = ftr.find_route(t1, t2)
         status21, route21 = ftr.find_route(t2, t1)
 
-        #If both traps are full
+        # If both traps are full
         if excess_cap1 == 0 and excess_cap2 == 0:
             need_rebalance = True
         else:
-           #If no route exists either way
+            # If no route exists either way
             if status12 == 1 and status21 == 1:
                 need_rebalance = True
         if need_rebalance:
-            #print("Rebalance procedure", "clk=", fire_time)
+            # print("Rebalance procedure", "clk=", fire_time)
             finish_time = self.do_rebalance_traps(fire_time)
-            #print("Rebalance procedure", "clk=", finish_time)
+            # print("Rebalance procedure", "clk=", finish_time)
         if need_rebalance:
             return 1, finish_time
         else:
@@ -365,19 +409,19 @@ class EJFSchedule:
         fin_time = fire_time
         for node in shuttle_graph.nodes():
             if shuttle_graph.in_degree(node) == 0 and type(node) == Trap:
-                #print("Starting computation from", node.show())
+                # print("Starting computation from", node.show())
                 updated_graph = shuttle_graph.copy()
                 for edge in used_flow:
-                    if used_flow[edge] == updated_graph[edge[0]][edge[1]]['weight']:
+                    if used_flow[edge] == updated_graph[edge[0]][edge[1]]["weight"]:
                         updated_graph.remove_edge(edge[0], edge[1])
                 T = nx.dfs_tree(updated_graph, source=node)
                 for tnode in T:
                     if T.out_degree(tnode) == 0:
                         shuttle_route = nx.shortest_path(T, node, tnode)
                         break
-                for i in range(len(shuttle_route)-1):
+                for i in range(len(shuttle_route) - 1):
                     e0 = shuttle_route[i]
-                    e1 = shuttle_route[i+1]
+                    e1 = shuttle_route[i + 1]
                     if (e0, e1) in used_flow:
                         used_flow[(e0, e1)] += 1
                     elif (e1, e0) in used_flow:
@@ -385,11 +429,11 @@ class EJFSchedule:
                 moving_ion = self.sys_state.trap_ions[node.id][0]
                 ion_time, _ = self.ion_ready_info(moving_ion)
                 fire_time = max(fire_time, ion_time)
-                #print("moving", moving_ion, "along path")
-                #for item in shuttle_route:
+                # print("moving", moving_ion, "along path")
+                # for item in shuttle_route:
                 #    print(item.show())
-                #print('path end')
-                #Fire a shuttle along this route, move first ion in the source trap for now
+                # print('path end')
+                # Fire a shuttle along this route, move first ion in the source trap for now
                 fin_time_new = self.fire_shuttle(node.id, tnode.id, moving_ion, fire_time, route=shuttle_route)
                 fin_time = max(fin_time, fin_time_new)
         return fin_time
@@ -397,12 +441,12 @@ class EJFSchedule:
     def run(self):
         self.gates = nx.topological_sort(self.ir)
         cnt = 0
-        #self.sys_state.print_state()
         for g in self.gates:
-            # 只调度CX门，跳过非CX门
-            if g not in self.gate_info:
-                continue  # 跳过非CX门
-            self.schedule_gate(g)
+            # 现在的 gate_info (all_gate_map) 包含了所有门
+            # 只要 parse.py 没问题，这里就不会 KeyError
+            if g in self.gate_info:
+                self.schedule_gate(g)
+            else:
+                # 仅作为保险，理论上不应到达这里
+                print(f"Warning: Gate {g} not in gate_info")
             cnt += 1
-        #self.schedule.print_events()
-        #self.sys_state.print_state()
