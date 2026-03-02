@@ -433,8 +433,7 @@ class QubitMapTrivial:
     def compute_mapping(self):
         # 获取所有量子比特 ID
         # 注意：这里最好用 parse_obj.cx_graph.nodes 确保涵盖所有相关比特
-        all_qubits = sorted(list(self.parse_obj.cx_graph.nodes))
-        num_qubits = len(all_qubits)
+        all_qubits = sorted(self.parse_obj.cx_graph.nodes)
 
         output_partition = {}
         traps = self.machine_obj.traps
@@ -458,10 +457,6 @@ class QubitMapTrivial:
                 current_load = 0
 
         return output_partition
-
-
-import networkx as nx
-import copy
 
 
 # 多次sabre，但未严格限制容量。
@@ -853,8 +848,6 @@ class QubitMapSABRE3:
 
 
 # 贪婪聚类版，2*3,8，qft32结果是110
-
-
 class QubitMapSABRE4:
     def __init__(self, parse_obj, machine_obj, excess_capacity=0):
         self.parse_obj = parse_obj
@@ -1243,10 +1236,6 @@ class QubitMapSABRE5:
 
 
 # 暴力聚类（Mapper产生的超载）” + “全局最优疏散，静态版本，在传给调度器之前就已经进行了合法化操作。当前结果是91
-import networkx as nx
-import math
-
-
 class QubitMapSABRE6:
     """
     SABRE-style greedy "violent clustering" (may overload traps),
@@ -1558,9 +1547,6 @@ class QubitMapSABRE6:
 
 
 # 暴力聚类（Mapper产生的超载）” + “全局最优疏散，动态版本，传给调度器超载版本的映射。对应的muss调度要进行修改，采用第四版本的调度。
-# mappers.py
-
-
 class QubitMapSABRE7:
     def __init__(self, parse_obj, machine_obj, excess_capacity=0):
         self.parse_obj = parse_obj
