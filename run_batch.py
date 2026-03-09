@@ -1,10 +1,11 @@
 import subprocess as sp
+import os
 
 PATH = "./programs"
 
 # 选择电路
-#PROG = ["BV32", "GHZ32", "ADDER32"]
-PROG = ["GHZ32"]
+PROG = ["BV32", "GHZ32", "ADDER32", "QAOA32", "QFT32","SQRT30"]
+#PROG = ["QFT32"]  # 只跑一个电路，便于调试和验证
 
 # 选择架构与容量
 MACHINE = {"G2x2": "12", "G2x3": "8"}
@@ -32,11 +33,18 @@ SCHEDULERS = [
     #("EJF",  ""),     # 文献[55]EJF，也可以扩展
 ]
 
+# [PATCH] 显式抽出 gate / swap 类型，便于统一切换与日志命名
+gate_type = "FM"
+swap_type = "PaperSwapDirect"
+
+# [PATCH] 保证输出目录存在
+os.makedirs("./output", exist_ok=True)
+
 for prog in PROG:
     for machine, ions in MACHINE.items():
         for family, version in SCHEDULERS:
             # 日志文件名带上版本信息，便于区分
-            log_name = f"./output/{prog}_{machine}_{ions}_{mapper}_{family}_{version}.log"
+            log_name = f"./output/{prog}_{machine}_{ions}_{mapper}_{family}_{version}_{gate_type}_{swap_type}.log"
             
             args = [
                 "python", "run.py",
@@ -46,7 +54,7 @@ for prog in PROG:
                 mapper,
                 reorder,
                 "1", "1", "1",          # serial_trap, serial_comm, serial_all
-                "FM", "GateSwap"
+                gate_type, swap_type
             ]
             
             # 只在需要 MUSS 家族时才传版本
@@ -55,7 +63,7 @@ for prog in PROG:
             else:
                 args.append(family)     # EJF 等只需要 family
 
-            print(f"Running: {' '.join(args)} → {log_name}")
+            print(f"Running: {' '.join(args)} -> {log_name}")
             
             with open(log_name, "w", encoding="utf-8") as f:
-                sp.call(args, stdout=f)
+                sp.call(args, stdout=f, stderr=sp.STDOUT)

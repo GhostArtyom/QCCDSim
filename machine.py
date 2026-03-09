@@ -46,7 +46,6 @@ class Segment:
     def __init__(self, idx, capacity: int, length_um: float):
         self.id = idx
         self.capacity = capacity
-        # 物理长度（um）
         self.length = float(length_um)
         self.ions = []  # （旧逻辑保留）
 
@@ -81,6 +80,11 @@ class MachineParams:
       - inter_ion_spacing_um (um)     ：阱内离子间距（影响 Duan/Trout/PM 的 gate_time 距离项）
       - alpha_bg                      ：背景 Bi 模型强度（Analyzer 用）
       - gate_type / swap_type         ：门/交换实现类型
+
+    swap_type 支持：
+      - "PaperSwapDirect"：论文对准版，链内 direct internal swap，一次即可，不按 hop 数累加时间
+      - "GateSwap"       ：旧逻辑，swap 时间 = 3 * gate_time(...)
+      - "IonSwap"        ：旧逻辑，swap 通过 split/move/merge 物理实现
     """
 
     def __init__(self):
@@ -96,13 +100,13 @@ class MachineParams:
         self.move_speed_um_per_us = 2.0  # 2 μm/us
 
         # ===== Not explicitly fixed by paper / implementation knobs =====
-        self.segment_length_um = 80.0          # 每条 segment 默认长度（um）
-        self.inter_ion_spacing_um = 1.0        # 阱内离子间距（um）
-        self.alpha_bg = 0.0                    # 背景 Bi 强度（Analyzer 用）
+        self.segment_length_um = 80.0
+        self.inter_ion_spacing_um = 1.0
+        self.alpha_bg = 0.0
 
         # ===== gate/swap type flags =====
         self.gate_type = "PM"                  # "FM"/"PM"/"Duan"/"Trout"
-        self.swap_type = "GateSwap"            # "GateSwap"/"IonSwap"
+        self.swap_type = "PaperSwapDirect"     # "PaperSwapDirect"/"GateSwap"/"IonSwap"
 
 
 # =========================
@@ -121,7 +125,6 @@ class Machine:
     """
 
     def __init__(self, mparams=None):
-        # 允许 mparams=None（兼容旧代码）
         self.mparams = mparams if mparams is not None else MachineParams()
 
         self.graph = nx.Graph()
@@ -129,10 +132,7 @@ class Machine:
         self.segments = []
         self.junctions = []
 
-        # seg_id -> Segment object（避免 seg_id != index 的错误）
         self.segments_by_id = {}
-
-        # trap-to-trap distance cache (hop count)
         self.dist_cache = {}
 
     # -------------------------
@@ -160,10 +160,6 @@ class Machine:
         - idx：segment id
         - obj1 / obj2：图的两个端点（Trap 或 Junction）
         - orientation：仅对 Trap 有意义。记录该 segment 在 trap 的左/右侧。
-
-        说明：
-        - segment 长度来自 mparams.segment_length_um（可调 knob）
-        - Segment capacity 这里保持为 16（沿用旧实现；如需也可外提为 knob）
         """
         seg_len = float(getattr(self.mparams, "segment_length_um", 10.0))
         new_seg = Segment(idx, 16, seg_len)
@@ -171,15 +167,14 @@ class Machine:
         self.segments.append(new_seg)
         self.segments_by_id[new_seg.id] = new_seg
 
-        # Trap 需要记录左右侧
         if isinstance(obj1, Trap):
             obj1.orientation[new_seg.id] = orientation
 
-        # 旧实现里不允许 Junction->Trap 作为 obj1（保持一致）
         if isinstance(obj1, Junction) and isinstance(obj2, Trap):
             raise AssertionError("add_segment junction->trap is not allowed by this API.")
 
         self.graph.add_edge(obj1, obj2, seg=new_seg)
+        return new_seg
 
     def get_segment_length_um(self, seg_id: int) -> float:
         """
@@ -213,9 +208,6 @@ class Machine:
         对齐论文评估：
         - gate_type == "FM" 时直接返回固定 40us（MUSS-TI Table 1）
         其它 gate_type 保留原经验公式（与离子距离相关）。
-
-        sys_state 依赖：
-        - sys_state.trap_ions[trap_id]：该 trap 内离子链的顺序列表
         """
         assert ion1 != ion2
         mp = self.mparams
@@ -223,7 +215,6 @@ class Machine:
         p1 = sys_state.trap_ions[trap_id].index(ion1)
         p2 = sys_state.trap_ions[trap_id].index(ion2)
 
-        # 离子间距（um），原来写死 1，这里可配置
         d_const = float(getattr(mp, "inter_ion_spacing_um", 1.0))
         ion_dist = abs(p1 - p2) * d_const
 
@@ -245,8 +236,7 @@ class Machine:
 
     def split_time(self, sys_state, trap_id: int, seg_id: int, ion1: int):
         """
-        计算 split_time，并给出 split swap 的统计信息（供 schedule/event 记录）
-        保留原逻辑不变。
+        计算 split_time，并给出 split swap 的统计信息（供 schedule/event 记录）。
 
         返回：
           (split_estimate,
@@ -255,10 +245,21 @@ class Machine:
            i1, i2,
            ion_swap_hops)
 
-        说明：
-        - split 的离子必须在链端，否则需要 swap 到链端（swap_type 决定实现方式）
-        - GateSwap：用门实现 swap（3 * gate_time）
-        - IonSwap：用 split/move/merge 组合实现 swap（更“物理”）
+        字段含义：
+        - split_estimate：本次 split 总时间估计
+        - split_swap_count：真正参与 analyzer heating / timing 的 swap 次数
+        - split_swap_hops：目标离子距链端的 hop 距离（统计量）
+        - i1, i2：若用 GateSwap，记录参与交换的两个离子
+        - ion_swap_hops：若用 IonSwap，记录物理 hop 数
+
+        重要修正：
+        - PaperSwapDirect 语义下：
+          不是 hop-by-hop 相邻交换，
+          而是“若目标离子不在链端，则与链端离子直接交换一次”
+          因此：
+              split_estimate = split_merge_time + ion_swap_time
+              split_swap_count = 1
+          无论 split_swap_hops 是多少，时间都只加一次 40us。
         """
         t = self.traps[trap_id]
         split_estimate = 0
@@ -268,43 +269,50 @@ class Machine:
         i1 = 0
         i2 = 0
 
-        # 要 split 的离子必须在链端，否则需要 swap 到链端
+        # 找到该 seg 对应的链端离子
         if t.orientation[seg_id] == "L":
-            ion2 = sys_state.trap_ions[trap_id][0]   # 左端
+            ion2 = sys_state.trap_ions[trap_id][0]
         else:
-            ion2 = sys_state.trap_ions[trap_id][-1]  # 右端
+            ion2 = sys_state.trap_ions[trap_id][-1]
 
         if ion1 == ion2:
-            split_estimate = self.mparams.split_merge_time
+            split_estimate = int(self.mparams.split_merge_time)
             split_swap_count = 0
             split_swap_hops = 0
         else:
             mp = self.mparams
-            swap_type = getattr(mp, "swap_type", "GateSwap")
+            swap_type = getattr(mp, "swap_type", "PaperSwapDirect")
 
-            if swap_type == "GateSwap":
-                # 用门实现 swap：3 * gate_time（旧逻辑保留）
-                swap_est = 3 * self.gate_time(sys_state, trap_id, ion1, ion2)
-                split_estimate = swap_est + self.mparams.split_merge_time
-                p1 = sys_state.trap_ions[trap_id].index(ion1)
-                p2 = sys_state.trap_ions[trap_id].index(ion2)
+            p1 = sys_state.trap_ions[trap_id].index(ion1)
+            p2 = sys_state.trap_ions[trap_id].index(ion2)
+            num_hops = abs(p1 - p2)
+            split_swap_hops = num_hops
+
+            if swap_type == "PaperSwapDirect":
+                # 关键修正：内部 direct swap，一次即可，不按 hop 数累加时间
+                split_estimate = int(self.mparams.split_merge_time) + int(self.mparams.ion_swap_time)
                 split_swap_count = 1
-                split_swap_hops = abs(p1 - p2)
+                i1 = ion1
+                i2 = ion2
+
+            elif swap_type == "GateSwap":
+                # 旧逻辑保留：用门实现 swap，时间 = 3 * gate_time
+                swap_est = 3 * self.gate_time(sys_state, trap_id, ion1, ion2)
+                split_estimate = int(swap_est + self.mparams.split_merge_time)
+
+                split_swap_count = 1
                 i1 = ion1
                 i2 = ion2
 
             elif swap_type == "IonSwap":
-                # 通过 ion moves + splits/merges 实现 swap（旧逻辑保留）
-                p1 = sys_state.trap_ions[trap_id].index(ion1)
-                p2 = sys_state.trap_ions[trap_id].index(ion2)
-                num_hops = abs(p1 - p2)
-
-                swap_est = num_hops * self.mparams.split_merge_time         # n splits
-                swap_est += (num_hops - 1) * self.mparams.split_merge_time  # n-1 merges
-                swap_est += self.mparams.ion_swap_time * num_hops           # n moves
-                split_estimate = swap_est
+                # 旧逻辑保留：通过 n 次 split / (n-1) 次 merge / n 次 ion move 实现
+                swap_est = num_hops * self.mparams.split_merge_time
+                swap_est += (num_hops - 1) * self.mparams.split_merge_time
+                swap_est += self.mparams.ion_swap_time * num_hops
+                split_estimate = int(swap_est)
 
                 ion_swap_hops = num_hops
+
             else:
                 raise AssertionError(f"Unsupported swap_type: {swap_type}")
 
@@ -326,7 +334,7 @@ class Machine:
         注意：
         - schedule 的 Move event 是 segment-to-segment 的 hop。
         - 这里用“目标 segment 的 length”作为本次 hop 的物理距离（简单且可校准）。
-        - 若 move_speed_um_per_us 未设置，回退到旧字段 shuttle_time（兼容旧实现）。
+        - 若 move_speed_um_per_us 未设置，回退到旧字段 shuttle_time。
         """
         speed = getattr(self.mparams, "move_speed_um_per_us", None)
         if speed is None:
@@ -342,10 +350,7 @@ class Machine:
 
     def junction_cross_time(self, junct) -> int:
         """
-        junction crossing 的额外时间，按 junction 度数选择参数：
-        - degree=2 用 junction2_cross_time
-        - degree=3 用 junction3_cross_time
-        - degree=4 用 junction4_cross_time
+        junction crossing 的额外时间，按 junction 度数选择参数。
         """
         deg = self.graph.degree(junct)
         if deg == 2:
@@ -361,15 +366,12 @@ class Machine:
     # 其它接口（保留原有功能）
     # -------------------------
     def single_qubit_gate_time(self, gate_type) -> int:
-        """1Q gate 时间（旧实现保留，固定很小的常数）。"""
+        """1Q gate 时间（旧实现保留，固定常数）。"""
         return 5
 
     def precompute_distances(self):
         """
         预计算 trap-to-trap 的最短路径长度（按 graph hop 数）。
-        hop 是 networkx shortest_path_length 的结果（节点之间的边数）。
-
-        注意：graph 的节点是 Trap/Junction 对象，因此需要通过对象来索引 all_pairs_shortest_path_length。
         """
         self.dist_cache = {}
         id_map = {t.id: t for t in self.traps}
@@ -390,5 +392,29 @@ class Machine:
                 elif t1 in all_paths and t2 in all_paths.get(t1, {}):
                     self.dist_cache[(id1, id2)] = all_paths[t1][t2]
                 else:
-                    # 不连通或异常情况：用一个很大的值
                     self.dist_cache[(id1, id2)] = 1000
+
+    def trap_distance(self, trap1_id: int, trap2_id: int) -> int:
+        """
+        兼容旧代码的查询接口：返回预计算的 trap-to-trap hop 距离。
+        """
+        if (trap1_id, trap2_id) in self.dist_cache:
+            return self.dist_cache[(trap1_id, trap2_id)]
+
+        t1 = None
+        t2 = None
+        for tr in self.traps:
+            if tr.id == trap1_id:
+                t1 = tr
+            if tr.id == trap2_id:
+                t2 = tr
+
+        if t1 is None or t2 is None:
+            return 1000
+
+        try:
+            d = nx.shortest_path_length(self.graph, t1, t2)
+            self.dist_cache[(trap1_id, trap2_id)] = d
+            return d
+        except Exception:
+            return 1000

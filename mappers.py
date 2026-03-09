@@ -584,99 +584,205 @@ class QubitMapSABRE1:
         return best_mapping
 
 
-# 单次sabre，并未严格限制，但似乎做到了限制。
+# 论文标准版。
 class QubitMapSABRE2:
-    def __init__(self, parse_obj, machine_obj, excess_capacity=0):
-        self.parse_obj = parse_obj
-        self.machine_obj = machine_obj
-        self.excess_capacity = excess_capacity
-        # 确保距离矩阵已计算
-        if not hasattr(self.machine_obj, "dist_cache") or not self.machine_obj.dist_cache:
-            self.machine_obj.precompute_distances()
-
-    def get_trap_load(self, mapping):
-        """辅助函数：计算当前每个 Trap 里的量子比特数量"""
-        load = [0] * len(self.machine_obj.traps)
-        for q, t in mapping.items():
-            load[t] += 1
-        return load
-
-    def run_pass(self, gate_list, start_mapping):
+    """
+    Standard SABRE initial mapping implementation as described in the paper (Section 3.4).
+    Implements Two-fold search (forward and backward passes) with alpha=1.5 and lookahead=8.
+    """
+    
+    def __init__(self, alpha=1.5, lookahead=8):
         """
-        执行一次 SABRE 遍历 (前向或反向)
-        :param gate_list: 门的执行序列
-        :param start_mapping: 初始布局 {qubit_id: trap_id}
-        :return: 结束时的布局
+        Initialize SABRE mapper with standard parameters.
+        
+        Args:
+            alpha (float): Distance decay factor (default=1.5 as in paper)
+            lookahead (int): Number of future gates to consider (default=8 as in paper)
         """
-        current_layout = start_mapping.copy()
-        traps = self.machine_obj.traps
+        self.alpha = alpha
+        self.lookahead = lookahead
 
-        for g in gate_list:
-            # 跳过非 CX 门 (假设单比特门原地执行)
-            if g not in self.parse_obj.cx_gate_map:
-                continue
+    def map_circuit(self, circuit, architecture):
+        """
+        Perform initial mapping using standard SABRE algorithm.
+        
+        Args:
+            circuit (Circuit): Quantum circuit to map
+            architecture (Architecture): Hardware architecture (e.g., grid)
+            
+        Returns:
+            list: Final logical-to-physical mapping (mapping[i] = physical position of logical qubit i)
+        """
+        # Run forward pass
+        mapping_fwd, cost_fwd = self._run_single_pass(circuit, architecture, forward=True)
+        
+        # Run backward pass (reverse circuit)
+        circuit_rev = circuit.reverse()
+        mapping_bwd, cost_bwd = self._run_single_pass(circuit_rev, architecture, forward=False)
+        
+        # Convert backward mapping back to original circuit order
+        mapping_bwd = self._convert_reverse_mapping(mapping_bwd, circuit.num_qubits)
+        
+        # Choose the mapping with lower cost
+        if cost_fwd <= cost_bwd:
+            return mapping_fwd
+        else:
+            return mapping_bwd
 
-            # 获取涉及的量子比特
-            qubits = self.parse_obj.cx_gate_map[g]
-            q1, q2 = qubits[0], qubits[1]
+    def _run_single_pass(self, circuit, architecture, forward=True):
+        """
+        Run SABRE on a single pass (forward or backward).
+        
+        Args:
+            circuit (Circuit): Circuit to process
+            architecture (Architecture): Hardware architecture
+            forward (bool): True for forward pass, False for backward pass
+            
+        Returns:
+            tuple: (mapping, total_cost)
+        """
+        n = circuit.num_qubits
+        # Initialize linear mapping: logical i -> physical i
+        mapping = list(range(n))
+        # Reverse mapping: physical -> logical (for quick lookup)
+        phys_to_log = list(range(n))
+        
+        total_cost = 0.0
+        
+        # Process gates in order (forward or reversed)
+        for gate_idx in range(len(circuit.gates)):
+            gate = circuit.gates[gate_idx]
+            if len(gate.qubits) < 2:
+                continue  # Skip single-qubit gates
+            
+            # Get physical positions of the two qubits
+            q1, q2 = gate.qubits
+            phys1 = mapping[q1]
+            phys2 = mapping[q2]
+            
+            # Check if gate can be executed (adjacent in architecture)
+            if architecture.is_adjacent(phys1, phys2):
+                continue  # Gate is executable, skip
+            
+            # Find best swap to minimize future cost
+            best_swap = None
+            best_cost = float('inf')
+            
+            # Generate all possible adjacent swaps (in physical grid)
+            for i in range(architecture.num_traps):
+                for j in range(i + 1, architecture.num_traps):
+                    if not architecture.is_adjacent(i, j):
+                        continue
+                    
+                    # Try swapping positions i and j
+                    swap_cost = self._calculate_swap_cost(
+                        mapping, phys_to_log, circuit, gate_idx, 
+                        architecture, i, j
+                    )
+                    
+                    if swap_cost < best_cost:
+                        best_cost = swap_cost
+                        best_swap = (i, j)
+            
+            # Apply best swap
+            i, j = best_swap
+            # Update reverse mapping
+            log_i = phys_to_log[i]
+            log_j = phys_to_log[j]
+            phys_to_log[i] = log_j
+            phys_to_log[j] = log_i
+            # Update forward mapping
+            mapping[log_i] = j
+            mapping[log_j] = i
+            
+            # Accumulate cost (for debugging)
+            total_cost += best_cost
+        
+        return mapping, total_cost
 
-            t1 = current_layout[q1]
-            t2 = current_layout[q2]
+    def _calculate_swap_cost(self, mapping, phys_to_log, circuit, gate_idx, 
+                            architecture, pos1, pos2):
+        """
+        Calculate cost of swapping positions pos1 and pos2 for future gates.
+        
+        Args:
+            mapping (list): Current logical->physical mapping
+            phys_to_log (list): Current physical->logical mapping
+            circuit (Circuit): Quantum circuit
+            gate_idx (int): Current gate index
+            architecture (Architecture): Hardware architecture
+            pos1, pos2 (int): Positions to swap
+            
+        Returns:
+            float: Total future cost after swap
+        """
+        # Create temporary mappings for swap simulation
+        temp_mapping = mapping[:]
+        temp_phys_to_log = phys_to_log[:]
+        
+        # Apply swap to temporary mappings
+        log1 = temp_phys_to_log[pos1]
+        log2 = temp_phys_to_log[pos2]
+        temp_phys_to_log[pos1] = log2
+        temp_phys_to_log[pos2] = log1
+        temp_mapping[log1] = pos2
+        temp_mapping[log2] = pos1
+        
+        # Calculate cost for future gates (lookahead)
+        cost = 0.0
+        end_idx = min(gate_idx + self.lookahead, len(circuit.gates))
+        
+        for idx in range(gate_idx, end_idx):
+            gate = circuit.gates[idx]
+            if len(gate.qubits) < 2:
+                continue  # Skip single-qubit gates
+            
+            q1, q2 = gate.qubits
+            phys1 = temp_mapping[q1]
+            phys2 = temp_mapping[q2]
+            
+            # Calculate Manhattan distance
+            dist = self._get_manhattan_distance(phys1, phys2, architecture)
+            cost += self.alpha ** dist
+        
+        return cost
 
-            # 如果不在同一个 Trap，根据负载和距离移动一个
-            if t1 != t2:
-                loads = self.get_trap_load(current_layout)
-                cap1 = traps[t1].capacity - self.excess_capacity
-                cap2 = traps[t2].capacity - self.excess_capacity
+    def _get_manhattan_distance(self, pos1, pos2, architecture):
+        """
+        Calculate Manhattan distance between two physical positions.
+        
+        Args:
+            pos1, pos2 (int): Physical positions
+            architecture (Architecture): Hardware architecture
+            
+        Returns:
+            int: Manhattan distance
+        """
+        width = architecture.width
+        x1 = pos1 % width
+        y1 = pos1 // width
+        x2 = pos2 % width
+        y2 = pos2 // width
+        return abs(x1 - x2) + abs(y1 - y2)
 
-                # 简单启发式：优先移动到有空位的 Trap
-                # 如果都有空位，SABRE 通常倾向于移动距离代价小的，或者为了收敛随机选择
-                # 这里为了减少 Shuttle，我们尝试将它们汇聚
-
-                can_move_to_t1 = loads[t1] < cap1
-                can_move_to_t2 = loads[t2] < cap2
-
-                if can_move_to_t1 and not can_move_to_t2:
-                    current_layout[q2] = t1
-                elif can_move_to_t2 and not can_move_to_t1:
-                    current_layout[q1] = t2
-                elif can_move_to_t1 and can_move_to_t2:
-                    # 都有位置，比较当前负载，移向负载较轻的，平衡热量
-                    if loads[t1] <= loads[t2]:
-                        current_layout[q2] = t1
-                    else:
-                        current_layout[q1] = t2
-                else:
-                    # 都没有位置 (死锁风险)，在映射阶段我们强制移动到 t1
-                    # 实际调度器会处理具体的交换/置换
-                    current_layout[q2] = t1
-
-        return current_layout
-
-    def compute_mapping(self):
-        # 1. 准备门序列
-        # 尝试拓扑排序，如果失败则使用默认顺序
-        try:
-            forward_gates = list(nx.topological_sort(self.parse_obj.gate_graph))
-        except:
-            forward_gates = list(self.parse_obj.gate_graph.nodes)
-
-        # 2. 初始种子：使用均匀分布 (Trivial) 或 随机分布
-        # SABRE 对初始值不极其敏感，均匀分布是个好起点
-        seed_mapper = QubitMapTrivial(self.parse_obj, self.machine_obj, self.excess_capacity)
-        seed_mapping = seed_mapper.compute_mapping()
-
-        # 3. Pass 1: 前向传播 (Forward)
-        # 模拟电路执行，让量子比特"流"到它们该去的地方
-        after_forward_mapping = self.run_pass(forward_gates, seed_mapping)
-
-        # 4. Pass 2: 反向传播 (Reverse)
-        # 这是 SABRE 的核心：用前向的终点作为反向的起点
-        # 电路反向执行后，量子比特会自然停留在"最适合开始"的位置
-        backward_gates = forward_gates[::-1]
-        final_initial_mapping = self.run_pass(backward_gates, after_forward_mapping)
-
-        return final_initial_mapping
+    def _convert_reverse_mapping(self, mapping, num_qubits):
+        """
+        Convert backward mapping (from reversed circuit) back to original circuit order.
+        
+        Args:
+            mapping (list): Mapping from logical qubits to physical positions (in reversed circuit)
+            num_qubits (int): Number of qubits
+            
+        Returns:
+            list: Converted mapping for original circuit
+        """
+        # Create inverse mapping for reversed circuit
+        rev_to_orig = [0] * num_qubits
+        for phys, log in enumerate(mapping):
+            rev_to_orig[log] = phys
+        
+        # Convert to original circuit order
+        return [rev_to_orig[i] for i in range(num_qubits)]
 
 
 # 严格离子阱容量限制版，加进行多次sabre

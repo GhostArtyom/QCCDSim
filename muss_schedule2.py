@@ -1,17 +1,22 @@
 # muss_schedule2.py
 # ============================================================
-# MUSS Scheduler (V2) —— 论文复现版（old_vision）
+# MUSS Scheduler (V2) —— 论文复现版（兼容修复版）
 #
 # 设计目标：
 # 1) 核心调度逻辑严格保留（frontier + rebalance + LRU + shuttle 链）
 # 2) 增强可观测性（shuttle_trace / schedule_events）
-# 3) 修复两处会导致“时间偏大 / 对齐困难”的问题：
-#    - [FIX-1] junction 的时间不应额外 +junction_cross_time（论文中 junction 通常被折进 move 的距离/速度）
-#    - [FIX-2] fire_shuttle 的估时 t_est 不能把 junction.id 当 segment.id 传给 move_time（会让 identify_start_time 推迟 clk）
+# 3) 兼容修复后的 analyzer.py：
+#    - [FIX-A1] 给 Split / Move / Merge 事件补充 shuttle_id，
+#               使 analyzer 的 aggregate shuttle fidelity 模式可用
+# 4) 兼容修复后的 machine.py：
+#    - [FIX-M1] 不再对链内 swap 语义做任何额外假设，完全信任 machine.split_time() 返回值
+# 5) 保留对时间对齐有帮助的两个修复：
+#    - [FIX-1] junction 的时间不应额外 +junction_cross_time（通常折进 move 的距离/速度）
+#    - [FIX-2] fire_shuttle 估时时不能把 junction.id 当 segment.id 传给 move_time
 #
 # 注意：
 # - “论文中明确给定的参数”（split_merge_time=80, gate(FM)=40, move_speed=2um/us 等）不在本文件修改
-# - MOVE 的物理距离模型由 machine.move_time() 决定（你可用 segment_length_um 等 knob 对齐 1760us）
+# - MOVE 的物理距离模型由 machine.move_time() 决定（你可用 segment_length_um 等 knob 对齐 1760us / 2320us）
 # ============================================================
 
 import networkx as nx
@@ -157,6 +162,24 @@ class MUSSSchedule:
             {"etype": etype, "t_start": int(t_start), "t_end": int(t_end), "desc": desc}
         )
 
+    def _annotate_last_event_with_shuttle_id(self):
+        """
+        [FIX-A1]
+        给刚刚写入 schedule 的最后一个事件补充 shuttle_id。
+        这样 analyzer 在 aggregate 模式下才能把
+        Split / Move / Merge 聚合成同一次 shuttle。
+        """
+        if self._current_shuttle_id is None:
+            return
+        if not hasattr(self.schedule, "events"):
+            return
+        if not self.schedule.events:
+            return
+        try:
+            self.schedule.events[-1][4]["shuttle_id"] = self._current_shuttle_id
+        except Exception:
+            pass
+
     # ==========================================================
     # Ready time / ion location 推断
     # ==========================================================
@@ -233,6 +256,7 @@ class MUSSSchedule:
             split_start = max(split_start, last_event_time_in_system)
 
         # 2) 计算 split 时间 + swap 信息
+        # [FIX-M1] 完全信任 machine.split_time() 的返回，不额外解释 swap 语义
         split_duration, split_swap_count, split_swap_hops, i1, i2, ion_swap_hops = \
             m.split_time(self.sys_state, src_trap.id, dest_seg.id, ion)
 
@@ -246,6 +270,9 @@ class MUSSSchedule:
             Schedule.Split,
             split_swap_count, split_swap_hops, i1, i2, ion_swap_hops
         )
+
+        # [FIX-A1] 给该事件补上 shuttle_id
+        self._annotate_last_event_with_shuttle_id()
 
         # 4) trace
         self._trace_add_step(
@@ -286,6 +313,9 @@ class MUSSSchedule:
             0, 0, 0, 0, 0
         )
 
+        # [FIX-A1] 给该事件补上 shuttle_id
+        self._annotate_last_event_with_shuttle_id()
+
         self._trace_add_step("MERGE", merge_start, merge_end, f"ion {ion}: Seg{src_seg.id} -> T{dest_trap.id}")
         self._trace_print(f"[TRACE] MERGE ion={ion} Seg{src_seg.id} -> T{dest_trap.id} ({merge_start}->{merge_end})")
 
@@ -315,6 +345,9 @@ class MUSSSchedule:
         move_start, move_end = self.schedule.junction_traffic_crossing(src_seg, dest_seg, junct, move_start, move_end)
 
         self.schedule.add_move(move_start, move_end, [ion], src_seg.id, dest_seg.id)
+
+        # [FIX-A1] 给该事件补上 shuttle_id
+        self._annotate_last_event_with_shuttle_id()
 
         self._trace_add_step(
             "MOVE", move_start, move_end,

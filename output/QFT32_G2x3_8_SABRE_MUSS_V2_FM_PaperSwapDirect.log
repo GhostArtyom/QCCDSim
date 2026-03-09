@@ -1,0 +1,2757 @@
+Simulation
+Program:           ./programs/QFT32.qasm
+Machine:           G2x3
+Model:             MUSS_Params
+Ions/Region:       8
+Mapper:            SABRE
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  MUSS
+Scheduler Version: V2
+qbit 1: 1 qbit 2: 0 dep gates: 0
+qbit 1: 1 qbit 2: 0 dep gates: 1
+qbit 1: 1 qbit 2: 0 dep gates: 1
+qbit 1 dep gates: 2
+qbit 1: 2 qbit 2: 0 dep gates: 2
+qbit 1: 2 qbit 2: 0 dep gates: 4
+qbit 1: 2 qbit 2: 0 dep gates: 4
+qbit 1: 2 qbit 2: 1 dep gates: 5
+qbit 1: 2 qbit 2: 1 dep gates: 3
+qbit 1: 2 qbit 2: 1 dep gates: 6
+qbit 1: 2 qbit 2: 1 dep gates: 6
+qbit 2 dep gates: 7
+qbit 1: 3 qbit 2: 0 dep gates: 5
+qbit 1: 3 qbit 2: 0 dep gates: 9
+qbit 1: 3 qbit 2: 0 dep gates: 9
+qbit 1: 3 qbit 2: 1 dep gates: 10
+qbit 1: 3 qbit 2: 1 dep gates: 7
+qbit 1: 3 qbit 2: 1 dep gates: 11
+qbit 1: 3 qbit 2: 1 dep gates: 11
+qbit 1: 3 qbit 2: 2 dep gates: 12
+qbit 1: 3 qbit 2: 2 dep gates: 8
+qbit 1: 3 qbit 2: 2 dep gates: 13
+qbit 1: 3 qbit 2: 2 dep gates: 13
+qbit 3 dep gates: 14
+qbit 1: 4 qbit 2: 0 dep gates: 10
+qbit 1: 4 qbit 2: 0 dep gates: 16
+qbit 1: 4 qbit 2: 0 dep gates: 16
+qbit 1: 4 qbit 2: 1 dep gates: 17
+qbit 1: 4 qbit 2: 1 dep gates: 12
+qbit 1: 4 qbit 2: 1 dep gates: 18
+qbit 1: 4 qbit 2: 1 dep gates: 18
+qbit 1: 4 qbit 2: 2 dep gates: 19
+qbit 1: 4 qbit 2: 2 dep gates: 14
+qbit 1: 4 qbit 2: 2 dep gates: 20
+qbit 1: 4 qbit 2: 2 dep gates: 20
+qbit 1: 4 qbit 2: 3 dep gates: 21
+qbit 1: 4 qbit 2: 3 dep gates: 15
+qbit 1: 4 qbit 2: 3 dep gates: 22
+qbit 1: 4 qbit 2: 3 dep gates: 22
+qbit 4 dep gates: 23
+qbit 1: 5 qbit 2: 0 dep gates: 17
+qbit 1: 5 qbit 2: 0 dep gates: 25
+qbit 1: 5 qbit 2: 0 dep gates: 25
+qbit 1: 5 qbit 2: 1 dep gates: 26
+qbit 1: 5 qbit 2: 1 dep gates: 19
+qbit 1: 5 qbit 2: 1 dep gates: 27
+qbit 1: 5 qbit 2: 1 dep gates: 27
+qbit 1: 5 qbit 2: 2 dep gates: 28
+qbit 1: 5 qbit 2: 2 dep gates: 21
+qbit 1: 5 qbit 2: 2 dep gates: 29
+qbit 1: 5 qbit 2: 2 dep gates: 29
+qbit 1: 5 qbit 2: 3 dep gates: 30
+qbit 1: 5 qbit 2: 3 dep gates: 23
+qbit 1: 5 qbit 2: 3 dep gates: 31
+qbit 1: 5 qbit 2: 3 dep gates: 31
+qbit 1: 5 qbit 2: 4 dep gates: 32
+qbit 1: 5 qbit 2: 4 dep gates: 24
+qbit 1: 5 qbit 2: 4 dep gates: 33
+qbit 1: 5 qbit 2: 4 dep gates: 33
+qbit 5 dep gates: 34
+qbit 1: 6 qbit 2: 0 dep gates: 26
+qbit 1: 6 qbit 2: 0 dep gates: 36
+qbit 1: 6 qbit 2: 0 dep gates: 36
+qbit 1: 6 qbit 2: 1 dep gates: 37
+qbit 1: 6 qbit 2: 1 dep gates: 28
+qbit 1: 6 qbit 2: 1 dep gates: 38
+qbit 1: 6 qbit 2: 1 dep gates: 38
+qbit 1: 6 qbit 2: 2 dep gates: 39
+qbit 1: 6 qbit 2: 2 dep gates: 30
+qbit 1: 6 qbit 2: 2 dep gates: 40
+qbit 1: 6 qbit 2: 2 dep gates: 40
+qbit 1: 6 qbit 2: 3 dep gates: 41
+qbit 1: 6 qbit 2: 3 dep gates: 32
+qbit 1: 6 qbit 2: 3 dep gates: 42
+qbit 1: 6 qbit 2: 3 dep gates: 42
+qbit 1: 6 qbit 2: 4 dep gates: 43
+qbit 1: 6 qbit 2: 4 dep gates: 34
+qbit 1: 6 qbit 2: 4 dep gates: 44
+qbit 1: 6 qbit 2: 4 dep gates: 44
+qbit 1: 6 qbit 2: 5 dep gates: 45
+qbit 1: 6 qbit 2: 5 dep gates: 35
+qbit 1: 6 qbit 2: 5 dep gates: 46
+qbit 1: 6 qbit 2: 5 dep gates: 46
+qbit 6 dep gates: 47
+qbit 1: 7 qbit 2: 0 dep gates: 37
+qbit 1: 7 qbit 2: 0 dep gates: 49
+qbit 1: 7 qbit 2: 0 dep gates: 49
+qbit 1: 7 qbit 2: 1 dep gates: 50
+qbit 1: 7 qbit 2: 1 dep gates: 39
+qbit 1: 7 qbit 2: 1 dep gates: 51
+qbit 1: 7 qbit 2: 1 dep gates: 51
+qbit 1: 7 qbit 2: 2 dep gates: 52
+qbit 1: 7 qbit 2: 2 dep gates: 41
+qbit 1: 7 qbit 2: 2 dep gates: 53
+qbit 1: 7 qbit 2: 2 dep gates: 53
+qbit 1: 7 qbit 2: 3 dep gates: 54
+qbit 1: 7 qbit 2: 3 dep gates: 43
+qbit 1: 7 qbit 2: 3 dep gates: 55
+qbit 1: 7 qbit 2: 3 dep gates: 55
+qbit 1: 7 qbit 2: 4 dep gates: 56
+qbit 1: 7 qbit 2: 4 dep gates: 45
+qbit 1: 7 qbit 2: 4 dep gates: 57
+qbit 1: 7 qbit 2: 4 dep gates: 57
+qbit 1: 7 qbit 2: 5 dep gates: 58
+qbit 1: 7 qbit 2: 5 dep gates: 47
+qbit 1: 7 qbit 2: 5 dep gates: 59
+qbit 1: 7 qbit 2: 5 dep gates: 59
+qbit 1: 7 qbit 2: 6 dep gates: 60
+qbit 1: 7 qbit 2: 6 dep gates: 48
+qbit 1: 7 qbit 2: 6 dep gates: 61
+qbit 1: 7 qbit 2: 6 dep gates: 61
+qbit 7 dep gates: 62
+qbit 1: 8 qbit 2: 0 dep gates: 50
+qbit 1: 8 qbit 2: 0 dep gates: 64
+qbit 1: 8 qbit 2: 0 dep gates: 64
+qbit 1: 8 qbit 2: 1 dep gates: 65
+qbit 1: 8 qbit 2: 1 dep gates: 52
+qbit 1: 8 qbit 2: 1 dep gates: 66
+qbit 1: 8 qbit 2: 1 dep gates: 66
+qbit 1: 8 qbit 2: 2 dep gates: 67
+qbit 1: 8 qbit 2: 2 dep gates: 54
+qbit 1: 8 qbit 2: 2 dep gates: 68
+qbit 1: 8 qbit 2: 2 dep gates: 68
+qbit 1: 8 qbit 2: 3 dep gates: 69
+qbit 1: 8 qbit 2: 3 dep gates: 56
+qbit 1: 8 qbit 2: 3 dep gates: 70
+qbit 1: 8 qbit 2: 3 dep gates: 70
+qbit 1: 8 qbit 2: 4 dep gates: 71
+qbit 1: 8 qbit 2: 4 dep gates: 58
+qbit 1: 8 qbit 2: 4 dep gates: 72
+qbit 1: 8 qbit 2: 4 dep gates: 72
+qbit 1: 8 qbit 2: 5 dep gates: 73
+qbit 1: 8 qbit 2: 5 dep gates: 60
+qbit 1: 8 qbit 2: 5 dep gates: 74
+qbit 1: 8 qbit 2: 5 dep gates: 74
+qbit 1: 8 qbit 2: 6 dep gates: 75
+qbit 1: 8 qbit 2: 6 dep gates: 62
+qbit 1: 8 qbit 2: 6 dep gates: 76
+qbit 1: 8 qbit 2: 6 dep gates: 76
+qbit 1: 8 qbit 2: 7 dep gates: 77
+qbit 1: 8 qbit 2: 7 dep gates: 63
+qbit 1: 8 qbit 2: 7 dep gates: 78
+qbit 1: 8 qbit 2: 7 dep gates: 78
+qbit 8 dep gates: 79
+qbit 1: 9 qbit 2: 0 dep gates: 65
+qbit 1: 9 qbit 2: 0 dep gates: 81
+qbit 1: 9 qbit 2: 0 dep gates: 81
+qbit 1: 9 qbit 2: 1 dep gates: 82
+qbit 1: 9 qbit 2: 1 dep gates: 67
+qbit 1: 9 qbit 2: 1 dep gates: 83
+qbit 1: 9 qbit 2: 1 dep gates: 83
+qbit 1: 9 qbit 2: 2 dep gates: 84
+qbit 1: 9 qbit 2: 2 dep gates: 69
+qbit 1: 9 qbit 2: 2 dep gates: 85
+qbit 1: 9 qbit 2: 2 dep gates: 85
+qbit 1: 9 qbit 2: 3 dep gates: 86
+qbit 1: 9 qbit 2: 3 dep gates: 71
+qbit 1: 9 qbit 2: 3 dep gates: 87
+qbit 1: 9 qbit 2: 3 dep gates: 87
+qbit 1: 9 qbit 2: 4 dep gates: 88
+qbit 1: 9 qbit 2: 4 dep gates: 73
+qbit 1: 9 qbit 2: 4 dep gates: 89
+qbit 1: 9 qbit 2: 4 dep gates: 89
+qbit 1: 9 qbit 2: 5 dep gates: 90
+qbit 1: 9 qbit 2: 5 dep gates: 75
+qbit 1: 9 qbit 2: 5 dep gates: 91
+qbit 1: 9 qbit 2: 5 dep gates: 91
+qbit 1: 9 qbit 2: 6 dep gates: 92
+qbit 1: 9 qbit 2: 6 dep gates: 77
+qbit 1: 9 qbit 2: 6 dep gates: 93
+qbit 1: 9 qbit 2: 6 dep gates: 93
+qbit 1: 9 qbit 2: 7 dep gates: 94
+qbit 1: 9 qbit 2: 7 dep gates: 79
+qbit 1: 9 qbit 2: 7 dep gates: 95
+qbit 1: 9 qbit 2: 7 dep gates: 95
+qbit 1: 9 qbit 2: 8 dep gates: 96
+qbit 1: 9 qbit 2: 8 dep gates: 80
+qbit 1: 9 qbit 2: 8 dep gates: 97
+qbit 1: 9 qbit 2: 8 dep gates: 97
+qbit 9 dep gates: 98
+qbit 1: 10 qbit 2: 0 dep gates: 82
+qbit 1: 10 qbit 2: 0 dep gates: 100
+qbit 1: 10 qbit 2: 0 dep gates: 100
+qbit 1: 10 qbit 2: 1 dep gates: 101
+qbit 1: 10 qbit 2: 1 dep gates: 84
+qbit 1: 10 qbit 2: 1 dep gates: 102
+qbit 1: 10 qbit 2: 1 dep gates: 102
+qbit 1: 10 qbit 2: 2 dep gates: 103
+qbit 1: 10 qbit 2: 2 dep gates: 86
+qbit 1: 10 qbit 2: 2 dep gates: 104
+qbit 1: 10 qbit 2: 2 dep gates: 104
+qbit 1: 10 qbit 2: 3 dep gates: 105
+qbit 1: 10 qbit 2: 3 dep gates: 88
+qbit 1: 10 qbit 2: 3 dep gates: 106
+qbit 1: 10 qbit 2: 3 dep gates: 106
+qbit 1: 10 qbit 2: 4 dep gates: 107
+qbit 1: 10 qbit 2: 4 dep gates: 90
+qbit 1: 10 qbit 2: 4 dep gates: 108
+qbit 1: 10 qbit 2: 4 dep gates: 108
+qbit 1: 10 qbit 2: 5 dep gates: 109
+qbit 1: 10 qbit 2: 5 dep gates: 92
+qbit 1: 10 qbit 2: 5 dep gates: 110
+qbit 1: 10 qbit 2: 5 dep gates: 110
+qbit 1: 10 qbit 2: 6 dep gates: 111
+qbit 1: 10 qbit 2: 6 dep gates: 94
+qbit 1: 10 qbit 2: 6 dep gates: 112
+qbit 1: 10 qbit 2: 6 dep gates: 112
+qbit 1: 10 qbit 2: 7 dep gates: 113
+qbit 1: 10 qbit 2: 7 dep gates: 96
+qbit 1: 10 qbit 2: 7 dep gates: 114
+qbit 1: 10 qbit 2: 7 dep gates: 114
+qbit 1: 10 qbit 2: 8 dep gates: 115
+qbit 1: 10 qbit 2: 8 dep gates: 98
+qbit 1: 10 qbit 2: 8 dep gates: 116
+qbit 1: 10 qbit 2: 8 dep gates: 116
+qbit 1: 10 qbit 2: 9 dep gates: 117
+qbit 1: 10 qbit 2: 9 dep gates: 99
+qbit 1: 10 qbit 2: 9 dep gates: 118
+qbit 1: 10 qbit 2: 9 dep gates: 118
+qbit 10 dep gates: 119
+qbit 1: 11 qbit 2: 0 dep gates: 101
+qbit 1: 11 qbit 2: 0 dep gates: 121
+qbit 1: 11 qbit 2: 0 dep gates: 121
+qbit 1: 11 qbit 2: 1 dep gates: 122
+qbit 1: 11 qbit 2: 1 dep gates: 103
+qbit 1: 11 qbit 2: 1 dep gates: 123
+qbit 1: 11 qbit 2: 1 dep gates: 123
+qbit 1: 11 qbit 2: 2 dep gates: 124
+qbit 1: 11 qbit 2: 2 dep gates: 105
+qbit 1: 11 qbit 2: 2 dep gates: 125
+qbit 1: 11 qbit 2: 2 dep gates: 125
+qbit 1: 11 qbit 2: 3 dep gates: 126
+qbit 1: 11 qbit 2: 3 dep gates: 107
+qbit 1: 11 qbit 2: 3 dep gates: 127
+qbit 1: 11 qbit 2: 3 dep gates: 127
+qbit 1: 11 qbit 2: 4 dep gates: 128
+qbit 1: 11 qbit 2: 4 dep gates: 109
+qbit 1: 11 qbit 2: 4 dep gates: 129
+qbit 1: 11 qbit 2: 4 dep gates: 129
+qbit 1: 11 qbit 2: 5 dep gates: 130
+qbit 1: 11 qbit 2: 5 dep gates: 111
+qbit 1: 11 qbit 2: 5 dep gates: 131
+qbit 1: 11 qbit 2: 5 dep gates: 131
+qbit 1: 11 qbit 2: 6 dep gates: 132
+qbit 1: 11 qbit 2: 6 dep gates: 113
+qbit 1: 11 qbit 2: 6 dep gates: 133
+qbit 1: 11 qbit 2: 6 dep gates: 133
+qbit 1: 11 qbit 2: 7 dep gates: 134
+qbit 1: 11 qbit 2: 7 dep gates: 115
+qbit 1: 11 qbit 2: 7 dep gates: 135
+qbit 1: 11 qbit 2: 7 dep gates: 135
+qbit 1: 11 qbit 2: 8 dep gates: 136
+qbit 1: 11 qbit 2: 8 dep gates: 117
+qbit 1: 11 qbit 2: 8 dep gates: 137
+qbit 1: 11 qbit 2: 8 dep gates: 137
+qbit 1: 11 qbit 2: 9 dep gates: 138
+qbit 1: 11 qbit 2: 9 dep gates: 119
+qbit 1: 11 qbit 2: 9 dep gates: 139
+qbit 1: 11 qbit 2: 9 dep gates: 139
+qbit 1: 11 qbit 2: 10 dep gates: 140
+qbit 1: 11 qbit 2: 10 dep gates: 120
+qbit 1: 11 qbit 2: 10 dep gates: 141
+qbit 1: 11 qbit 2: 10 dep gates: 141
+qbit 11 dep gates: 142
+qbit 1: 12 qbit 2: 0 dep gates: 122
+qbit 1: 12 qbit 2: 0 dep gates: 144
+qbit 1: 12 qbit 2: 0 dep gates: 144
+qbit 1: 12 qbit 2: 1 dep gates: 145
+qbit 1: 12 qbit 2: 1 dep gates: 124
+qbit 1: 12 qbit 2: 1 dep gates: 146
+qbit 1: 12 qbit 2: 1 dep gates: 146
+qbit 1: 12 qbit 2: 2 dep gates: 147
+qbit 1: 12 qbit 2: 2 dep gates: 126
+qbit 1: 12 qbit 2: 2 dep gates: 148
+qbit 1: 12 qbit 2: 2 dep gates: 148
+qbit 1: 12 qbit 2: 3 dep gates: 149
+qbit 1: 12 qbit 2: 3 dep gates: 128
+qbit 1: 12 qbit 2: 3 dep gates: 150
+qbit 1: 12 qbit 2: 3 dep gates: 150
+qbit 1: 12 qbit 2: 4 dep gates: 151
+qbit 1: 12 qbit 2: 4 dep gates: 130
+qbit 1: 12 qbit 2: 4 dep gates: 152
+qbit 1: 12 qbit 2: 4 dep gates: 152
+qbit 1: 12 qbit 2: 5 dep gates: 153
+qbit 1: 12 qbit 2: 5 dep gates: 132
+qbit 1: 12 qbit 2: 5 dep gates: 154
+qbit 1: 12 qbit 2: 5 dep gates: 154
+qbit 1: 12 qbit 2: 6 dep gates: 155
+qbit 1: 12 qbit 2: 6 dep gates: 134
+qbit 1: 12 qbit 2: 6 dep gates: 156
+qbit 1: 12 qbit 2: 6 dep gates: 156
+qbit 1: 12 qbit 2: 7 dep gates: 157
+qbit 1: 12 qbit 2: 7 dep gates: 136
+qbit 1: 12 qbit 2: 7 dep gates: 158
+qbit 1: 12 qbit 2: 7 dep gates: 158
+qbit 1: 12 qbit 2: 8 dep gates: 159
+qbit 1: 12 qbit 2: 8 dep gates: 138
+qbit 1: 12 qbit 2: 8 dep gates: 160
+qbit 1: 12 qbit 2: 8 dep gates: 160
+qbit 1: 12 qbit 2: 9 dep gates: 161
+qbit 1: 12 qbit 2: 9 dep gates: 140
+qbit 1: 12 qbit 2: 9 dep gates: 162
+qbit 1: 12 qbit 2: 9 dep gates: 162
+qbit 1: 12 qbit 2: 10 dep gates: 163
+qbit 1: 12 qbit 2: 10 dep gates: 142
+qbit 1: 12 qbit 2: 10 dep gates: 164
+qbit 1: 12 qbit 2: 10 dep gates: 164
+qbit 1: 12 qbit 2: 11 dep gates: 165
+qbit 1: 12 qbit 2: 11 dep gates: 143
+qbit 1: 12 qbit 2: 11 dep gates: 166
+qbit 1: 12 qbit 2: 11 dep gates: 166
+qbit 12 dep gates: 167
+qbit 1: 13 qbit 2: 0 dep gates: 145
+qbit 1: 13 qbit 2: 0 dep gates: 169
+qbit 1: 13 qbit 2: 0 dep gates: 169
+qbit 1: 13 qbit 2: 1 dep gates: 170
+qbit 1: 13 qbit 2: 1 dep gates: 147
+qbit 1: 13 qbit 2: 1 dep gates: 171
+qbit 1: 13 qbit 2: 1 dep gates: 171
+qbit 1: 13 qbit 2: 2 dep gates: 172
+qbit 1: 13 qbit 2: 2 dep gates: 149
+qbit 1: 13 qbit 2: 2 dep gates: 173
+qbit 1: 13 qbit 2: 2 dep gates: 173
+qbit 1: 13 qbit 2: 3 dep gates: 174
+qbit 1: 13 qbit 2: 3 dep gates: 151
+qbit 1: 13 qbit 2: 3 dep gates: 175
+qbit 1: 13 qbit 2: 3 dep gates: 175
+qbit 1: 13 qbit 2: 4 dep gates: 176
+qbit 1: 13 qbit 2: 4 dep gates: 153
+qbit 1: 13 qbit 2: 4 dep gates: 177
+qbit 1: 13 qbit 2: 4 dep gates: 177
+qbit 1: 13 qbit 2: 5 dep gates: 178
+qbit 1: 13 qbit 2: 5 dep gates: 155
+qbit 1: 13 qbit 2: 5 dep gates: 179
+qbit 1: 13 qbit 2: 5 dep gates: 179
+qbit 1: 13 qbit 2: 6 dep gates: 180
+qbit 1: 13 qbit 2: 6 dep gates: 157
+qbit 1: 13 qbit 2: 6 dep gates: 181
+qbit 1: 13 qbit 2: 6 dep gates: 181
+qbit 1: 13 qbit 2: 7 dep gates: 182
+qbit 1: 13 qbit 2: 7 dep gates: 159
+qbit 1: 13 qbit 2: 7 dep gates: 183
+qbit 1: 13 qbit 2: 7 dep gates: 183
+qbit 1: 13 qbit 2: 8 dep gates: 184
+qbit 1: 13 qbit 2: 8 dep gates: 161
+qbit 1: 13 qbit 2: 8 dep gates: 185
+qbit 1: 13 qbit 2: 8 dep gates: 185
+qbit 1: 13 qbit 2: 9 dep gates: 186
+qbit 1: 13 qbit 2: 9 dep gates: 163
+qbit 1: 13 qbit 2: 9 dep gates: 187
+qbit 1: 13 qbit 2: 9 dep gates: 187
+qbit 1: 13 qbit 2: 10 dep gates: 188
+qbit 1: 13 qbit 2: 10 dep gates: 165
+qbit 1: 13 qbit 2: 10 dep gates: 189
+qbit 1: 13 qbit 2: 10 dep gates: 189
+qbit 1: 13 qbit 2: 11 dep gates: 190
+qbit 1: 13 qbit 2: 11 dep gates: 167
+qbit 1: 13 qbit 2: 11 dep gates: 191
+qbit 1: 13 qbit 2: 11 dep gates: 191
+qbit 1: 13 qbit 2: 12 dep gates: 192
+qbit 1: 13 qbit 2: 12 dep gates: 168
+qbit 1: 13 qbit 2: 12 dep gates: 193
+qbit 1: 13 qbit 2: 12 dep gates: 193
+qbit 13 dep gates: 194
+qbit 1: 14 qbit 2: 0 dep gates: 170
+qbit 1: 14 qbit 2: 0 dep gates: 196
+qbit 1: 14 qbit 2: 0 dep gates: 196
+qbit 1: 14 qbit 2: 1 dep gates: 197
+qbit 1: 14 qbit 2: 1 dep gates: 172
+qbit 1: 14 qbit 2: 1 dep gates: 198
+qbit 1: 14 qbit 2: 1 dep gates: 198
+qbit 1: 14 qbit 2: 2 dep gates: 199
+qbit 1: 14 qbit 2: 2 dep gates: 174
+qbit 1: 14 qbit 2: 2 dep gates: 200
+qbit 1: 14 qbit 2: 2 dep gates: 200
+qbit 1: 14 qbit 2: 3 dep gates: 201
+qbit 1: 14 qbit 2: 3 dep gates: 176
+qbit 1: 14 qbit 2: 3 dep gates: 202
+qbit 1: 14 qbit 2: 3 dep gates: 202
+qbit 1: 14 qbit 2: 4 dep gates: 203
+qbit 1: 14 qbit 2: 4 dep gates: 178
+qbit 1: 14 qbit 2: 4 dep gates: 204
+qbit 1: 14 qbit 2: 4 dep gates: 204
+qbit 1: 14 qbit 2: 5 dep gates: 205
+qbit 1: 14 qbit 2: 5 dep gates: 180
+qbit 1: 14 qbit 2: 5 dep gates: 206
+qbit 1: 14 qbit 2: 5 dep gates: 206
+qbit 1: 14 qbit 2: 6 dep gates: 207
+qbit 1: 14 qbit 2: 6 dep gates: 182
+qbit 1: 14 qbit 2: 6 dep gates: 208
+qbit 1: 14 qbit 2: 6 dep gates: 208
+qbit 1: 14 qbit 2: 7 dep gates: 209
+qbit 1: 14 qbit 2: 7 dep gates: 184
+qbit 1: 14 qbit 2: 7 dep gates: 210
+qbit 1: 14 qbit 2: 7 dep gates: 210
+qbit 1: 14 qbit 2: 8 dep gates: 211
+qbit 1: 14 qbit 2: 8 dep gates: 186
+qbit 1: 14 qbit 2: 8 dep gates: 212
+qbit 1: 14 qbit 2: 8 dep gates: 212
+qbit 1: 14 qbit 2: 9 dep gates: 213
+qbit 1: 14 qbit 2: 9 dep gates: 188
+qbit 1: 14 qbit 2: 9 dep gates: 214
+qbit 1: 14 qbit 2: 9 dep gates: 214
+qbit 1: 14 qbit 2: 10 dep gates: 215
+qbit 1: 14 qbit 2: 10 dep gates: 190
+qbit 1: 14 qbit 2: 10 dep gates: 216
+qbit 1: 14 qbit 2: 10 dep gates: 216
+qbit 1: 14 qbit 2: 11 dep gates: 217
+qbit 1: 14 qbit 2: 11 dep gates: 192
+qbit 1: 14 qbit 2: 11 dep gates: 218
+qbit 1: 14 qbit 2: 11 dep gates: 218
+qbit 1: 14 qbit 2: 12 dep gates: 219
+qbit 1: 14 qbit 2: 12 dep gates: 194
+qbit 1: 14 qbit 2: 12 dep gates: 220
+qbit 1: 14 qbit 2: 12 dep gates: 220
+qbit 1: 14 qbit 2: 13 dep gates: 221
+qbit 1: 14 qbit 2: 13 dep gates: 195
+qbit 1: 14 qbit 2: 13 dep gates: 222
+qbit 1: 14 qbit 2: 13 dep gates: 222
+qbit 14 dep gates: 223
+qbit 1: 15 qbit 2: 0 dep gates: 197
+qbit 1: 15 qbit 2: 0 dep gates: 225
+qbit 1: 15 qbit 2: 0 dep gates: 225
+qbit 1: 15 qbit 2: 1 dep gates: 226
+qbit 1: 15 qbit 2: 1 dep gates: 199
+qbit 1: 15 qbit 2: 1 dep gates: 227
+qbit 1: 15 qbit 2: 1 dep gates: 227
+qbit 1: 15 qbit 2: 2 dep gates: 228
+qbit 1: 15 qbit 2: 2 dep gates: 201
+qbit 1: 15 qbit 2: 2 dep gates: 229
+qbit 1: 15 qbit 2: 2 dep gates: 229
+qbit 1: 15 qbit 2: 3 dep gates: 230
+qbit 1: 15 qbit 2: 3 dep gates: 203
+qbit 1: 15 qbit 2: 3 dep gates: 231
+qbit 1: 15 qbit 2: 3 dep gates: 231
+qbit 1: 15 qbit 2: 4 dep gates: 232
+qbit 1: 15 qbit 2: 4 dep gates: 205
+qbit 1: 15 qbit 2: 4 dep gates: 233
+qbit 1: 15 qbit 2: 4 dep gates: 233
+qbit 1: 15 qbit 2: 5 dep gates: 234
+qbit 1: 15 qbit 2: 5 dep gates: 207
+qbit 1: 15 qbit 2: 5 dep gates: 235
+qbit 1: 15 qbit 2: 5 dep gates: 235
+qbit 1: 15 qbit 2: 6 dep gates: 236
+qbit 1: 15 qbit 2: 6 dep gates: 209
+qbit 1: 15 qbit 2: 6 dep gates: 237
+qbit 1: 15 qbit 2: 6 dep gates: 237
+qbit 1: 15 qbit 2: 7 dep gates: 238
+qbit 1: 15 qbit 2: 7 dep gates: 211
+qbit 1: 15 qbit 2: 7 dep gates: 239
+qbit 1: 15 qbit 2: 7 dep gates: 239
+qbit 1: 15 qbit 2: 8 dep gates: 240
+qbit 1: 15 qbit 2: 8 dep gates: 213
+qbit 1: 15 qbit 2: 8 dep gates: 241
+qbit 1: 15 qbit 2: 8 dep gates: 241
+qbit 1: 15 qbit 2: 9 dep gates: 242
+qbit 1: 15 qbit 2: 9 dep gates: 215
+qbit 1: 15 qbit 2: 9 dep gates: 243
+qbit 1: 15 qbit 2: 9 dep gates: 243
+qbit 1: 15 qbit 2: 10 dep gates: 244
+qbit 1: 15 qbit 2: 10 dep gates: 217
+qbit 1: 15 qbit 2: 10 dep gates: 245
+qbit 1: 15 qbit 2: 10 dep gates: 245
+qbit 1: 15 qbit 2: 11 dep gates: 246
+qbit 1: 15 qbit 2: 11 dep gates: 219
+qbit 1: 15 qbit 2: 11 dep gates: 247
+qbit 1: 15 qbit 2: 11 dep gates: 247
+qbit 1: 15 qbit 2: 12 dep gates: 248
+qbit 1: 15 qbit 2: 12 dep gates: 221
+qbit 1: 15 qbit 2: 12 dep gates: 249
+qbit 1: 15 qbit 2: 12 dep gates: 249
+qbit 1: 15 qbit 2: 13 dep gates: 250
+qbit 1: 15 qbit 2: 13 dep gates: 223
+qbit 1: 15 qbit 2: 13 dep gates: 251
+qbit 1: 15 qbit 2: 13 dep gates: 251
+qbit 1: 15 qbit 2: 14 dep gates: 252
+qbit 1: 15 qbit 2: 14 dep gates: 224
+qbit 1: 15 qbit 2: 14 dep gates: 253
+qbit 1: 15 qbit 2: 14 dep gates: 253
+qbit 15 dep gates: 254
+qbit 1: 16 qbit 2: 0 dep gates: 226
+qbit 1: 16 qbit 2: 0 dep gates: 256
+qbit 1: 16 qbit 2: 0 dep gates: 256
+qbit 1: 16 qbit 2: 1 dep gates: 257
+qbit 1: 16 qbit 2: 1 dep gates: 228
+qbit 1: 16 qbit 2: 1 dep gates: 258
+qbit 1: 16 qbit 2: 1 dep gates: 258
+qbit 1: 16 qbit 2: 2 dep gates: 259
+qbit 1: 16 qbit 2: 2 dep gates: 230
+qbit 1: 16 qbit 2: 2 dep gates: 260
+qbit 1: 16 qbit 2: 2 dep gates: 260
+qbit 1: 16 qbit 2: 3 dep gates: 261
+qbit 1: 16 qbit 2: 3 dep gates: 232
+qbit 1: 16 qbit 2: 3 dep gates: 262
+qbit 1: 16 qbit 2: 3 dep gates: 262
+qbit 1: 16 qbit 2: 4 dep gates: 263
+qbit 1: 16 qbit 2: 4 dep gates: 234
+qbit 1: 16 qbit 2: 4 dep gates: 264
+qbit 1: 16 qbit 2: 4 dep gates: 264
+qbit 1: 16 qbit 2: 5 dep gates: 265
+qbit 1: 16 qbit 2: 5 dep gates: 236
+qbit 1: 16 qbit 2: 5 dep gates: 266
+qbit 1: 16 qbit 2: 5 dep gates: 266
+qbit 1: 16 qbit 2: 6 dep gates: 267
+qbit 1: 16 qbit 2: 6 dep gates: 238
+qbit 1: 16 qbit 2: 6 dep gates: 268
+qbit 1: 16 qbit 2: 6 dep gates: 268
+qbit 1: 16 qbit 2: 7 dep gates: 269
+qbit 1: 16 qbit 2: 7 dep gates: 240
+qbit 1: 16 qbit 2: 7 dep gates: 270
+qbit 1: 16 qbit 2: 7 dep gates: 270
+qbit 1: 16 qbit 2: 8 dep gates: 271
+qbit 1: 16 qbit 2: 8 dep gates: 242
+qbit 1: 16 qbit 2: 8 dep gates: 272
+qbit 1: 16 qbit 2: 8 dep gates: 272
+qbit 1: 16 qbit 2: 9 dep gates: 273
+qbit 1: 16 qbit 2: 9 dep gates: 244
+qbit 1: 16 qbit 2: 9 dep gates: 274
+qbit 1: 16 qbit 2: 9 dep gates: 274
+qbit 1: 16 qbit 2: 10 dep gates: 275
+qbit 1: 16 qbit 2: 10 dep gates: 246
+qbit 1: 16 qbit 2: 10 dep gates: 276
+qbit 1: 16 qbit 2: 10 dep gates: 276
+qbit 1: 16 qbit 2: 11 dep gates: 277
+qbit 1: 16 qbit 2: 11 dep gates: 248
+qbit 1: 16 qbit 2: 11 dep gates: 278
+qbit 1: 16 qbit 2: 11 dep gates: 278
+qbit 1: 16 qbit 2: 12 dep gates: 279
+qbit 1: 16 qbit 2: 12 dep gates: 250
+qbit 1: 16 qbit 2: 12 dep gates: 280
+qbit 1: 16 qbit 2: 12 dep gates: 280
+qbit 1: 16 qbit 2: 13 dep gates: 281
+qbit 1: 16 qbit 2: 13 dep gates: 252
+qbit 1: 16 qbit 2: 13 dep gates: 282
+qbit 1: 16 qbit 2: 13 dep gates: 282
+qbit 1: 16 qbit 2: 14 dep gates: 283
+qbit 1: 16 qbit 2: 14 dep gates: 254
+qbit 1: 16 qbit 2: 14 dep gates: 284
+qbit 1: 16 qbit 2: 14 dep gates: 284
+qbit 1: 16 qbit 2: 15 dep gates: 285
+qbit 1: 16 qbit 2: 15 dep gates: 255
+qbit 1: 16 qbit 2: 15 dep gates: 286
+qbit 1: 16 qbit 2: 15 dep gates: 286
+qbit 16 dep gates: 287
+qbit 1: 17 qbit 2: 0 dep gates: 257
+qbit 1: 17 qbit 2: 0 dep gates: 289
+qbit 1: 17 qbit 2: 0 dep gates: 289
+qbit 1: 17 qbit 2: 1 dep gates: 290
+qbit 1: 17 qbit 2: 1 dep gates: 259
+qbit 1: 17 qbit 2: 1 dep gates: 291
+qbit 1: 17 qbit 2: 1 dep gates: 291
+qbit 1: 17 qbit 2: 2 dep gates: 292
+qbit 1: 17 qbit 2: 2 dep gates: 261
+qbit 1: 17 qbit 2: 2 dep gates: 293
+qbit 1: 17 qbit 2: 2 dep gates: 293
+qbit 1: 17 qbit 2: 3 dep gates: 294
+qbit 1: 17 qbit 2: 3 dep gates: 263
+qbit 1: 17 qbit 2: 3 dep gates: 295
+qbit 1: 17 qbit 2: 3 dep gates: 295
+qbit 1: 17 qbit 2: 4 dep gates: 296
+qbit 1: 17 qbit 2: 4 dep gates: 265
+qbit 1: 17 qbit 2: 4 dep gates: 297
+qbit 1: 17 qbit 2: 4 dep gates: 297
+qbit 1: 17 qbit 2: 5 dep gates: 298
+qbit 1: 17 qbit 2: 5 dep gates: 267
+qbit 1: 17 qbit 2: 5 dep gates: 299
+qbit 1: 17 qbit 2: 5 dep gates: 299
+qbit 1: 17 qbit 2: 6 dep gates: 300
+qbit 1: 17 qbit 2: 6 dep gates: 269
+qbit 1: 17 qbit 2: 6 dep gates: 301
+qbit 1: 17 qbit 2: 6 dep gates: 301
+qbit 1: 17 qbit 2: 7 dep gates: 302
+qbit 1: 17 qbit 2: 7 dep gates: 271
+qbit 1: 17 qbit 2: 7 dep gates: 303
+qbit 1: 17 qbit 2: 7 dep gates: 303
+qbit 1: 17 qbit 2: 8 dep gates: 304
+qbit 1: 17 qbit 2: 8 dep gates: 273
+qbit 1: 17 qbit 2: 8 dep gates: 305
+qbit 1: 17 qbit 2: 8 dep gates: 305
+qbit 1: 17 qbit 2: 9 dep gates: 306
+qbit 1: 17 qbit 2: 9 dep gates: 275
+qbit 1: 17 qbit 2: 9 dep gates: 307
+qbit 1: 17 qbit 2: 9 dep gates: 307
+qbit 1: 17 qbit 2: 10 dep gates: 308
+qbit 1: 17 qbit 2: 10 dep gates: 277
+qbit 1: 17 qbit 2: 10 dep gates: 309
+qbit 1: 17 qbit 2: 10 dep gates: 309
+qbit 1: 17 qbit 2: 11 dep gates: 310
+qbit 1: 17 qbit 2: 11 dep gates: 279
+qbit 1: 17 qbit 2: 11 dep gates: 311
+qbit 1: 17 qbit 2: 11 dep gates: 311
+qbit 1: 17 qbit 2: 12 dep gates: 312
+qbit 1: 17 qbit 2: 12 dep gates: 281
+qbit 1: 17 qbit 2: 12 dep gates: 313
+qbit 1: 17 qbit 2: 12 dep gates: 313
+qbit 1: 17 qbit 2: 13 dep gates: 314
+qbit 1: 17 qbit 2: 13 dep gates: 283
+qbit 1: 17 qbit 2: 13 dep gates: 315
+qbit 1: 17 qbit 2: 13 dep gates: 315
+qbit 1: 17 qbit 2: 14 dep gates: 316
+qbit 1: 17 qbit 2: 14 dep gates: 285
+qbit 1: 17 qbit 2: 14 dep gates: 317
+qbit 1: 17 qbit 2: 14 dep gates: 317
+qbit 1: 17 qbit 2: 15 dep gates: 318
+qbit 1: 17 qbit 2: 15 dep gates: 287
+qbit 1: 17 qbit 2: 15 dep gates: 319
+qbit 1: 17 qbit 2: 15 dep gates: 319
+qbit 1: 17 qbit 2: 16 dep gates: 320
+qbit 1: 17 qbit 2: 16 dep gates: 288
+qbit 1: 17 qbit 2: 16 dep gates: 321
+qbit 1: 17 qbit 2: 16 dep gates: 321
+qbit 17 dep gates: 322
+qbit 1: 18 qbit 2: 0 dep gates: 290
+qbit 1: 18 qbit 2: 0 dep gates: 324
+qbit 1: 18 qbit 2: 0 dep gates: 324
+qbit 1: 18 qbit 2: 1 dep gates: 325
+qbit 1: 18 qbit 2: 1 dep gates: 292
+qbit 1: 18 qbit 2: 1 dep gates: 326
+qbit 1: 18 qbit 2: 1 dep gates: 326
+qbit 1: 18 qbit 2: 2 dep gates: 327
+qbit 1: 18 qbit 2: 2 dep gates: 294
+qbit 1: 18 qbit 2: 2 dep gates: 328
+qbit 1: 18 qbit 2: 2 dep gates: 328
+qbit 1: 18 qbit 2: 3 dep gates: 329
+qbit 1: 18 qbit 2: 3 dep gates: 296
+qbit 1: 18 qbit 2: 3 dep gates: 330
+qbit 1: 18 qbit 2: 3 dep gates: 330
+qbit 1: 18 qbit 2: 4 dep gates: 331
+qbit 1: 18 qbit 2: 4 dep gates: 298
+qbit 1: 18 qbit 2: 4 dep gates: 332
+qbit 1: 18 qbit 2: 4 dep gates: 332
+qbit 1: 18 qbit 2: 5 dep gates: 333
+qbit 1: 18 qbit 2: 5 dep gates: 300
+qbit 1: 18 qbit 2: 5 dep gates: 334
+qbit 1: 18 qbit 2: 5 dep gates: 334
+qbit 1: 18 qbit 2: 6 dep gates: 335
+qbit 1: 18 qbit 2: 6 dep gates: 302
+qbit 1: 18 qbit 2: 6 dep gates: 336
+qbit 1: 18 qbit 2: 6 dep gates: 336
+qbit 1: 18 qbit 2: 7 dep gates: 337
+qbit 1: 18 qbit 2: 7 dep gates: 304
+qbit 1: 18 qbit 2: 7 dep gates: 338
+qbit 1: 18 qbit 2: 7 dep gates: 338
+qbit 1: 18 qbit 2: 8 dep gates: 339
+qbit 1: 18 qbit 2: 8 dep gates: 306
+qbit 1: 18 qbit 2: 8 dep gates: 340
+qbit 1: 18 qbit 2: 8 dep gates: 340
+qbit 1: 18 qbit 2: 9 dep gates: 341
+qbit 1: 18 qbit 2: 9 dep gates: 308
+qbit 1: 18 qbit 2: 9 dep gates: 342
+qbit 1: 18 qbit 2: 9 dep gates: 342
+qbit 1: 18 qbit 2: 10 dep gates: 343
+qbit 1: 18 qbit 2: 10 dep gates: 310
+qbit 1: 18 qbit 2: 10 dep gates: 344
+qbit 1: 18 qbit 2: 10 dep gates: 344
+qbit 1: 18 qbit 2: 11 dep gates: 345
+qbit 1: 18 qbit 2: 11 dep gates: 312
+qbit 1: 18 qbit 2: 11 dep gates: 346
+qbit 1: 18 qbit 2: 11 dep gates: 346
+qbit 1: 18 qbit 2: 12 dep gates: 347
+qbit 1: 18 qbit 2: 12 dep gates: 314
+qbit 1: 18 qbit 2: 12 dep gates: 348
+qbit 1: 18 qbit 2: 12 dep gates: 348
+qbit 1: 18 qbit 2: 13 dep gates: 349
+qbit 1: 18 qbit 2: 13 dep gates: 316
+qbit 1: 18 qbit 2: 13 dep gates: 350
+qbit 1: 18 qbit 2: 13 dep gates: 350
+qbit 1: 18 qbit 2: 14 dep gates: 351
+qbit 1: 18 qbit 2: 14 dep gates: 318
+qbit 1: 18 qbit 2: 14 dep gates: 352
+qbit 1: 18 qbit 2: 14 dep gates: 352
+qbit 1: 18 qbit 2: 15 dep gates: 353
+qbit 1: 18 qbit 2: 15 dep gates: 320
+qbit 1: 18 qbit 2: 15 dep gates: 354
+qbit 1: 18 qbit 2: 15 dep gates: 354
+qbit 1: 18 qbit 2: 16 dep gates: 355
+qbit 1: 18 qbit 2: 16 dep gates: 322
+qbit 1: 18 qbit 2: 16 dep gates: 356
+qbit 1: 18 qbit 2: 16 dep gates: 356
+qbit 1: 18 qbit 2: 17 dep gates: 357
+qbit 1: 18 qbit 2: 17 dep gates: 323
+qbit 1: 18 qbit 2: 17 dep gates: 358
+qbit 1: 18 qbit 2: 17 dep gates: 358
+qbit 18 dep gates: 359
+qbit 1: 19 qbit 2: 0 dep gates: 325
+qbit 1: 19 qbit 2: 0 dep gates: 361
+qbit 1: 19 qbit 2: 0 dep gates: 361
+qbit 1: 19 qbit 2: 1 dep gates: 362
+qbit 1: 19 qbit 2: 1 dep gates: 327
+qbit 1: 19 qbit 2: 1 dep gates: 363
+qbit 1: 19 qbit 2: 1 dep gates: 363
+qbit 1: 19 qbit 2: 2 dep gates: 364
+qbit 1: 19 qbit 2: 2 dep gates: 329
+qbit 1: 19 qbit 2: 2 dep gates: 365
+qbit 1: 19 qbit 2: 2 dep gates: 365
+qbit 1: 19 qbit 2: 3 dep gates: 366
+qbit 1: 19 qbit 2: 3 dep gates: 331
+qbit 1: 19 qbit 2: 3 dep gates: 367
+qbit 1: 19 qbit 2: 3 dep gates: 367
+qbit 1: 19 qbit 2: 4 dep gates: 368
+qbit 1: 19 qbit 2: 4 dep gates: 333
+qbit 1: 19 qbit 2: 4 dep gates: 369
+qbit 1: 19 qbit 2: 4 dep gates: 369
+qbit 1: 19 qbit 2: 5 dep gates: 370
+qbit 1: 19 qbit 2: 5 dep gates: 335
+qbit 1: 19 qbit 2: 5 dep gates: 371
+qbit 1: 19 qbit 2: 5 dep gates: 371
+qbit 1: 19 qbit 2: 6 dep gates: 372
+qbit 1: 19 qbit 2: 6 dep gates: 337
+qbit 1: 19 qbit 2: 6 dep gates: 373
+qbit 1: 19 qbit 2: 6 dep gates: 373
+qbit 1: 19 qbit 2: 7 dep gates: 374
+qbit 1: 19 qbit 2: 7 dep gates: 339
+qbit 1: 19 qbit 2: 7 dep gates: 375
+qbit 1: 19 qbit 2: 7 dep gates: 375
+qbit 1: 19 qbit 2: 8 dep gates: 376
+qbit 1: 19 qbit 2: 8 dep gates: 341
+qbit 1: 19 qbit 2: 8 dep gates: 377
+qbit 1: 19 qbit 2: 8 dep gates: 377
+qbit 1: 19 qbit 2: 9 dep gates: 378
+qbit 1: 19 qbit 2: 9 dep gates: 343
+qbit 1: 19 qbit 2: 9 dep gates: 379
+qbit 1: 19 qbit 2: 9 dep gates: 379
+qbit 1: 19 qbit 2: 10 dep gates: 380
+qbit 1: 19 qbit 2: 10 dep gates: 345
+qbit 1: 19 qbit 2: 10 dep gates: 381
+qbit 1: 19 qbit 2: 10 dep gates: 381
+qbit 1: 19 qbit 2: 11 dep gates: 382
+qbit 1: 19 qbit 2: 11 dep gates: 347
+qbit 1: 19 qbit 2: 11 dep gates: 383
+qbit 1: 19 qbit 2: 11 dep gates: 383
+qbit 1: 19 qbit 2: 12 dep gates: 384
+qbit 1: 19 qbit 2: 12 dep gates: 349
+qbit 1: 19 qbit 2: 12 dep gates: 385
+qbit 1: 19 qbit 2: 12 dep gates: 385
+qbit 1: 19 qbit 2: 13 dep gates: 386
+qbit 1: 19 qbit 2: 13 dep gates: 351
+qbit 1: 19 qbit 2: 13 dep gates: 387
+qbit 1: 19 qbit 2: 13 dep gates: 387
+qbit 1: 19 qbit 2: 14 dep gates: 388
+qbit 1: 19 qbit 2: 14 dep gates: 353
+qbit 1: 19 qbit 2: 14 dep gates: 389
+qbit 1: 19 qbit 2: 14 dep gates: 389
+qbit 1: 19 qbit 2: 15 dep gates: 390
+qbit 1: 19 qbit 2: 15 dep gates: 355
+qbit 1: 19 qbit 2: 15 dep gates: 391
+qbit 1: 19 qbit 2: 15 dep gates: 391
+qbit 1: 19 qbit 2: 16 dep gates: 392
+qbit 1: 19 qbit 2: 16 dep gates: 357
+qbit 1: 19 qbit 2: 16 dep gates: 393
+qbit 1: 19 qbit 2: 16 dep gates: 393
+qbit 1: 19 qbit 2: 17 dep gates: 394
+qbit 1: 19 qbit 2: 17 dep gates: 359
+qbit 1: 19 qbit 2: 17 dep gates: 395
+qbit 1: 19 qbit 2: 17 dep gates: 395
+qbit 1: 19 qbit 2: 18 dep gates: 396
+qbit 1: 19 qbit 2: 18 dep gates: 360
+qbit 1: 19 qbit 2: 18 dep gates: 397
+qbit 1: 19 qbit 2: 18 dep gates: 397
+qbit 19 dep gates: 398
+qbit 1: 20 qbit 2: 0 dep gates: 362
+qbit 1: 20 qbit 2: 0 dep gates: 400
+qbit 1: 20 qbit 2: 0 dep gates: 400
+qbit 1: 20 qbit 2: 1 dep gates: 401
+qbit 1: 20 qbit 2: 1 dep gates: 364
+qbit 1: 20 qbit 2: 1 dep gates: 402
+qbit 1: 20 qbit 2: 1 dep gates: 402
+qbit 1: 20 qbit 2: 2 dep gates: 403
+qbit 1: 20 qbit 2: 2 dep gates: 366
+qbit 1: 20 qbit 2: 2 dep gates: 404
+qbit 1: 20 qbit 2: 2 dep gates: 404
+qbit 1: 20 qbit 2: 3 dep gates: 405
+qbit 1: 20 qbit 2: 3 dep gates: 368
+qbit 1: 20 qbit 2: 3 dep gates: 406
+qbit 1: 20 qbit 2: 3 dep gates: 406
+qbit 1: 20 qbit 2: 4 dep gates: 407
+qbit 1: 20 qbit 2: 4 dep gates: 370
+qbit 1: 20 qbit 2: 4 dep gates: 408
+qbit 1: 20 qbit 2: 4 dep gates: 408
+qbit 1: 20 qbit 2: 5 dep gates: 409
+qbit 1: 20 qbit 2: 5 dep gates: 372
+qbit 1: 20 qbit 2: 5 dep gates: 410
+qbit 1: 20 qbit 2: 5 dep gates: 410
+qbit 1: 20 qbit 2: 6 dep gates: 411
+qbit 1: 20 qbit 2: 6 dep gates: 374
+qbit 1: 20 qbit 2: 6 dep gates: 412
+qbit 1: 20 qbit 2: 6 dep gates: 412
+qbit 1: 20 qbit 2: 7 dep gates: 413
+qbit 1: 20 qbit 2: 7 dep gates: 376
+qbit 1: 20 qbit 2: 7 dep gates: 414
+qbit 1: 20 qbit 2: 7 dep gates: 414
+qbit 1: 20 qbit 2: 8 dep gates: 415
+qbit 1: 20 qbit 2: 8 dep gates: 378
+qbit 1: 20 qbit 2: 8 dep gates: 416
+qbit 1: 20 qbit 2: 8 dep gates: 416
+qbit 1: 20 qbit 2: 9 dep gates: 417
+qbit 1: 20 qbit 2: 9 dep gates: 380
+qbit 1: 20 qbit 2: 9 dep gates: 418
+qbit 1: 20 qbit 2: 9 dep gates: 418
+qbit 1: 20 qbit 2: 10 dep gates: 419
+qbit 1: 20 qbit 2: 10 dep gates: 382
+qbit 1: 20 qbit 2: 10 dep gates: 420
+qbit 1: 20 qbit 2: 10 dep gates: 420
+qbit 1: 20 qbit 2: 11 dep gates: 421
+qbit 1: 20 qbit 2: 11 dep gates: 384
+qbit 1: 20 qbit 2: 11 dep gates: 422
+qbit 1: 20 qbit 2: 11 dep gates: 422
+qbit 1: 20 qbit 2: 12 dep gates: 423
+qbit 1: 20 qbit 2: 12 dep gates: 386
+qbit 1: 20 qbit 2: 12 dep gates: 424
+qbit 1: 20 qbit 2: 12 dep gates: 424
+qbit 1: 20 qbit 2: 13 dep gates: 425
+qbit 1: 20 qbit 2: 13 dep gates: 388
+qbit 1: 20 qbit 2: 13 dep gates: 426
+qbit 1: 20 qbit 2: 13 dep gates: 426
+qbit 1: 20 qbit 2: 14 dep gates: 427
+qbit 1: 20 qbit 2: 14 dep gates: 390
+qbit 1: 20 qbit 2: 14 dep gates: 428
+qbit 1: 20 qbit 2: 14 dep gates: 428
+qbit 1: 20 qbit 2: 15 dep gates: 429
+qbit 1: 20 qbit 2: 15 dep gates: 392
+qbit 1: 20 qbit 2: 15 dep gates: 430
+qbit 1: 20 qbit 2: 15 dep gates: 430
+qbit 1: 20 qbit 2: 16 dep gates: 431
+qbit 1: 20 qbit 2: 16 dep gates: 394
+qbit 1: 20 qbit 2: 16 dep gates: 432
+qbit 1: 20 qbit 2: 16 dep gates: 432
+qbit 1: 20 qbit 2: 17 dep gates: 433
+qbit 1: 20 qbit 2: 17 dep gates: 396
+qbit 1: 20 qbit 2: 17 dep gates: 434
+qbit 1: 20 qbit 2: 17 dep gates: 434
+qbit 1: 20 qbit 2: 18 dep gates: 435
+qbit 1: 20 qbit 2: 18 dep gates: 398
+qbit 1: 20 qbit 2: 18 dep gates: 436
+qbit 1: 20 qbit 2: 18 dep gates: 436
+qbit 1: 20 qbit 2: 19 dep gates: 437
+qbit 1: 20 qbit 2: 19 dep gates: 399
+qbit 1: 20 qbit 2: 19 dep gates: 438
+qbit 1: 20 qbit 2: 19 dep gates: 438
+qbit 20 dep gates: 439
+qbit 1: 21 qbit 2: 0 dep gates: 401
+qbit 1: 21 qbit 2: 0 dep gates: 441
+qbit 1: 21 qbit 2: 0 dep gates: 441
+qbit 1: 21 qbit 2: 1 dep gates: 442
+qbit 1: 21 qbit 2: 1 dep gates: 403
+qbit 1: 21 qbit 2: 1 dep gates: 443
+qbit 1: 21 qbit 2: 1 dep gates: 443
+qbit 1: 21 qbit 2: 2 dep gates: 444
+qbit 1: 21 qbit 2: 2 dep gates: 405
+qbit 1: 21 qbit 2: 2 dep gates: 445
+qbit 1: 21 qbit 2: 2 dep gates: 445
+qbit 1: 21 qbit 2: 3 dep gates: 446
+qbit 1: 21 qbit 2: 3 dep gates: 407
+qbit 1: 21 qbit 2: 3 dep gates: 447
+qbit 1: 21 qbit 2: 3 dep gates: 447
+qbit 1: 21 qbit 2: 4 dep gates: 448
+qbit 1: 21 qbit 2: 4 dep gates: 409
+qbit 1: 21 qbit 2: 4 dep gates: 449
+qbit 1: 21 qbit 2: 4 dep gates: 449
+qbit 1: 21 qbit 2: 5 dep gates: 450
+qbit 1: 21 qbit 2: 5 dep gates: 411
+qbit 1: 21 qbit 2: 5 dep gates: 451
+qbit 1: 21 qbit 2: 5 dep gates: 451
+qbit 1: 21 qbit 2: 6 dep gates: 452
+qbit 1: 21 qbit 2: 6 dep gates: 413
+qbit 1: 21 qbit 2: 6 dep gates: 453
+qbit 1: 21 qbit 2: 6 dep gates: 453
+qbit 1: 21 qbit 2: 7 dep gates: 454
+qbit 1: 21 qbit 2: 7 dep gates: 415
+qbit 1: 21 qbit 2: 7 dep gates: 455
+qbit 1: 21 qbit 2: 7 dep gates: 455
+qbit 1: 21 qbit 2: 8 dep gates: 456
+qbit 1: 21 qbit 2: 8 dep gates: 417
+qbit 1: 21 qbit 2: 8 dep gates: 457
+qbit 1: 21 qbit 2: 8 dep gates: 457
+qbit 1: 21 qbit 2: 9 dep gates: 458
+qbit 1: 21 qbit 2: 9 dep gates: 419
+qbit 1: 21 qbit 2: 9 dep gates: 459
+qbit 1: 21 qbit 2: 9 dep gates: 459
+qbit 1: 21 qbit 2: 10 dep gates: 460
+qbit 1: 21 qbit 2: 10 dep gates: 421
+qbit 1: 21 qbit 2: 10 dep gates: 461
+qbit 1: 21 qbit 2: 10 dep gates: 461
+qbit 1: 21 qbit 2: 11 dep gates: 462
+qbit 1: 21 qbit 2: 11 dep gates: 423
+qbit 1: 21 qbit 2: 11 dep gates: 463
+qbit 1: 21 qbit 2: 11 dep gates: 463
+qbit 1: 21 qbit 2: 12 dep gates: 464
+qbit 1: 21 qbit 2: 12 dep gates: 425
+qbit 1: 21 qbit 2: 12 dep gates: 465
+qbit 1: 21 qbit 2: 12 dep gates: 465
+qbit 1: 21 qbit 2: 13 dep gates: 466
+qbit 1: 21 qbit 2: 13 dep gates: 427
+qbit 1: 21 qbit 2: 13 dep gates: 467
+qbit 1: 21 qbit 2: 13 dep gates: 467
+qbit 1: 21 qbit 2: 14 dep gates: 468
+qbit 1: 21 qbit 2: 14 dep gates: 429
+qbit 1: 21 qbit 2: 14 dep gates: 469
+qbit 1: 21 qbit 2: 14 dep gates: 469
+qbit 1: 21 qbit 2: 15 dep gates: 470
+qbit 1: 21 qbit 2: 15 dep gates: 431
+qbit 1: 21 qbit 2: 15 dep gates: 471
+qbit 1: 21 qbit 2: 15 dep gates: 471
+qbit 1: 21 qbit 2: 16 dep gates: 472
+qbit 1: 21 qbit 2: 16 dep gates: 433
+qbit 1: 21 qbit 2: 16 dep gates: 473
+qbit 1: 21 qbit 2: 16 dep gates: 473
+qbit 1: 21 qbit 2: 17 dep gates: 474
+qbit 1: 21 qbit 2: 17 dep gates: 435
+qbit 1: 21 qbit 2: 17 dep gates: 475
+qbit 1: 21 qbit 2: 17 dep gates: 475
+qbit 1: 21 qbit 2: 18 dep gates: 476
+qbit 1: 21 qbit 2: 18 dep gates: 437
+qbit 1: 21 qbit 2: 18 dep gates: 477
+qbit 1: 21 qbit 2: 18 dep gates: 477
+qbit 1: 21 qbit 2: 19 dep gates: 478
+qbit 1: 21 qbit 2: 19 dep gates: 439
+qbit 1: 21 qbit 2: 19 dep gates: 479
+qbit 1: 21 qbit 2: 19 dep gates: 479
+qbit 1: 21 qbit 2: 20 dep gates: 480
+qbit 1: 21 qbit 2: 20 dep gates: 440
+qbit 1: 21 qbit 2: 20 dep gates: 481
+qbit 1: 21 qbit 2: 20 dep gates: 481
+qbit 21 dep gates: 482
+qbit 1: 22 qbit 2: 0 dep gates: 442
+qbit 1: 22 qbit 2: 0 dep gates: 484
+qbit 1: 22 qbit 2: 0 dep gates: 484
+qbit 1: 22 qbit 2: 1 dep gates: 485
+qbit 1: 22 qbit 2: 1 dep gates: 444
+qbit 1: 22 qbit 2: 1 dep gates: 486
+qbit 1: 22 qbit 2: 1 dep gates: 486
+qbit 1: 22 qbit 2: 2 dep gates: 487
+qbit 1: 22 qbit 2: 2 dep gates: 446
+qbit 1: 22 qbit 2: 2 dep gates: 488
+qbit 1: 22 qbit 2: 2 dep gates: 488
+qbit 1: 22 qbit 2: 3 dep gates: 489
+qbit 1: 22 qbit 2: 3 dep gates: 448
+qbit 1: 22 qbit 2: 3 dep gates: 490
+qbit 1: 22 qbit 2: 3 dep gates: 490
+qbit 1: 22 qbit 2: 4 dep gates: 491
+qbit 1: 22 qbit 2: 4 dep gates: 450
+qbit 1: 22 qbit 2: 4 dep gates: 492
+qbit 1: 22 qbit 2: 4 dep gates: 492
+qbit 1: 22 qbit 2: 5 dep gates: 493
+qbit 1: 22 qbit 2: 5 dep gates: 452
+qbit 1: 22 qbit 2: 5 dep gates: 494
+qbit 1: 22 qbit 2: 5 dep gates: 494
+qbit 1: 22 qbit 2: 6 dep gates: 495
+qbit 1: 22 qbit 2: 6 dep gates: 454
+qbit 1: 22 qbit 2: 6 dep gates: 496
+qbit 1: 22 qbit 2: 6 dep gates: 496
+qbit 1: 22 qbit 2: 7 dep gates: 497
+qbit 1: 22 qbit 2: 7 dep gates: 456
+qbit 1: 22 qbit 2: 7 dep gates: 498
+qbit 1: 22 qbit 2: 7 dep gates: 498
+qbit 1: 22 qbit 2: 8 dep gates: 499
+qbit 1: 22 qbit 2: 8 dep gates: 458
+qbit 1: 22 qbit 2: 8 dep gates: 500
+qbit 1: 22 qbit 2: 8 dep gates: 500
+qbit 1: 22 qbit 2: 9 dep gates: 501
+qbit 1: 22 qbit 2: 9 dep gates: 460
+qbit 1: 22 qbit 2: 9 dep gates: 502
+qbit 1: 22 qbit 2: 9 dep gates: 502
+qbit 1: 22 qbit 2: 10 dep gates: 503
+qbit 1: 22 qbit 2: 10 dep gates: 462
+qbit 1: 22 qbit 2: 10 dep gates: 504
+qbit 1: 22 qbit 2: 10 dep gates: 504
+qbit 1: 22 qbit 2: 11 dep gates: 505
+qbit 1: 22 qbit 2: 11 dep gates: 464
+qbit 1: 22 qbit 2: 11 dep gates: 506
+qbit 1: 22 qbit 2: 11 dep gates: 506
+qbit 1: 22 qbit 2: 12 dep gates: 507
+qbit 1: 22 qbit 2: 12 dep gates: 466
+qbit 1: 22 qbit 2: 12 dep gates: 508
+qbit 1: 22 qbit 2: 12 dep gates: 508
+qbit 1: 22 qbit 2: 13 dep gates: 509
+qbit 1: 22 qbit 2: 13 dep gates: 468
+qbit 1: 22 qbit 2: 13 dep gates: 510
+qbit 1: 22 qbit 2: 13 dep gates: 510
+qbit 1: 22 qbit 2: 14 dep gates: 511
+qbit 1: 22 qbit 2: 14 dep gates: 470
+qbit 1: 22 qbit 2: 14 dep gates: 512
+qbit 1: 22 qbit 2: 14 dep gates: 512
+qbit 1: 22 qbit 2: 15 dep gates: 513
+qbit 1: 22 qbit 2: 15 dep gates: 472
+qbit 1: 22 qbit 2: 15 dep gates: 514
+qbit 1: 22 qbit 2: 15 dep gates: 514
+qbit 1: 22 qbit 2: 16 dep gates: 515
+qbit 1: 22 qbit 2: 16 dep gates: 474
+qbit 1: 22 qbit 2: 16 dep gates: 516
+qbit 1: 22 qbit 2: 16 dep gates: 516
+qbit 1: 22 qbit 2: 17 dep gates: 517
+qbit 1: 22 qbit 2: 17 dep gates: 476
+qbit 1: 22 qbit 2: 17 dep gates: 518
+qbit 1: 22 qbit 2: 17 dep gates: 518
+qbit 1: 22 qbit 2: 18 dep gates: 519
+qbit 1: 22 qbit 2: 18 dep gates: 478
+qbit 1: 22 qbit 2: 18 dep gates: 520
+qbit 1: 22 qbit 2: 18 dep gates: 520
+qbit 1: 22 qbit 2: 19 dep gates: 521
+qbit 1: 22 qbit 2: 19 dep gates: 480
+qbit 1: 22 qbit 2: 19 dep gates: 522
+qbit 1: 22 qbit 2: 19 dep gates: 522
+qbit 1: 22 qbit 2: 20 dep gates: 523
+qbit 1: 22 qbit 2: 20 dep gates: 482
+qbit 1: 22 qbit 2: 20 dep gates: 524
+qbit 1: 22 qbit 2: 20 dep gates: 524
+qbit 1: 22 qbit 2: 21 dep gates: 525
+qbit 1: 22 qbit 2: 21 dep gates: 483
+qbit 1: 22 qbit 2: 21 dep gates: 526
+qbit 1: 22 qbit 2: 21 dep gates: 526
+qbit 22 dep gates: 527
+qbit 1: 23 qbit 2: 0 dep gates: 485
+qbit 1: 23 qbit 2: 0 dep gates: 529
+qbit 1: 23 qbit 2: 0 dep gates: 529
+qbit 1: 23 qbit 2: 1 dep gates: 530
+qbit 1: 23 qbit 2: 1 dep gates: 487
+qbit 1: 23 qbit 2: 1 dep gates: 531
+qbit 1: 23 qbit 2: 1 dep gates: 531
+qbit 1: 23 qbit 2: 2 dep gates: 532
+qbit 1: 23 qbit 2: 2 dep gates: 489
+qbit 1: 23 qbit 2: 2 dep gates: 533
+qbit 1: 23 qbit 2: 2 dep gates: 533
+qbit 1: 23 qbit 2: 3 dep gates: 534
+qbit 1: 23 qbit 2: 3 dep gates: 491
+qbit 1: 23 qbit 2: 3 dep gates: 535
+qbit 1: 23 qbit 2: 3 dep gates: 535
+qbit 1: 23 qbit 2: 4 dep gates: 536
+qbit 1: 23 qbit 2: 4 dep gates: 493
+qbit 1: 23 qbit 2: 4 dep gates: 537
+qbit 1: 23 qbit 2: 4 dep gates: 537
+qbit 1: 23 qbit 2: 5 dep gates: 538
+qbit 1: 23 qbit 2: 5 dep gates: 495
+qbit 1: 23 qbit 2: 5 dep gates: 539
+qbit 1: 23 qbit 2: 5 dep gates: 539
+qbit 1: 23 qbit 2: 6 dep gates: 540
+qbit 1: 23 qbit 2: 6 dep gates: 497
+qbit 1: 23 qbit 2: 6 dep gates: 541
+qbit 1: 23 qbit 2: 6 dep gates: 541
+qbit 1: 23 qbit 2: 7 dep gates: 542
+qbit 1: 23 qbit 2: 7 dep gates: 499
+qbit 1: 23 qbit 2: 7 dep gates: 543
+qbit 1: 23 qbit 2: 7 dep gates: 543
+qbit 1: 23 qbit 2: 8 dep gates: 544
+qbit 1: 23 qbit 2: 8 dep gates: 501
+qbit 1: 23 qbit 2: 8 dep gates: 545
+qbit 1: 23 qbit 2: 8 dep gates: 545
+qbit 1: 23 qbit 2: 9 dep gates: 546
+qbit 1: 23 qbit 2: 9 dep gates: 503
+qbit 1: 23 qbit 2: 9 dep gates: 547
+qbit 1: 23 qbit 2: 9 dep gates: 547
+qbit 1: 23 qbit 2: 10 dep gates: 548
+qbit 1: 23 qbit 2: 10 dep gates: 505
+qbit 1: 23 qbit 2: 10 dep gates: 549
+qbit 1: 23 qbit 2: 10 dep gates: 549
+qbit 1: 23 qbit 2: 11 dep gates: 550
+qbit 1: 23 qbit 2: 11 dep gates: 507
+qbit 1: 23 qbit 2: 11 dep gates: 551
+qbit 1: 23 qbit 2: 11 dep gates: 551
+qbit 1: 23 qbit 2: 12 dep gates: 552
+qbit 1: 23 qbit 2: 12 dep gates: 509
+qbit 1: 23 qbit 2: 12 dep gates: 553
+qbit 1: 23 qbit 2: 12 dep gates: 553
+qbit 1: 23 qbit 2: 13 dep gates: 554
+qbit 1: 23 qbit 2: 13 dep gates: 511
+qbit 1: 23 qbit 2: 13 dep gates: 555
+qbit 1: 23 qbit 2: 13 dep gates: 555
+qbit 1: 23 qbit 2: 14 dep gates: 556
+qbit 1: 23 qbit 2: 14 dep gates: 513
+qbit 1: 23 qbit 2: 14 dep gates: 557
+qbit 1: 23 qbit 2: 14 dep gates: 557
+qbit 1: 23 qbit 2: 15 dep gates: 558
+qbit 1: 23 qbit 2: 15 dep gates: 515
+qbit 1: 23 qbit 2: 15 dep gates: 559
+qbit 1: 23 qbit 2: 15 dep gates: 559
+qbit 1: 23 qbit 2: 16 dep gates: 560
+qbit 1: 23 qbit 2: 16 dep gates: 517
+qbit 1: 23 qbit 2: 16 dep gates: 561
+qbit 1: 23 qbit 2: 16 dep gates: 561
+qbit 1: 23 qbit 2: 17 dep gates: 562
+qbit 1: 23 qbit 2: 17 dep gates: 519
+qbit 1: 23 qbit 2: 17 dep gates: 563
+qbit 1: 23 qbit 2: 17 dep gates: 563
+qbit 1: 23 qbit 2: 18 dep gates: 564
+qbit 1: 23 qbit 2: 18 dep gates: 521
+qbit 1: 23 qbit 2: 18 dep gates: 565
+qbit 1: 23 qbit 2: 18 dep gates: 565
+qbit 1: 23 qbit 2: 19 dep gates: 566
+qbit 1: 23 qbit 2: 19 dep gates: 523
+qbit 1: 23 qbit 2: 19 dep gates: 567
+qbit 1: 23 qbit 2: 19 dep gates: 567
+qbit 1: 23 qbit 2: 20 dep gates: 568
+qbit 1: 23 qbit 2: 20 dep gates: 525
+qbit 1: 23 qbit 2: 20 dep gates: 569
+qbit 1: 23 qbit 2: 20 dep gates: 569
+qbit 1: 23 qbit 2: 21 dep gates: 570
+qbit 1: 23 qbit 2: 21 dep gates: 527
+qbit 1: 23 qbit 2: 21 dep gates: 571
+qbit 1: 23 qbit 2: 21 dep gates: 571
+qbit 1: 23 qbit 2: 22 dep gates: 572
+qbit 1: 23 qbit 2: 22 dep gates: 528
+qbit 1: 23 qbit 2: 22 dep gates: 573
+qbit 1: 23 qbit 2: 22 dep gates: 573
+qbit 23 dep gates: 574
+qbit 1: 24 qbit 2: 0 dep gates: 530
+qbit 1: 24 qbit 2: 0 dep gates: 576
+qbit 1: 24 qbit 2: 0 dep gates: 576
+qbit 1: 24 qbit 2: 1 dep gates: 577
+qbit 1: 24 qbit 2: 1 dep gates: 532
+qbit 1: 24 qbit 2: 1 dep gates: 578
+qbit 1: 24 qbit 2: 1 dep gates: 578
+qbit 1: 24 qbit 2: 2 dep gates: 579
+qbit 1: 24 qbit 2: 2 dep gates: 534
+qbit 1: 24 qbit 2: 2 dep gates: 580
+qbit 1: 24 qbit 2: 2 dep gates: 580
+qbit 1: 24 qbit 2: 3 dep gates: 581
+qbit 1: 24 qbit 2: 3 dep gates: 536
+qbit 1: 24 qbit 2: 3 dep gates: 582
+qbit 1: 24 qbit 2: 3 dep gates: 582
+qbit 1: 24 qbit 2: 4 dep gates: 583
+qbit 1: 24 qbit 2: 4 dep gates: 538
+qbit 1: 24 qbit 2: 4 dep gates: 584
+qbit 1: 24 qbit 2: 4 dep gates: 584
+qbit 1: 24 qbit 2: 5 dep gates: 585
+qbit 1: 24 qbit 2: 5 dep gates: 540
+qbit 1: 24 qbit 2: 5 dep gates: 586
+qbit 1: 24 qbit 2: 5 dep gates: 586
+qbit 1: 24 qbit 2: 6 dep gates: 587
+qbit 1: 24 qbit 2: 6 dep gates: 542
+qbit 1: 24 qbit 2: 6 dep gates: 588
+qbit 1: 24 qbit 2: 6 dep gates: 588
+qbit 1: 24 qbit 2: 7 dep gates: 589
+qbit 1: 24 qbit 2: 7 dep gates: 544
+qbit 1: 24 qbit 2: 7 dep gates: 590
+qbit 1: 24 qbit 2: 7 dep gates: 590
+qbit 1: 24 qbit 2: 8 dep gates: 591
+qbit 1: 24 qbit 2: 8 dep gates: 546
+qbit 1: 24 qbit 2: 8 dep gates: 592
+qbit 1: 24 qbit 2: 8 dep gates: 592
+qbit 1: 24 qbit 2: 9 dep gates: 593
+qbit 1: 24 qbit 2: 9 dep gates: 548
+qbit 1: 24 qbit 2: 9 dep gates: 594
+qbit 1: 24 qbit 2: 9 dep gates: 594
+qbit 1: 24 qbit 2: 10 dep gates: 595
+qbit 1: 24 qbit 2: 10 dep gates: 550
+qbit 1: 24 qbit 2: 10 dep gates: 596
+qbit 1: 24 qbit 2: 10 dep gates: 596
+qbit 1: 24 qbit 2: 11 dep gates: 597
+qbit 1: 24 qbit 2: 11 dep gates: 552
+qbit 1: 24 qbit 2: 11 dep gates: 598
+qbit 1: 24 qbit 2: 11 dep gates: 598
+qbit 1: 24 qbit 2: 12 dep gates: 599
+qbit 1: 24 qbit 2: 12 dep gates: 554
+qbit 1: 24 qbit 2: 12 dep gates: 600
+qbit 1: 24 qbit 2: 12 dep gates: 600
+qbit 1: 24 qbit 2: 13 dep gates: 601
+qbit 1: 24 qbit 2: 13 dep gates: 556
+qbit 1: 24 qbit 2: 13 dep gates: 602
+qbit 1: 24 qbit 2: 13 dep gates: 602
+qbit 1: 24 qbit 2: 14 dep gates: 603
+qbit 1: 24 qbit 2: 14 dep gates: 558
+qbit 1: 24 qbit 2: 14 dep gates: 604
+qbit 1: 24 qbit 2: 14 dep gates: 604
+qbit 1: 24 qbit 2: 15 dep gates: 605
+qbit 1: 24 qbit 2: 15 dep gates: 560
+qbit 1: 24 qbit 2: 15 dep gates: 606
+qbit 1: 24 qbit 2: 15 dep gates: 606
+qbit 1: 24 qbit 2: 16 dep gates: 607
+qbit 1: 24 qbit 2: 16 dep gates: 562
+qbit 1: 24 qbit 2: 16 dep gates: 608
+qbit 1: 24 qbit 2: 16 dep gates: 608
+qbit 1: 24 qbit 2: 17 dep gates: 609
+qbit 1: 24 qbit 2: 17 dep gates: 564
+qbit 1: 24 qbit 2: 17 dep gates: 610
+qbit 1: 24 qbit 2: 17 dep gates: 610
+qbit 1: 24 qbit 2: 18 dep gates: 611
+qbit 1: 24 qbit 2: 18 dep gates: 566
+qbit 1: 24 qbit 2: 18 dep gates: 612
+qbit 1: 24 qbit 2: 18 dep gates: 612
+qbit 1: 24 qbit 2: 19 dep gates: 613
+qbit 1: 24 qbit 2: 19 dep gates: 568
+qbit 1: 24 qbit 2: 19 dep gates: 614
+qbit 1: 24 qbit 2: 19 dep gates: 614
+qbit 1: 24 qbit 2: 20 dep gates: 615
+qbit 1: 24 qbit 2: 20 dep gates: 570
+qbit 1: 24 qbit 2: 20 dep gates: 616
+qbit 1: 24 qbit 2: 20 dep gates: 616
+qbit 1: 24 qbit 2: 21 dep gates: 617
+qbit 1: 24 qbit 2: 21 dep gates: 572
+qbit 1: 24 qbit 2: 21 dep gates: 618
+qbit 1: 24 qbit 2: 21 dep gates: 618
+qbit 1: 24 qbit 2: 22 dep gates: 619
+qbit 1: 24 qbit 2: 22 dep gates: 574
+qbit 1: 24 qbit 2: 22 dep gates: 620
+qbit 1: 24 qbit 2: 22 dep gates: 620
+qbit 1: 24 qbit 2: 23 dep gates: 621
+qbit 1: 24 qbit 2: 23 dep gates: 575
+qbit 1: 24 qbit 2: 23 dep gates: 622
+qbit 1: 24 qbit 2: 23 dep gates: 622
+qbit 24 dep gates: 623
+qbit 1: 25 qbit 2: 0 dep gates: 577
+qbit 1: 25 qbit 2: 0 dep gates: 625
+qbit 1: 25 qbit 2: 0 dep gates: 625
+qbit 1: 25 qbit 2: 1 dep gates: 626
+qbit 1: 25 qbit 2: 1 dep gates: 579
+qbit 1: 25 qbit 2: 1 dep gates: 627
+qbit 1: 25 qbit 2: 1 dep gates: 627
+qbit 1: 25 qbit 2: 2 dep gates: 628
+qbit 1: 25 qbit 2: 2 dep gates: 581
+qbit 1: 25 qbit 2: 2 dep gates: 629
+qbit 1: 25 qbit 2: 2 dep gates: 629
+qbit 1: 25 qbit 2: 3 dep gates: 630
+qbit 1: 25 qbit 2: 3 dep gates: 583
+qbit 1: 25 qbit 2: 3 dep gates: 631
+qbit 1: 25 qbit 2: 3 dep gates: 631
+qbit 1: 25 qbit 2: 4 dep gates: 632
+qbit 1: 25 qbit 2: 4 dep gates: 585
+qbit 1: 25 qbit 2: 4 dep gates: 633
+qbit 1: 25 qbit 2: 4 dep gates: 633
+qbit 1: 25 qbit 2: 5 dep gates: 634
+qbit 1: 25 qbit 2: 5 dep gates: 587
+qbit 1: 25 qbit 2: 5 dep gates: 635
+qbit 1: 25 qbit 2: 5 dep gates: 635
+qbit 1: 25 qbit 2: 6 dep gates: 636
+qbit 1: 25 qbit 2: 6 dep gates: 589
+qbit 1: 25 qbit 2: 6 dep gates: 637
+qbit 1: 25 qbit 2: 6 dep gates: 637
+qbit 1: 25 qbit 2: 7 dep gates: 638
+qbit 1: 25 qbit 2: 7 dep gates: 591
+qbit 1: 25 qbit 2: 7 dep gates: 639
+qbit 1: 25 qbit 2: 7 dep gates: 639
+qbit 1: 25 qbit 2: 8 dep gates: 640
+qbit 1: 25 qbit 2: 8 dep gates: 593
+qbit 1: 25 qbit 2: 8 dep gates: 641
+qbit 1: 25 qbit 2: 8 dep gates: 641
+qbit 1: 25 qbit 2: 9 dep gates: 642
+qbit 1: 25 qbit 2: 9 dep gates: 595
+qbit 1: 25 qbit 2: 9 dep gates: 643
+qbit 1: 25 qbit 2: 9 dep gates: 643
+qbit 1: 25 qbit 2: 10 dep gates: 644
+qbit 1: 25 qbit 2: 10 dep gates: 597
+qbit 1: 25 qbit 2: 10 dep gates: 645
+qbit 1: 25 qbit 2: 10 dep gates: 645
+qbit 1: 25 qbit 2: 11 dep gates: 646
+qbit 1: 25 qbit 2: 11 dep gates: 599
+qbit 1: 25 qbit 2: 11 dep gates: 647
+qbit 1: 25 qbit 2: 11 dep gates: 647
+qbit 1: 25 qbit 2: 12 dep gates: 648
+qbit 1: 25 qbit 2: 12 dep gates: 601
+qbit 1: 25 qbit 2: 12 dep gates: 649
+qbit 1: 25 qbit 2: 12 dep gates: 649
+qbit 1: 25 qbit 2: 13 dep gates: 650
+qbit 1: 25 qbit 2: 13 dep gates: 603
+qbit 1: 25 qbit 2: 13 dep gates: 651
+qbit 1: 25 qbit 2: 13 dep gates: 651
+qbit 1: 25 qbit 2: 14 dep gates: 652
+qbit 1: 25 qbit 2: 14 dep gates: 605
+qbit 1: 25 qbit 2: 14 dep gates: 653
+qbit 1: 25 qbit 2: 14 dep gates: 653
+qbit 1: 25 qbit 2: 15 dep gates: 654
+qbit 1: 25 qbit 2: 15 dep gates: 607
+qbit 1: 25 qbit 2: 15 dep gates: 655
+qbit 1: 25 qbit 2: 15 dep gates: 655
+qbit 1: 25 qbit 2: 16 dep gates: 656
+qbit 1: 25 qbit 2: 16 dep gates: 609
+qbit 1: 25 qbit 2: 16 dep gates: 657
+qbit 1: 25 qbit 2: 16 dep gates: 657
+qbit 1: 25 qbit 2: 17 dep gates: 658
+qbit 1: 25 qbit 2: 17 dep gates: 611
+qbit 1: 25 qbit 2: 17 dep gates: 659
+qbit 1: 25 qbit 2: 17 dep gates: 659
+qbit 1: 25 qbit 2: 18 dep gates: 660
+qbit 1: 25 qbit 2: 18 dep gates: 613
+qbit 1: 25 qbit 2: 18 dep gates: 661
+qbit 1: 25 qbit 2: 18 dep gates: 661
+qbit 1: 25 qbit 2: 19 dep gates: 662
+qbit 1: 25 qbit 2: 19 dep gates: 615
+qbit 1: 25 qbit 2: 19 dep gates: 663
+qbit 1: 25 qbit 2: 19 dep gates: 663
+qbit 1: 25 qbit 2: 20 dep gates: 664
+qbit 1: 25 qbit 2: 20 dep gates: 617
+qbit 1: 25 qbit 2: 20 dep gates: 665
+qbit 1: 25 qbit 2: 20 dep gates: 665
+qbit 1: 25 qbit 2: 21 dep gates: 666
+qbit 1: 25 qbit 2: 21 dep gates: 619
+qbit 1: 25 qbit 2: 21 dep gates: 667
+qbit 1: 25 qbit 2: 21 dep gates: 667
+qbit 1: 25 qbit 2: 22 dep gates: 668
+qbit 1: 25 qbit 2: 22 dep gates: 621
+qbit 1: 25 qbit 2: 22 dep gates: 669
+qbit 1: 25 qbit 2: 22 dep gates: 669
+qbit 1: 25 qbit 2: 23 dep gates: 670
+qbit 1: 25 qbit 2: 23 dep gates: 623
+qbit 1: 25 qbit 2: 23 dep gates: 671
+qbit 1: 25 qbit 2: 23 dep gates: 671
+qbit 1: 25 qbit 2: 24 dep gates: 672
+qbit 1: 25 qbit 2: 24 dep gates: 624
+qbit 1: 25 qbit 2: 24 dep gates: 673
+qbit 1: 25 qbit 2: 24 dep gates: 673
+qbit 25 dep gates: 674
+qbit 1: 26 qbit 2: 0 dep gates: 626
+qbit 1: 26 qbit 2: 0 dep gates: 676
+qbit 1: 26 qbit 2: 0 dep gates: 676
+qbit 1: 26 qbit 2: 1 dep gates: 677
+qbit 1: 26 qbit 2: 1 dep gates: 628
+qbit 1: 26 qbit 2: 1 dep gates: 678
+qbit 1: 26 qbit 2: 1 dep gates: 678
+qbit 1: 26 qbit 2: 2 dep gates: 679
+qbit 1: 26 qbit 2: 2 dep gates: 630
+qbit 1: 26 qbit 2: 2 dep gates: 680
+qbit 1: 26 qbit 2: 2 dep gates: 680
+qbit 1: 26 qbit 2: 3 dep gates: 681
+qbit 1: 26 qbit 2: 3 dep gates: 632
+qbit 1: 26 qbit 2: 3 dep gates: 682
+qbit 1: 26 qbit 2: 3 dep gates: 682
+qbit 1: 26 qbit 2: 4 dep gates: 683
+qbit 1: 26 qbit 2: 4 dep gates: 634
+qbit 1: 26 qbit 2: 4 dep gates: 684
+qbit 1: 26 qbit 2: 4 dep gates: 684
+qbit 1: 26 qbit 2: 5 dep gates: 685
+qbit 1: 26 qbit 2: 5 dep gates: 636
+qbit 1: 26 qbit 2: 5 dep gates: 686
+qbit 1: 26 qbit 2: 5 dep gates: 686
+qbit 1: 26 qbit 2: 6 dep gates: 687
+qbit 1: 26 qbit 2: 6 dep gates: 638
+qbit 1: 26 qbit 2: 6 dep gates: 688
+qbit 1: 26 qbit 2: 6 dep gates: 688
+qbit 1: 26 qbit 2: 7 dep gates: 689
+qbit 1: 26 qbit 2: 7 dep gates: 640
+qbit 1: 26 qbit 2: 7 dep gates: 690
+qbit 1: 26 qbit 2: 7 dep gates: 690
+qbit 1: 26 qbit 2: 8 dep gates: 691
+qbit 1: 26 qbit 2: 8 dep gates: 642
+qbit 1: 26 qbit 2: 8 dep gates: 692
+qbit 1: 26 qbit 2: 8 dep gates: 692
+qbit 1: 26 qbit 2: 9 dep gates: 693
+qbit 1: 26 qbit 2: 9 dep gates: 644
+qbit 1: 26 qbit 2: 9 dep gates: 694
+qbit 1: 26 qbit 2: 9 dep gates: 694
+qbit 1: 26 qbit 2: 10 dep gates: 695
+qbit 1: 26 qbit 2: 10 dep gates: 646
+qbit 1: 26 qbit 2: 10 dep gates: 696
+qbit 1: 26 qbit 2: 10 dep gates: 696
+qbit 1: 26 qbit 2: 11 dep gates: 697
+qbit 1: 26 qbit 2: 11 dep gates: 648
+qbit 1: 26 qbit 2: 11 dep gates: 698
+qbit 1: 26 qbit 2: 11 dep gates: 698
+qbit 1: 26 qbit 2: 12 dep gates: 699
+qbit 1: 26 qbit 2: 12 dep gates: 650
+qbit 1: 26 qbit 2: 12 dep gates: 700
+qbit 1: 26 qbit 2: 12 dep gates: 700
+qbit 1: 26 qbit 2: 13 dep gates: 701
+qbit 1: 26 qbit 2: 13 dep gates: 652
+qbit 1: 26 qbit 2: 13 dep gates: 702
+qbit 1: 26 qbit 2: 13 dep gates: 702
+qbit 1: 26 qbit 2: 14 dep gates: 703
+qbit 1: 26 qbit 2: 14 dep gates: 654
+qbit 1: 26 qbit 2: 14 dep gates: 704
+qbit 1: 26 qbit 2: 14 dep gates: 704
+qbit 1: 26 qbit 2: 15 dep gates: 705
+qbit 1: 26 qbit 2: 15 dep gates: 656
+qbit 1: 26 qbit 2: 15 dep gates: 706
+qbit 1: 26 qbit 2: 15 dep gates: 706
+qbit 1: 26 qbit 2: 16 dep gates: 707
+qbit 1: 26 qbit 2: 16 dep gates: 658
+qbit 1: 26 qbit 2: 16 dep gates: 708
+qbit 1: 26 qbit 2: 16 dep gates: 708
+qbit 1: 26 qbit 2: 17 dep gates: 709
+qbit 1: 26 qbit 2: 17 dep gates: 660
+qbit 1: 26 qbit 2: 17 dep gates: 710
+qbit 1: 26 qbit 2: 17 dep gates: 710
+qbit 1: 26 qbit 2: 18 dep gates: 711
+qbit 1: 26 qbit 2: 18 dep gates: 662
+qbit 1: 26 qbit 2: 18 dep gates: 712
+qbit 1: 26 qbit 2: 18 dep gates: 712
+qbit 1: 26 qbit 2: 19 dep gates: 713
+qbit 1: 26 qbit 2: 19 dep gates: 664
+qbit 1: 26 qbit 2: 19 dep gates: 714
+qbit 1: 26 qbit 2: 19 dep gates: 714
+qbit 1: 26 qbit 2: 20 dep gates: 715
+qbit 1: 26 qbit 2: 20 dep gates: 666
+qbit 1: 26 qbit 2: 20 dep gates: 716
+qbit 1: 26 qbit 2: 20 dep gates: 716
+qbit 1: 26 qbit 2: 21 dep gates: 717
+qbit 1: 26 qbit 2: 21 dep gates: 668
+qbit 1: 26 qbit 2: 21 dep gates: 718
+qbit 1: 26 qbit 2: 21 dep gates: 718
+qbit 1: 26 qbit 2: 22 dep gates: 719
+qbit 1: 26 qbit 2: 22 dep gates: 670
+qbit 1: 26 qbit 2: 22 dep gates: 720
+qbit 1: 26 qbit 2: 22 dep gates: 720
+qbit 1: 26 qbit 2: 23 dep gates: 721
+qbit 1: 26 qbit 2: 23 dep gates: 672
+qbit 1: 26 qbit 2: 23 dep gates: 722
+qbit 1: 26 qbit 2: 23 dep gates: 722
+qbit 1: 26 qbit 2: 24 dep gates: 723
+qbit 1: 26 qbit 2: 24 dep gates: 674
+qbit 1: 26 qbit 2: 24 dep gates: 724
+qbit 1: 26 qbit 2: 24 dep gates: 724
+qbit 1: 26 qbit 2: 25 dep gates: 725
+qbit 1: 26 qbit 2: 25 dep gates: 675
+qbit 1: 26 qbit 2: 25 dep gates: 726
+qbit 1: 26 qbit 2: 25 dep gates: 726
+qbit 26 dep gates: 727
+qbit 1: 27 qbit 2: 0 dep gates: 677
+qbit 1: 27 qbit 2: 0 dep gates: 729
+qbit 1: 27 qbit 2: 0 dep gates: 729
+qbit 1: 27 qbit 2: 1 dep gates: 730
+qbit 1: 27 qbit 2: 1 dep gates: 679
+qbit 1: 27 qbit 2: 1 dep gates: 731
+qbit 1: 27 qbit 2: 1 dep gates: 731
+qbit 1: 27 qbit 2: 2 dep gates: 732
+qbit 1: 27 qbit 2: 2 dep gates: 681
+qbit 1: 27 qbit 2: 2 dep gates: 733
+qbit 1: 27 qbit 2: 2 dep gates: 733
+qbit 1: 27 qbit 2: 3 dep gates: 734
+qbit 1: 27 qbit 2: 3 dep gates: 683
+qbit 1: 27 qbit 2: 3 dep gates: 735
+qbit 1: 27 qbit 2: 3 dep gates: 735
+qbit 1: 27 qbit 2: 4 dep gates: 736
+qbit 1: 27 qbit 2: 4 dep gates: 685
+qbit 1: 27 qbit 2: 4 dep gates: 737
+qbit 1: 27 qbit 2: 4 dep gates: 737
+qbit 1: 27 qbit 2: 5 dep gates: 738
+qbit 1: 27 qbit 2: 5 dep gates: 687
+qbit 1: 27 qbit 2: 5 dep gates: 739
+qbit 1: 27 qbit 2: 5 dep gates: 739
+qbit 1: 27 qbit 2: 6 dep gates: 740
+qbit 1: 27 qbit 2: 6 dep gates: 689
+qbit 1: 27 qbit 2: 6 dep gates: 741
+qbit 1: 27 qbit 2: 6 dep gates: 741
+qbit 1: 27 qbit 2: 7 dep gates: 742
+qbit 1: 27 qbit 2: 7 dep gates: 691
+qbit 1: 27 qbit 2: 7 dep gates: 743
+qbit 1: 27 qbit 2: 7 dep gates: 743
+qbit 1: 27 qbit 2: 8 dep gates: 744
+qbit 1: 27 qbit 2: 8 dep gates: 693
+qbit 1: 27 qbit 2: 8 dep gates: 745
+qbit 1: 27 qbit 2: 8 dep gates: 745
+qbit 1: 27 qbit 2: 9 dep gates: 746
+qbit 1: 27 qbit 2: 9 dep gates: 695
+qbit 1: 27 qbit 2: 9 dep gates: 747
+qbit 1: 27 qbit 2: 9 dep gates: 747
+qbit 1: 27 qbit 2: 10 dep gates: 748
+qbit 1: 27 qbit 2: 10 dep gates: 697
+qbit 1: 27 qbit 2: 10 dep gates: 749
+qbit 1: 27 qbit 2: 10 dep gates: 749
+qbit 1: 27 qbit 2: 11 dep gates: 750
+qbit 1: 27 qbit 2: 11 dep gates: 699
+qbit 1: 27 qbit 2: 11 dep gates: 751
+qbit 1: 27 qbit 2: 11 dep gates: 751
+qbit 1: 27 qbit 2: 12 dep gates: 752
+qbit 1: 27 qbit 2: 12 dep gates: 701
+qbit 1: 27 qbit 2: 12 dep gates: 753
+qbit 1: 27 qbit 2: 12 dep gates: 753
+qbit 1: 27 qbit 2: 13 dep gates: 754
+qbit 1: 27 qbit 2: 13 dep gates: 703
+qbit 1: 27 qbit 2: 13 dep gates: 755
+qbit 1: 27 qbit 2: 13 dep gates: 755
+qbit 1: 27 qbit 2: 14 dep gates: 756
+qbit 1: 27 qbit 2: 14 dep gates: 705
+qbit 1: 27 qbit 2: 14 dep gates: 757
+qbit 1: 27 qbit 2: 14 dep gates: 757
+qbit 1: 27 qbit 2: 15 dep gates: 758
+qbit 1: 27 qbit 2: 15 dep gates: 707
+qbit 1: 27 qbit 2: 15 dep gates: 759
+qbit 1: 27 qbit 2: 15 dep gates: 759
+qbit 1: 27 qbit 2: 16 dep gates: 760
+qbit 1: 27 qbit 2: 16 dep gates: 709
+qbit 1: 27 qbit 2: 16 dep gates: 761
+qbit 1: 27 qbit 2: 16 dep gates: 761
+qbit 1: 27 qbit 2: 17 dep gates: 762
+qbit 1: 27 qbit 2: 17 dep gates: 711
+qbit 1: 27 qbit 2: 17 dep gates: 763
+qbit 1: 27 qbit 2: 17 dep gates: 763
+qbit 1: 27 qbit 2: 18 dep gates: 764
+qbit 1: 27 qbit 2: 18 dep gates: 713
+qbit 1: 27 qbit 2: 18 dep gates: 765
+qbit 1: 27 qbit 2: 18 dep gates: 765
+qbit 1: 27 qbit 2: 19 dep gates: 766
+qbit 1: 27 qbit 2: 19 dep gates: 715
+qbit 1: 27 qbit 2: 19 dep gates: 767
+qbit 1: 27 qbit 2: 19 dep gates: 767
+qbit 1: 27 qbit 2: 20 dep gates: 768
+qbit 1: 27 qbit 2: 20 dep gates: 717
+qbit 1: 27 qbit 2: 20 dep gates: 769
+qbit 1: 27 qbit 2: 20 dep gates: 769
+qbit 1: 27 qbit 2: 21 dep gates: 770
+qbit 1: 27 qbit 2: 21 dep gates: 719
+qbit 1: 27 qbit 2: 21 dep gates: 771
+qbit 1: 27 qbit 2: 21 dep gates: 771
+qbit 1: 27 qbit 2: 22 dep gates: 772
+qbit 1: 27 qbit 2: 22 dep gates: 721
+qbit 1: 27 qbit 2: 22 dep gates: 773
+qbit 1: 27 qbit 2: 22 dep gates: 773
+qbit 1: 27 qbit 2: 23 dep gates: 774
+qbit 1: 27 qbit 2: 23 dep gates: 723
+qbit 1: 27 qbit 2: 23 dep gates: 775
+qbit 1: 27 qbit 2: 23 dep gates: 775
+qbit 1: 27 qbit 2: 24 dep gates: 776
+qbit 1: 27 qbit 2: 24 dep gates: 725
+qbit 1: 27 qbit 2: 24 dep gates: 777
+qbit 1: 27 qbit 2: 24 dep gates: 777
+qbit 1: 27 qbit 2: 25 dep gates: 778
+qbit 1: 27 qbit 2: 25 dep gates: 727
+qbit 1: 27 qbit 2: 25 dep gates: 779
+qbit 1: 27 qbit 2: 25 dep gates: 779
+qbit 1: 27 qbit 2: 26 dep gates: 780
+qbit 1: 27 qbit 2: 26 dep gates: 728
+qbit 1: 27 qbit 2: 26 dep gates: 781
+qbit 1: 27 qbit 2: 26 dep gates: 781
+qbit 27 dep gates: 782
+qbit 1: 28 qbit 2: 0 dep gates: 730
+qbit 1: 28 qbit 2: 0 dep gates: 784
+qbit 1: 28 qbit 2: 0 dep gates: 784
+qbit 1: 28 qbit 2: 1 dep gates: 785
+qbit 1: 28 qbit 2: 1 dep gates: 732
+qbit 1: 28 qbit 2: 1 dep gates: 786
+qbit 1: 28 qbit 2: 1 dep gates: 786
+qbit 1: 28 qbit 2: 2 dep gates: 787
+qbit 1: 28 qbit 2: 2 dep gates: 734
+qbit 1: 28 qbit 2: 2 dep gates: 788
+qbit 1: 28 qbit 2: 2 dep gates: 788
+qbit 1: 28 qbit 2: 3 dep gates: 789
+qbit 1: 28 qbit 2: 3 dep gates: 736
+qbit 1: 28 qbit 2: 3 dep gates: 790
+qbit 1: 28 qbit 2: 3 dep gates: 790
+qbit 1: 28 qbit 2: 4 dep gates: 791
+qbit 1: 28 qbit 2: 4 dep gates: 738
+qbit 1: 28 qbit 2: 4 dep gates: 792
+qbit 1: 28 qbit 2: 4 dep gates: 792
+qbit 1: 28 qbit 2: 5 dep gates: 793
+qbit 1: 28 qbit 2: 5 dep gates: 740
+qbit 1: 28 qbit 2: 5 dep gates: 794
+qbit 1: 28 qbit 2: 5 dep gates: 794
+qbit 1: 28 qbit 2: 6 dep gates: 795
+qbit 1: 28 qbit 2: 6 dep gates: 742
+qbit 1: 28 qbit 2: 6 dep gates: 796
+qbit 1: 28 qbit 2: 6 dep gates: 796
+qbit 1: 28 qbit 2: 7 dep gates: 797
+qbit 1: 28 qbit 2: 7 dep gates: 744
+qbit 1: 28 qbit 2: 7 dep gates: 798
+qbit 1: 28 qbit 2: 7 dep gates: 798
+qbit 1: 28 qbit 2: 8 dep gates: 799
+qbit 1: 28 qbit 2: 8 dep gates: 746
+qbit 1: 28 qbit 2: 8 dep gates: 800
+qbit 1: 28 qbit 2: 8 dep gates: 800
+qbit 1: 28 qbit 2: 9 dep gates: 801
+qbit 1: 28 qbit 2: 9 dep gates: 748
+qbit 1: 28 qbit 2: 9 dep gates: 802
+qbit 1: 28 qbit 2: 9 dep gates: 802
+qbit 1: 28 qbit 2: 10 dep gates: 803
+qbit 1: 28 qbit 2: 10 dep gates: 750
+qbit 1: 28 qbit 2: 10 dep gates: 804
+qbit 1: 28 qbit 2: 10 dep gates: 804
+qbit 1: 28 qbit 2: 11 dep gates: 805
+qbit 1: 28 qbit 2: 11 dep gates: 752
+qbit 1: 28 qbit 2: 11 dep gates: 806
+qbit 1: 28 qbit 2: 11 dep gates: 806
+qbit 1: 28 qbit 2: 12 dep gates: 807
+qbit 1: 28 qbit 2: 12 dep gates: 754
+qbit 1: 28 qbit 2: 12 dep gates: 808
+qbit 1: 28 qbit 2: 12 dep gates: 808
+qbit 1: 28 qbit 2: 13 dep gates: 809
+qbit 1: 28 qbit 2: 13 dep gates: 756
+qbit 1: 28 qbit 2: 13 dep gates: 810
+qbit 1: 28 qbit 2: 13 dep gates: 810
+qbit 1: 28 qbit 2: 14 dep gates: 811
+qbit 1: 28 qbit 2: 14 dep gates: 758
+qbit 1: 28 qbit 2: 14 dep gates: 812
+qbit 1: 28 qbit 2: 14 dep gates: 812
+qbit 1: 28 qbit 2: 15 dep gates: 813
+qbit 1: 28 qbit 2: 15 dep gates: 760
+qbit 1: 28 qbit 2: 15 dep gates: 814
+qbit 1: 28 qbit 2: 15 dep gates: 814
+qbit 1: 28 qbit 2: 16 dep gates: 815
+qbit 1: 28 qbit 2: 16 dep gates: 762
+qbit 1: 28 qbit 2: 16 dep gates: 816
+qbit 1: 28 qbit 2: 16 dep gates: 816
+qbit 1: 28 qbit 2: 17 dep gates: 817
+qbit 1: 28 qbit 2: 17 dep gates: 764
+qbit 1: 28 qbit 2: 17 dep gates: 818
+qbit 1: 28 qbit 2: 17 dep gates: 818
+qbit 1: 28 qbit 2: 18 dep gates: 819
+qbit 1: 28 qbit 2: 18 dep gates: 766
+qbit 1: 28 qbit 2: 18 dep gates: 820
+qbit 1: 28 qbit 2: 18 dep gates: 820
+qbit 1: 28 qbit 2: 19 dep gates: 821
+qbit 1: 28 qbit 2: 19 dep gates: 768
+qbit 1: 28 qbit 2: 19 dep gates: 822
+qbit 1: 28 qbit 2: 19 dep gates: 822
+qbit 1: 28 qbit 2: 20 dep gates: 823
+qbit 1: 28 qbit 2: 20 dep gates: 770
+qbit 1: 28 qbit 2: 20 dep gates: 824
+qbit 1: 28 qbit 2: 20 dep gates: 824
+qbit 1: 28 qbit 2: 21 dep gates: 825
+qbit 1: 28 qbit 2: 21 dep gates: 772
+qbit 1: 28 qbit 2: 21 dep gates: 826
+qbit 1: 28 qbit 2: 21 dep gates: 826
+qbit 1: 28 qbit 2: 22 dep gates: 827
+qbit 1: 28 qbit 2: 22 dep gates: 774
+qbit 1: 28 qbit 2: 22 dep gates: 828
+qbit 1: 28 qbit 2: 22 dep gates: 828
+qbit 1: 28 qbit 2: 23 dep gates: 829
+qbit 1: 28 qbit 2: 23 dep gates: 776
+qbit 1: 28 qbit 2: 23 dep gates: 830
+qbit 1: 28 qbit 2: 23 dep gates: 830
+qbit 1: 28 qbit 2: 24 dep gates: 831
+qbit 1: 28 qbit 2: 24 dep gates: 778
+qbit 1: 28 qbit 2: 24 dep gates: 832
+qbit 1: 28 qbit 2: 24 dep gates: 832
+qbit 1: 28 qbit 2: 25 dep gates: 833
+qbit 1: 28 qbit 2: 25 dep gates: 780
+qbit 1: 28 qbit 2: 25 dep gates: 834
+qbit 1: 28 qbit 2: 25 dep gates: 834
+qbit 1: 28 qbit 2: 26 dep gates: 835
+qbit 1: 28 qbit 2: 26 dep gates: 782
+qbit 1: 28 qbit 2: 26 dep gates: 836
+qbit 1: 28 qbit 2: 26 dep gates: 836
+qbit 1: 28 qbit 2: 27 dep gates: 837
+qbit 1: 28 qbit 2: 27 dep gates: 783
+qbit 1: 28 qbit 2: 27 dep gates: 838
+qbit 1: 28 qbit 2: 27 dep gates: 838
+qbit 28 dep gates: 839
+qbit 1: 29 qbit 2: 0 dep gates: 785
+qbit 1: 29 qbit 2: 0 dep gates: 841
+qbit 1: 29 qbit 2: 0 dep gates: 841
+qbit 1: 29 qbit 2: 1 dep gates: 842
+qbit 1: 29 qbit 2: 1 dep gates: 787
+qbit 1: 29 qbit 2: 1 dep gates: 843
+qbit 1: 29 qbit 2: 1 dep gates: 843
+qbit 1: 29 qbit 2: 2 dep gates: 844
+qbit 1: 29 qbit 2: 2 dep gates: 789
+qbit 1: 29 qbit 2: 2 dep gates: 845
+qbit 1: 29 qbit 2: 2 dep gates: 845
+qbit 1: 29 qbit 2: 3 dep gates: 846
+qbit 1: 29 qbit 2: 3 dep gates: 791
+qbit 1: 29 qbit 2: 3 dep gates: 847
+qbit 1: 29 qbit 2: 3 dep gates: 847
+qbit 1: 29 qbit 2: 4 dep gates: 848
+qbit 1: 29 qbit 2: 4 dep gates: 793
+qbit 1: 29 qbit 2: 4 dep gates: 849
+qbit 1: 29 qbit 2: 4 dep gates: 849
+qbit 1: 29 qbit 2: 5 dep gates: 850
+qbit 1: 29 qbit 2: 5 dep gates: 795
+qbit 1: 29 qbit 2: 5 dep gates: 851
+qbit 1: 29 qbit 2: 5 dep gates: 851
+qbit 1: 29 qbit 2: 6 dep gates: 852
+qbit 1: 29 qbit 2: 6 dep gates: 797
+qbit 1: 29 qbit 2: 6 dep gates: 853
+qbit 1: 29 qbit 2: 6 dep gates: 853
+qbit 1: 29 qbit 2: 7 dep gates: 854
+qbit 1: 29 qbit 2: 7 dep gates: 799
+qbit 1: 29 qbit 2: 7 dep gates: 855
+qbit 1: 29 qbit 2: 7 dep gates: 855
+qbit 1: 29 qbit 2: 8 dep gates: 856
+qbit 1: 29 qbit 2: 8 dep gates: 801
+qbit 1: 29 qbit 2: 8 dep gates: 857
+qbit 1: 29 qbit 2: 8 dep gates: 857
+qbit 1: 29 qbit 2: 9 dep gates: 858
+qbit 1: 29 qbit 2: 9 dep gates: 803
+qbit 1: 29 qbit 2: 9 dep gates: 859
+qbit 1: 29 qbit 2: 9 dep gates: 859
+qbit 1: 29 qbit 2: 10 dep gates: 860
+qbit 1: 29 qbit 2: 10 dep gates: 805
+qbit 1: 29 qbit 2: 10 dep gates: 861
+qbit 1: 29 qbit 2: 10 dep gates: 861
+qbit 1: 29 qbit 2: 11 dep gates: 862
+qbit 1: 29 qbit 2: 11 dep gates: 807
+qbit 1: 29 qbit 2: 11 dep gates: 863
+qbit 1: 29 qbit 2: 11 dep gates: 863
+qbit 1: 29 qbit 2: 12 dep gates: 864
+qbit 1: 29 qbit 2: 12 dep gates: 809
+qbit 1: 29 qbit 2: 12 dep gates: 865
+qbit 1: 29 qbit 2: 12 dep gates: 865
+qbit 1: 29 qbit 2: 13 dep gates: 866
+qbit 1: 29 qbit 2: 13 dep gates: 811
+qbit 1: 29 qbit 2: 13 dep gates: 867
+qbit 1: 29 qbit 2: 13 dep gates: 867
+qbit 1: 29 qbit 2: 14 dep gates: 868
+qbit 1: 29 qbit 2: 14 dep gates: 813
+qbit 1: 29 qbit 2: 14 dep gates: 869
+qbit 1: 29 qbit 2: 14 dep gates: 869
+qbit 1: 29 qbit 2: 15 dep gates: 870
+qbit 1: 29 qbit 2: 15 dep gates: 815
+qbit 1: 29 qbit 2: 15 dep gates: 871
+qbit 1: 29 qbit 2: 15 dep gates: 871
+qbit 1: 29 qbit 2: 16 dep gates: 872
+qbit 1: 29 qbit 2: 16 dep gates: 817
+qbit 1: 29 qbit 2: 16 dep gates: 873
+qbit 1: 29 qbit 2: 16 dep gates: 873
+qbit 1: 29 qbit 2: 17 dep gates: 874
+qbit 1: 29 qbit 2: 17 dep gates: 819
+qbit 1: 29 qbit 2: 17 dep gates: 875
+qbit 1: 29 qbit 2: 17 dep gates: 875
+qbit 1: 29 qbit 2: 18 dep gates: 876
+qbit 1: 29 qbit 2: 18 dep gates: 821
+qbit 1: 29 qbit 2: 18 dep gates: 877
+qbit 1: 29 qbit 2: 18 dep gates: 877
+qbit 1: 29 qbit 2: 19 dep gates: 878
+qbit 1: 29 qbit 2: 19 dep gates: 823
+qbit 1: 29 qbit 2: 19 dep gates: 879
+qbit 1: 29 qbit 2: 19 dep gates: 879
+qbit 1: 29 qbit 2: 20 dep gates: 880
+qbit 1: 29 qbit 2: 20 dep gates: 825
+qbit 1: 29 qbit 2: 20 dep gates: 881
+qbit 1: 29 qbit 2: 20 dep gates: 881
+qbit 1: 29 qbit 2: 21 dep gates: 882
+qbit 1: 29 qbit 2: 21 dep gates: 827
+qbit 1: 29 qbit 2: 21 dep gates: 883
+qbit 1: 29 qbit 2: 21 dep gates: 883
+qbit 1: 29 qbit 2: 22 dep gates: 884
+qbit 1: 29 qbit 2: 22 dep gates: 829
+qbit 1: 29 qbit 2: 22 dep gates: 885
+qbit 1: 29 qbit 2: 22 dep gates: 885
+qbit 1: 29 qbit 2: 23 dep gates: 886
+qbit 1: 29 qbit 2: 23 dep gates: 831
+qbit 1: 29 qbit 2: 23 dep gates: 887
+qbit 1: 29 qbit 2: 23 dep gates: 887
+qbit 1: 29 qbit 2: 24 dep gates: 888
+qbit 1: 29 qbit 2: 24 dep gates: 833
+qbit 1: 29 qbit 2: 24 dep gates: 889
+qbit 1: 29 qbit 2: 24 dep gates: 889
+qbit 1: 29 qbit 2: 25 dep gates: 890
+qbit 1: 29 qbit 2: 25 dep gates: 835
+qbit 1: 29 qbit 2: 25 dep gates: 891
+qbit 1: 29 qbit 2: 25 dep gates: 891
+qbit 1: 29 qbit 2: 26 dep gates: 892
+qbit 1: 29 qbit 2: 26 dep gates: 837
+qbit 1: 29 qbit 2: 26 dep gates: 893
+qbit 1: 29 qbit 2: 26 dep gates: 893
+qbit 1: 29 qbit 2: 27 dep gates: 894
+qbit 1: 29 qbit 2: 27 dep gates: 839
+qbit 1: 29 qbit 2: 27 dep gates: 895
+qbit 1: 29 qbit 2: 27 dep gates: 895
+qbit 1: 29 qbit 2: 28 dep gates: 896
+qbit 1: 29 qbit 2: 28 dep gates: 840
+qbit 1: 29 qbit 2: 28 dep gates: 897
+qbit 1: 29 qbit 2: 28 dep gates: 897
+qbit 29 dep gates: 898
+qbit 1: 30 qbit 2: 0 dep gates: 842
+qbit 1: 30 qbit 2: 0 dep gates: 900
+qbit 1: 30 qbit 2: 0 dep gates: 900
+qbit 1: 30 qbit 2: 1 dep gates: 901
+qbit 1: 30 qbit 2: 1 dep gates: 844
+qbit 1: 30 qbit 2: 1 dep gates: 902
+qbit 1: 30 qbit 2: 1 dep gates: 902
+qbit 1: 30 qbit 2: 2 dep gates: 903
+qbit 1: 30 qbit 2: 2 dep gates: 846
+qbit 1: 30 qbit 2: 2 dep gates: 904
+qbit 1: 30 qbit 2: 2 dep gates: 904
+qbit 1: 30 qbit 2: 3 dep gates: 905
+qbit 1: 30 qbit 2: 3 dep gates: 848
+qbit 1: 30 qbit 2: 3 dep gates: 906
+qbit 1: 30 qbit 2: 3 dep gates: 906
+qbit 1: 30 qbit 2: 4 dep gates: 907
+qbit 1: 30 qbit 2: 4 dep gates: 850
+qbit 1: 30 qbit 2: 4 dep gates: 908
+qbit 1: 30 qbit 2: 4 dep gates: 908
+qbit 1: 30 qbit 2: 5 dep gates: 909
+qbit 1: 30 qbit 2: 5 dep gates: 852
+qbit 1: 30 qbit 2: 5 dep gates: 910
+qbit 1: 30 qbit 2: 5 dep gates: 910
+qbit 1: 30 qbit 2: 6 dep gates: 911
+qbit 1: 30 qbit 2: 6 dep gates: 854
+qbit 1: 30 qbit 2: 6 dep gates: 912
+qbit 1: 30 qbit 2: 6 dep gates: 912
+qbit 1: 30 qbit 2: 7 dep gates: 913
+qbit 1: 30 qbit 2: 7 dep gates: 856
+qbit 1: 30 qbit 2: 7 dep gates: 914
+qbit 1: 30 qbit 2: 7 dep gates: 914
+qbit 1: 30 qbit 2: 8 dep gates: 915
+qbit 1: 30 qbit 2: 8 dep gates: 858
+qbit 1: 30 qbit 2: 8 dep gates: 916
+qbit 1: 30 qbit 2: 8 dep gates: 916
+qbit 1: 30 qbit 2: 9 dep gates: 917
+qbit 1: 30 qbit 2: 9 dep gates: 860
+qbit 1: 30 qbit 2: 9 dep gates: 918
+qbit 1: 30 qbit 2: 9 dep gates: 918
+qbit 1: 30 qbit 2: 10 dep gates: 919
+qbit 1: 30 qbit 2: 10 dep gates: 862
+qbit 1: 30 qbit 2: 10 dep gates: 920
+qbit 1: 30 qbit 2: 10 dep gates: 920
+qbit 1: 30 qbit 2: 11 dep gates: 921
+qbit 1: 30 qbit 2: 11 dep gates: 864
+qbit 1: 30 qbit 2: 11 dep gates: 922
+qbit 1: 30 qbit 2: 11 dep gates: 922
+qbit 1: 30 qbit 2: 12 dep gates: 923
+qbit 1: 30 qbit 2: 12 dep gates: 866
+qbit 1: 30 qbit 2: 12 dep gates: 924
+qbit 1: 30 qbit 2: 12 dep gates: 924
+qbit 1: 30 qbit 2: 13 dep gates: 925
+qbit 1: 30 qbit 2: 13 dep gates: 868
+qbit 1: 30 qbit 2: 13 dep gates: 926
+qbit 1: 30 qbit 2: 13 dep gates: 926
+qbit 1: 30 qbit 2: 14 dep gates: 927
+qbit 1: 30 qbit 2: 14 dep gates: 870
+qbit 1: 30 qbit 2: 14 dep gates: 928
+qbit 1: 30 qbit 2: 14 dep gates: 928
+qbit 1: 30 qbit 2: 15 dep gates: 929
+qbit 1: 30 qbit 2: 15 dep gates: 872
+qbit 1: 30 qbit 2: 15 dep gates: 930
+qbit 1: 30 qbit 2: 15 dep gates: 930
+qbit 1: 30 qbit 2: 16 dep gates: 931
+qbit 1: 30 qbit 2: 16 dep gates: 874
+qbit 1: 30 qbit 2: 16 dep gates: 932
+qbit 1: 30 qbit 2: 16 dep gates: 932
+qbit 1: 30 qbit 2: 17 dep gates: 933
+qbit 1: 30 qbit 2: 17 dep gates: 876
+qbit 1: 30 qbit 2: 17 dep gates: 934
+qbit 1: 30 qbit 2: 17 dep gates: 934
+qbit 1: 30 qbit 2: 18 dep gates: 935
+qbit 1: 30 qbit 2: 18 dep gates: 878
+qbit 1: 30 qbit 2: 18 dep gates: 936
+qbit 1: 30 qbit 2: 18 dep gates: 936
+qbit 1: 30 qbit 2: 19 dep gates: 937
+qbit 1: 30 qbit 2: 19 dep gates: 880
+qbit 1: 30 qbit 2: 19 dep gates: 938
+qbit 1: 30 qbit 2: 19 dep gates: 938
+qbit 1: 30 qbit 2: 20 dep gates: 939
+qbit 1: 30 qbit 2: 20 dep gates: 882
+qbit 1: 30 qbit 2: 20 dep gates: 940
+qbit 1: 30 qbit 2: 20 dep gates: 940
+qbit 1: 30 qbit 2: 21 dep gates: 941
+qbit 1: 30 qbit 2: 21 dep gates: 884
+qbit 1: 30 qbit 2: 21 dep gates: 942
+qbit 1: 30 qbit 2: 21 dep gates: 942
+qbit 1: 30 qbit 2: 22 dep gates: 943
+qbit 1: 30 qbit 2: 22 dep gates: 886
+qbit 1: 30 qbit 2: 22 dep gates: 944
+qbit 1: 30 qbit 2: 22 dep gates: 944
+qbit 1: 30 qbit 2: 23 dep gates: 945
+qbit 1: 30 qbit 2: 23 dep gates: 888
+qbit 1: 30 qbit 2: 23 dep gates: 946
+qbit 1: 30 qbit 2: 23 dep gates: 946
+qbit 1: 30 qbit 2: 24 dep gates: 947
+qbit 1: 30 qbit 2: 24 dep gates: 890
+qbit 1: 30 qbit 2: 24 dep gates: 948
+qbit 1: 30 qbit 2: 24 dep gates: 948
+qbit 1: 30 qbit 2: 25 dep gates: 949
+qbit 1: 30 qbit 2: 25 dep gates: 892
+qbit 1: 30 qbit 2: 25 dep gates: 950
+qbit 1: 30 qbit 2: 25 dep gates: 950
+qbit 1: 30 qbit 2: 26 dep gates: 951
+qbit 1: 30 qbit 2: 26 dep gates: 894
+qbit 1: 30 qbit 2: 26 dep gates: 952
+qbit 1: 30 qbit 2: 26 dep gates: 952
+qbit 1: 30 qbit 2: 27 dep gates: 953
+qbit 1: 30 qbit 2: 27 dep gates: 896
+qbit 1: 30 qbit 2: 27 dep gates: 954
+qbit 1: 30 qbit 2: 27 dep gates: 954
+qbit 1: 30 qbit 2: 28 dep gates: 955
+qbit 1: 30 qbit 2: 28 dep gates: 898
+qbit 1: 30 qbit 2: 28 dep gates: 956
+qbit 1: 30 qbit 2: 28 dep gates: 956
+qbit 1: 30 qbit 2: 29 dep gates: 957
+qbit 1: 30 qbit 2: 29 dep gates: 899
+qbit 1: 30 qbit 2: 29 dep gates: 958
+qbit 1: 30 qbit 2: 29 dep gates: 958
+qbit 30 dep gates: 959
+qbit 1: 31 qbit 2: 0 dep gates: 901
+qbit 1: 31 qbit 2: 0 dep gates: 961
+qbit 1: 31 qbit 2: 0 dep gates: 961
+qbit 1: 31 qbit 2: 1 dep gates: 962
+qbit 1: 31 qbit 2: 1 dep gates: 903
+qbit 1: 31 qbit 2: 1 dep gates: 963
+qbit 1: 31 qbit 2: 1 dep gates: 963
+qbit 1: 31 qbit 2: 2 dep gates: 964
+qbit 1: 31 qbit 2: 2 dep gates: 905
+qbit 1: 31 qbit 2: 2 dep gates: 965
+qbit 1: 31 qbit 2: 2 dep gates: 965
+qbit 1: 31 qbit 2: 3 dep gates: 966
+qbit 1: 31 qbit 2: 3 dep gates: 907
+qbit 1: 31 qbit 2: 3 dep gates: 967
+qbit 1: 31 qbit 2: 3 dep gates: 967
+qbit 1: 31 qbit 2: 4 dep gates: 968
+qbit 1: 31 qbit 2: 4 dep gates: 909
+qbit 1: 31 qbit 2: 4 dep gates: 969
+qbit 1: 31 qbit 2: 4 dep gates: 969
+qbit 1: 31 qbit 2: 5 dep gates: 970
+qbit 1: 31 qbit 2: 5 dep gates: 911
+qbit 1: 31 qbit 2: 5 dep gates: 971
+qbit 1: 31 qbit 2: 5 dep gates: 971
+qbit 1: 31 qbit 2: 6 dep gates: 972
+qbit 1: 31 qbit 2: 6 dep gates: 913
+qbit 1: 31 qbit 2: 6 dep gates: 973
+qbit 1: 31 qbit 2: 6 dep gates: 973
+qbit 1: 31 qbit 2: 7 dep gates: 974
+qbit 1: 31 qbit 2: 7 dep gates: 915
+qbit 1: 31 qbit 2: 7 dep gates: 975
+qbit 1: 31 qbit 2: 7 dep gates: 975
+qbit 1: 31 qbit 2: 8 dep gates: 976
+qbit 1: 31 qbit 2: 8 dep gates: 917
+qbit 1: 31 qbit 2: 8 dep gates: 977
+qbit 1: 31 qbit 2: 8 dep gates: 977
+qbit 1: 31 qbit 2: 9 dep gates: 978
+qbit 1: 31 qbit 2: 9 dep gates: 919
+qbit 1: 31 qbit 2: 9 dep gates: 979
+qbit 1: 31 qbit 2: 9 dep gates: 979
+qbit 1: 31 qbit 2: 10 dep gates: 980
+qbit 1: 31 qbit 2: 10 dep gates: 921
+qbit 1: 31 qbit 2: 10 dep gates: 981
+qbit 1: 31 qbit 2: 10 dep gates: 981
+qbit 1: 31 qbit 2: 11 dep gates: 982
+qbit 1: 31 qbit 2: 11 dep gates: 923
+qbit 1: 31 qbit 2: 11 dep gates: 983
+qbit 1: 31 qbit 2: 11 dep gates: 983
+qbit 1: 31 qbit 2: 12 dep gates: 984
+qbit 1: 31 qbit 2: 12 dep gates: 925
+qbit 1: 31 qbit 2: 12 dep gates: 985
+qbit 1: 31 qbit 2: 12 dep gates: 985
+qbit 1: 31 qbit 2: 13 dep gates: 986
+qbit 1: 31 qbit 2: 13 dep gates: 927
+qbit 1: 31 qbit 2: 13 dep gates: 987
+qbit 1: 31 qbit 2: 13 dep gates: 987
+qbit 1: 31 qbit 2: 14 dep gates: 988
+qbit 1: 31 qbit 2: 14 dep gates: 929
+qbit 1: 31 qbit 2: 14 dep gates: 989
+qbit 1: 31 qbit 2: 14 dep gates: 989
+qbit 1: 31 qbit 2: 15 dep gates: 990
+qbit 1: 31 qbit 2: 15 dep gates: 931
+qbit 1: 31 qbit 2: 15 dep gates: 991
+qbit 1: 31 qbit 2: 15 dep gates: 991
+qbit 1: 31 qbit 2: 16 dep gates: 992
+qbit 1: 31 qbit 2: 16 dep gates: 933
+qbit 1: 31 qbit 2: 16 dep gates: 993
+qbit 1: 31 qbit 2: 16 dep gates: 993
+qbit 1: 31 qbit 2: 17 dep gates: 994
+qbit 1: 31 qbit 2: 17 dep gates: 935
+qbit 1: 31 qbit 2: 17 dep gates: 995
+qbit 1: 31 qbit 2: 17 dep gates: 995
+qbit 1: 31 qbit 2: 18 dep gates: 996
+qbit 1: 31 qbit 2: 18 dep gates: 937
+qbit 1: 31 qbit 2: 18 dep gates: 997
+qbit 1: 31 qbit 2: 18 dep gates: 997
+qbit 1: 31 qbit 2: 19 dep gates: 998
+qbit 1: 31 qbit 2: 19 dep gates: 939
+qbit 1: 31 qbit 2: 19 dep gates: 999
+qbit 1: 31 qbit 2: 19 dep gates: 999
+qbit 1: 31 qbit 2: 20 dep gates: 1000
+qbit 1: 31 qbit 2: 20 dep gates: 941
+qbit 1: 31 qbit 2: 20 dep gates: 1001
+qbit 1: 31 qbit 2: 20 dep gates: 1001
+qbit 1: 31 qbit 2: 21 dep gates: 1002
+qbit 1: 31 qbit 2: 21 dep gates: 943
+qbit 1: 31 qbit 2: 21 dep gates: 1003
+qbit 1: 31 qbit 2: 21 dep gates: 1003
+qbit 1: 31 qbit 2: 22 dep gates: 1004
+qbit 1: 31 qbit 2: 22 dep gates: 945
+qbit 1: 31 qbit 2: 22 dep gates: 1005
+qbit 1: 31 qbit 2: 22 dep gates: 1005
+qbit 1: 31 qbit 2: 23 dep gates: 1006
+qbit 1: 31 qbit 2: 23 dep gates: 947
+qbit 1: 31 qbit 2: 23 dep gates: 1007
+qbit 1: 31 qbit 2: 23 dep gates: 1007
+qbit 1: 31 qbit 2: 24 dep gates: 1008
+qbit 1: 31 qbit 2: 24 dep gates: 949
+qbit 1: 31 qbit 2: 24 dep gates: 1009
+qbit 1: 31 qbit 2: 24 dep gates: 1009
+qbit 1: 31 qbit 2: 25 dep gates: 1010
+qbit 1: 31 qbit 2: 25 dep gates: 951
+qbit 1: 31 qbit 2: 25 dep gates: 1011
+qbit 1: 31 qbit 2: 25 dep gates: 1011
+qbit 1: 31 qbit 2: 26 dep gates: 1012
+qbit 1: 31 qbit 2: 26 dep gates: 953
+qbit 1: 31 qbit 2: 26 dep gates: 1013
+qbit 1: 31 qbit 2: 26 dep gates: 1013
+qbit 1: 31 qbit 2: 27 dep gates: 1014
+qbit 1: 31 qbit 2: 27 dep gates: 955
+qbit 1: 31 qbit 2: 27 dep gates: 1015
+qbit 1: 31 qbit 2: 27 dep gates: 1015
+qbit 1: 31 qbit 2: 28 dep gates: 1016
+qbit 1: 31 qbit 2: 28 dep gates: 957
+qbit 1: 31 qbit 2: 28 dep gates: 1017
+qbit 1: 31 qbit 2: 28 dep gates: 1017
+qbit 1: 31 qbit 2: 29 dep gates: 1018
+qbit 1: 31 qbit 2: 29 dep gates: 959
+qbit 1: 31 qbit 2: 29 dep gates: 1019
+qbit 1: 31 qbit 2: 29 dep gates: 1019
+qbit 1: 31 qbit 2: 30 dep gates: 1020
+qbit 1: 31 qbit 2: 30 dep gates: 960
+qbit 1: 31 qbit 2: 30 dep gates: 1021
+qbit 1: 31 qbit 2: 30 dep gates: 1021
+qbit 31 dep gates: 1022
+qbit 0 dep gates: 962
+qbit 1 dep gates: 964
+qbit 2 dep gates: 966
+qbit 3 dep gates: 968
+qbit 4 dep gates: 970
+qbit 5 dep gates: 972
+qbit 6 dep gates: 974
+qbit 7 dep gates: 976
+qbit 8 dep gates: 978
+qbit 9 dep gates: 980
+qbit 10 dep gates: 982
+qbit 11 dep gates: 984
+qbit 12 dep gates: 986
+qbit 13 dep gates: 988
+qbit 14 dep gates: 990
+qbit 15 dep gates: 992
+qbit 16 dep gates: 994
+qbit 17 dep gates: 996
+qbit 18 dep gates: 998
+qbit 19 dep gates: 1000
+qbit 20 dep gates: 1002
+qbit 21 dep gates: 1004
+qbit 22 dep gates: 1006
+qbit 23 dep gates: 1008
+qbit 24 dep gates: 1010
+qbit 25 dep gates: 1012
+qbit 26 dep gates: 1014
+qbit 27 dep gates: 1016
+qbit 28 dep gates: 1018
+qbit 29 dep gates: 1020
+qbit 30 dep gates: 1022
+qbit 31 dep gates: 1023
+parse object map:
+{1: [1, 0], 2: [1, 0], 4: [2, 0], 5: [2, 0], 6: [2, 1], 7: [2, 1], 9: [3, 0], 10: [3, 0], 11: [3, 1], 12: [3, 1], 13: [3, 2], 14: [3, 2], 16: [4, 0], 17: [4, 0], 18: [4, 1], 19: [4, 1], 20: [4, 2], 21: [4, 2], 22: [4, 3], 23: [4, 3], 25: [5, 0], 26: [5, 0], 27: [5, 1], 28: [5, 1], 29: [5, 2], 30: [5, 2], 31: [5, 3], 32: [5, 3], 33: [5, 4], 34: [5, 4], 36: [6, 0], 37: [6, 0], 38: [6, 1], 39: [6, 1], 40: [6, 2], 41: [6, 2], 42: [6, 3], 43: [6, 3], 44: [6, 4], 45: [6, 4], 46: [6, 5], 47: [6, 5], 49: [7, 0], 50: [7, 0], 51: [7, 1], 52: [7, 1], 53: [7, 2], 54: [7, 2], 55: [7, 3], 56: [7, 3], 57: [7, 4], 58: [7, 4], 59: [7, 5], 60: [7, 5], 61: [7, 6], 62: [7, 6], 64: [8, 0], 65: [8, 0], 66: [8, 1], 67: [8, 1], 68: [8, 2], 69: [8, 2], 70: [8, 3], 71: [8, 3], 72: [8, 4], 73: [8, 4], 74: [8, 5], 75: [8, 5], 76: [8, 6], 77: [8, 6], 78: [8, 7], 79: [8, 7], 81: [9, 0], 82: [9, 0], 83: [9, 1], 84: [9, 1], 85: [9, 2], 86: [9, 2], 87: [9, 3], 88: [9, 3], 89: [9, 4], 90: [9, 4], 91: [9, 5], 92: [9, 5], 93: [9, 6], 94: [9, 6], 95: [9, 7], 96: [9, 7], 97: [9, 8], 98: [9, 8], 100: [10, 0], 101: [10, 0], 102: [10, 1], 103: [10, 1], 104: [10, 2], 105: [10, 2], 106: [10, 3], 107: [10, 3], 108: [10, 4], 109: [10, 4], 110: [10, 5], 111: [10, 5], 112: [10, 6], 113: [10, 6], 114: [10, 7], 115: [10, 7], 116: [10, 8], 117: [10, 8], 118: [10, 9], 119: [10, 9], 121: [11, 0], 122: [11, 0], 123: [11, 1], 124: [11, 1], 125: [11, 2], 126: [11, 2], 127: [11, 3], 128: [11, 3], 129: [11, 4], 130: [11, 4], 131: [11, 5], 132: [11, 5], 133: [11, 6], 134: [11, 6], 135: [11, 7], 136: [11, 7], 137: [11, 8], 138: [11, 8], 139: [11, 9], 140: [11, 9], 141: [11, 10], 142: [11, 10], 144: [12, 0], 145: [12, 0], 146: [12, 1], 147: [12, 1], 148: [12, 2], 149: [12, 2], 150: [12, 3], 151: [12, 3], 152: [12, 4], 153: [12, 4], 154: [12, 5], 155: [12, 5], 156: [12, 6], 157: [12, 6], 158: [12, 7], 159: [12, 7], 160: [12, 8], 161: [12, 8], 162: [12, 9], 163: [12, 9], 164: [12, 10], 165: [12, 10], 166: [12, 11], 167: [12, 11], 169: [13, 0], 170: [13, 0], 171: [13, 1], 172: [13, 1], 173: [13, 2], 174: [13, 2], 175: [13, 3], 176: [13, 3], 177: [13, 4], 178: [13, 4], 179: [13, 5], 180: [13, 5], 181: [13, 6], 182: [13, 6], 183: [13, 7], 184: [13, 7], 185: [13, 8], 186: [13, 8], 187: [13, 9], 188: [13, 9], 189: [13, 10], 190: [13, 10], 191: [13, 11], 192: [13, 11], 193: [13, 12], 194: [13, 12], 196: [14, 0], 197: [14, 0], 198: [14, 1], 199: [14, 1], 200: [14, 2], 201: [14, 2], 202: [14, 3], 203: [14, 3], 204: [14, 4], 205: [14, 4], 206: [14, 5], 207: [14, 5], 208: [14, 6], 209: [14, 6], 210: [14, 7], 211: [14, 7], 212: [14, 8], 213: [14, 8], 214: [14, 9], 215: [14, 9], 216: [14, 10], 217: [14, 10], 218: [14, 11], 219: [14, 11], 220: [14, 12], 221: [14, 12], 222: [14, 13], 223: [14, 13], 225: [15, 0], 226: [15, 0], 227: [15, 1], 228: [15, 1], 229: [15, 2], 230: [15, 2], 231: [15, 3], 232: [15, 3], 233: [15, 4], 234: [15, 4], 235: [15, 5], 236: [15, 5], 237: [15, 6], 238: [15, 6], 239: [15, 7], 240: [15, 7], 241: [15, 8], 242: [15, 8], 243: [15, 9], 244: [15, 9], 245: [15, 10], 246: [15, 10], 247: [15, 11], 248: [15, 11], 249: [15, 12], 250: [15, 12], 251: [15, 13], 252: [15, 13], 253: [15, 14], 254: [15, 14], 256: [16, 0], 257: [16, 0], 258: [16, 1], 259: [16, 1], 260: [16, 2], 261: [16, 2], 262: [16, 3], 263: [16, 3], 264: [16, 4], 265: [16, 4], 266: [16, 5], 267: [16, 5], 268: [16, 6], 269: [16, 6], 270: [16, 7], 271: [16, 7], 272: [16, 8], 273: [16, 8], 274: [16, 9], 275: [16, 9], 276: [16, 10], 277: [16, 10], 278: [16, 11], 279: [16, 11], 280: [16, 12], 281: [16, 12], 282: [16, 13], 283: [16, 13], 284: [16, 14], 285: [16, 14], 286: [16, 15], 287: [16, 15], 289: [17, 0], 290: [17, 0], 291: [17, 1], 292: [17, 1], 293: [17, 2], 294: [17, 2], 295: [17, 3], 296: [17, 3], 297: [17, 4], 298: [17, 4], 299: [17, 5], 300: [17, 5], 301: [17, 6], 302: [17, 6], 303: [17, 7], 304: [17, 7], 305: [17, 8], 306: [17, 8], 307: [17, 9], 308: [17, 9], 309: [17, 10], 310: [17, 10], 311: [17, 11], 312: [17, 11], 313: [17, 12], 314: [17, 12], 315: [17, 13], 316: [17, 13], 317: [17, 14], 318: [17, 14], 319: [17, 15], 320: [17, 15], 321: [17, 16], 322: [17, 16], 324: [18, 0], 325: [18, 0], 326: [18, 1], 327: [18, 1], 328: [18, 2], 329: [18, 2], 330: [18, 3], 331: [18, 3], 332: [18, 4], 333: [18, 4], 334: [18, 5], 335: [18, 5], 336: [18, 6], 337: [18, 6], 338: [18, 7], 339: [18, 7], 340: [18, 8], 341: [18, 8], 342: [18, 9], 343: [18, 9], 344: [18, 10], 345: [18, 10], 346: [18, 11], 347: [18, 11], 348: [18, 12], 349: [18, 12], 350: [18, 13], 351: [18, 13], 352: [18, 14], 353: [18, 14], 354: [18, 15], 355: [18, 15], 356: [18, 16], 357: [18, 16], 358: [18, 17], 359: [18, 17], 361: [19, 0], 362: [19, 0], 363: [19, 1], 364: [19, 1], 365: [19, 2], 366: [19, 2], 367: [19, 3], 368: [19, 3], 369: [19, 4], 370: [19, 4], 371: [19, 5], 372: [19, 5], 373: [19, 6], 374: [19, 6], 375: [19, 7], 376: [19, 7], 377: [19, 8], 378: [19, 8], 379: [19, 9], 380: [19, 9], 381: [19, 10], 382: [19, 10], 383: [19, 11], 384: [19, 11], 385: [19, 12], 386: [19, 12], 387: [19, 13], 388: [19, 13], 389: [19, 14], 390: [19, 14], 391: [19, 15], 392: [19, 15], 393: [19, 16], 394: [19, 16], 395: [19, 17], 396: [19, 17], 397: [19, 18], 398: [19, 18], 400: [20, 0], 401: [20, 0], 402: [20, 1], 403: [20, 1], 404: [20, 2], 405: [20, 2], 406: [20, 3], 407: [20, 3], 408: [20, 4], 409: [20, 4], 410: [20, 5], 411: [20, 5], 412: [20, 6], 413: [20, 6], 414: [20, 7], 415: [20, 7], 416: [20, 8], 417: [20, 8], 418: [20, 9], 419: [20, 9], 420: [20, 10], 421: [20, 10], 422: [20, 11], 423: [20, 11], 424: [20, 12], 425: [20, 12], 426: [20, 13], 427: [20, 13], 428: [20, 14], 429: [20, 14], 430: [20, 15], 431: [20, 15], 432: [20, 16], 433: [20, 16], 434: [20, 17], 435: [20, 17], 436: [20, 18], 437: [20, 18], 438: [20, 19], 439: [20, 19], 441: [21, 0], 442: [21, 0], 443: [21, 1], 444: [21, 1], 445: [21, 2], 446: [21, 2], 447: [21, 3], 448: [21, 3], 449: [21, 4], 450: [21, 4], 451: [21, 5], 452: [21, 5], 453: [21, 6], 454: [21, 6], 455: [21, 7], 456: [21, 7], 457: [21, 8], 458: [21, 8], 459: [21, 9], 460: [21, 9], 461: [21, 10], 462: [21, 10], 463: [21, 11], 464: [21, 11], 465: [21, 12], 466: [21, 12], 467: [21, 13], 468: [21, 13], 469: [21, 14], 470: [21, 14], 471: [21, 15], 472: [21, 15], 473: [21, 16], 474: [21, 16], 475: [21, 17], 476: [21, 17], 477: [21, 18], 478: [21, 18], 479: [21, 19], 480: [21, 19], 481: [21, 20], 482: [21, 20], 484: [22, 0], 485: [22, 0], 486: [22, 1], 487: [22, 1], 488: [22, 2], 489: [22, 2], 490: [22, 3], 491: [22, 3], 492: [22, 4], 493: [22, 4], 494: [22, 5], 495: [22, 5], 496: [22, 6], 497: [22, 6], 498: [22, 7], 499: [22, 7], 500: [22, 8], 501: [22, 8], 502: [22, 9], 503: [22, 9], 504: [22, 10], 505: [22, 10], 506: [22, 11], 507: [22, 11], 508: [22, 12], 509: [22, 12], 510: [22, 13], 511: [22, 13], 512: [22, 14], 513: [22, 14], 514: [22, 15], 515: [22, 15], 516: [22, 16], 517: [22, 16], 518: [22, 17], 519: [22, 17], 520: [22, 18], 521: [22, 18], 522: [22, 19], 523: [22, 19], 524: [22, 20], 525: [22, 20], 526: [22, 21], 527: [22, 21], 529: [23, 0], 530: [23, 0], 531: [23, 1], 532: [23, 1], 533: [23, 2], 534: [23, 2], 535: [23, 3], 536: [23, 3], 537: [23, 4], 538: [23, 4], 539: [23, 5], 540: [23, 5], 541: [23, 6], 542: [23, 6], 543: [23, 7], 544: [23, 7], 545: [23, 8], 546: [23, 8], 547: [23, 9], 548: [23, 9], 549: [23, 10], 550: [23, 10], 551: [23, 11], 552: [23, 11], 553: [23, 12], 554: [23, 12], 555: [23, 13], 556: [23, 13], 557: [23, 14], 558: [23, 14], 559: [23, 15], 560: [23, 15], 561: [23, 16], 562: [23, 16], 563: [23, 17], 564: [23, 17], 565: [23, 18], 566: [23, 18], 567: [23, 19], 568: [23, 19], 569: [23, 20], 570: [23, 20], 571: [23, 21], 572: [23, 21], 573: [23, 22], 574: [23, 22], 576: [24, 0], 577: [24, 0], 578: [24, 1], 579: [24, 1], 580: [24, 2], 581: [24, 2], 582: [24, 3], 583: [24, 3], 584: [24, 4], 585: [24, 4], 586: [24, 5], 587: [24, 5], 588: [24, 6], 589: [24, 6], 590: [24, 7], 591: [24, 7], 592: [24, 8], 593: [24, 8], 594: [24, 9], 595: [24, 9], 596: [24, 10], 597: [24, 10], 598: [24, 11], 599: [24, 11], 600: [24, 12], 601: [24, 12], 602: [24, 13], 603: [24, 13], 604: [24, 14], 605: [24, 14], 606: [24, 15], 607: [24, 15], 608: [24, 16], 609: [24, 16], 610: [24, 17], 611: [24, 17], 612: [24, 18], 613: [24, 18], 614: [24, 19], 615: [24, 19], 616: [24, 20], 617: [24, 20], 618: [24, 21], 619: [24, 21], 620: [24, 22], 621: [24, 22], 622: [24, 23], 623: [24, 23], 625: [25, 0], 626: [25, 0], 627: [25, 1], 628: [25, 1], 629: [25, 2], 630: [25, 2], 631: [25, 3], 632: [25, 3], 633: [25, 4], 634: [25, 4], 635: [25, 5], 636: [25, 5], 637: [25, 6], 638: [25, 6], 639: [25, 7], 640: [25, 7], 641: [25, 8], 642: [25, 8], 643: [25, 9], 644: [25, 9], 645: [25, 10], 646: [25, 10], 647: [25, 11], 648: [25, 11], 649: [25, 12], 650: [25, 12], 651: [25, 13], 652: [25, 13], 653: [25, 14], 654: [25, 14], 655: [25, 15], 656: [25, 15], 657: [25, 16], 658: [25, 16], 659: [25, 17], 660: [25, 17], 661: [25, 18], 662: [25, 18], 663: [25, 19], 664: [25, 19], 665: [25, 20], 666: [25, 20], 667: [25, 21], 668: [25, 21], 669: [25, 22], 670: [25, 22], 671: [25, 23], 672: [25, 23], 673: [25, 24], 674: [25, 24], 676: [26, 0], 677: [26, 0], 678: [26, 1], 679: [26, 1], 680: [26, 2], 681: [26, 2], 682: [26, 3], 683: [26, 3], 684: [26, 4], 685: [26, 4], 686: [26, 5], 687: [26, 5], 688: [26, 6], 689: [26, 6], 690: [26, 7], 691: [26, 7], 692: [26, 8], 693: [26, 8], 694: [26, 9], 695: [26, 9], 696: [26, 10], 697: [26, 10], 698: [26, 11], 699: [26, 11], 700: [26, 12], 701: [26, 12], 702: [26, 13], 703: [26, 13], 704: [26, 14], 705: [26, 14], 706: [26, 15], 707: [26, 15], 708: [26, 16], 709: [26, 16], 710: [26, 17], 711: [26, 17], 712: [26, 18], 713: [26, 18], 714: [26, 19], 715: [26, 19], 716: [26, 20], 717: [26, 20], 718: [26, 21], 719: [26, 21], 720: [26, 22], 721: [26, 22], 722: [26, 23], 723: [26, 23], 724: [26, 24], 725: [26, 24], 726: [26, 25], 727: [26, 25], 729: [27, 0], 730: [27, 0], 731: [27, 1], 732: [27, 1], 733: [27, 2], 734: [27, 2], 735: [27, 3], 736: [27, 3], 737: [27, 4], 738: [27, 4], 739: [27, 5], 740: [27, 5], 741: [27, 6], 742: [27, 6], 743: [27, 7], 744: [27, 7], 745: [27, 8], 746: [27, 8], 747: [27, 9], 748: [27, 9], 749: [27, 10], 750: [27, 10], 751: [27, 11], 752: [27, 11], 753: [27, 12], 754: [27, 12], 755: [27, 13], 756: [27, 13], 757: [27, 14], 758: [27, 14], 759: [27, 15], 760: [27, 15], 761: [27, 16], 762: [27, 16], 763: [27, 17], 764: [27, 17], 765: [27, 18], 766: [27, 18], 767: [27, 19], 768: [27, 19], 769: [27, 20], 770: [27, 20], 771: [27, 21], 772: [27, 21], 773: [27, 22], 774: [27, 22], 775: [27, 23], 776: [27, 23], 777: [27, 24], 778: [27, 24], 779: [27, 25], 780: [27, 25], 781: [27, 26], 782: [27, 26], 784: [28, 0], 785: [28, 0], 786: [28, 1], 787: [28, 1], 788: [28, 2], 789: [28, 2], 790: [28, 3], 791: [28, 3], 792: [28, 4], 793: [28, 4], 794: [28, 5], 795: [28, 5], 796: [28, 6], 797: [28, 6], 798: [28, 7], 799: [28, 7], 800: [28, 8], 801: [28, 8], 802: [28, 9], 803: [28, 9], 804: [28, 10], 805: [28, 10], 806: [28, 11], 807: [28, 11], 808: [28, 12], 809: [28, 12], 810: [28, 13], 811: [28, 13], 812: [28, 14], 813: [28, 14], 814: [28, 15], 815: [28, 15], 816: [28, 16], 817: [28, 16], 818: [28, 17], 819: [28, 17], 820: [28, 18], 821: [28, 18], 822: [28, 19], 823: [28, 19], 824: [28, 20], 825: [28, 20], 826: [28, 21], 827: [28, 21], 828: [28, 22], 829: [28, 22], 830: [28, 23], 831: [28, 23], 832: [28, 24], 833: [28, 24], 834: [28, 25], 835: [28, 25], 836: [28, 26], 837: [28, 26], 838: [28, 27], 839: [28, 27], 841: [29, 0], 842: [29, 0], 843: [29, 1], 844: [29, 1], 845: [29, 2], 846: [29, 2], 847: [29, 3], 848: [29, 3], 849: [29, 4], 850: [29, 4], 851: [29, 5], 852: [29, 5], 853: [29, 6], 854: [29, 6], 855: [29, 7], 856: [29, 7], 857: [29, 8], 858: [29, 8], 859: [29, 9], 860: [29, 9], 861: [29, 10], 862: [29, 10], 863: [29, 11], 864: [29, 11], 865: [29, 12], 866: [29, 12], 867: [29, 13], 868: [29, 13], 869: [29, 14], 870: [29, 14], 871: [29, 15], 872: [29, 15], 873: [29, 16], 874: [29, 16], 875: [29, 17], 876: [29, 17], 877: [29, 18], 878: [29, 18], 879: [29, 19], 880: [29, 19], 881: [29, 20], 882: [29, 20], 883: [29, 21], 884: [29, 21], 885: [29, 22], 886: [29, 22], 887: [29, 23], 888: [29, 23], 889: [29, 24], 890: [29, 24], 891: [29, 25], 892: [29, 25], 893: [29, 26], 894: [29, 26], 895: [29, 27], 896: [29, 27], 897: [29, 28], 898: [29, 28], 900: [30, 0], 901: [30, 0], 902: [30, 1], 903: [30, 1], 904: [30, 2], 905: [30, 2], 906: [30, 3], 907: [30, 3], 908: [30, 4], 909: [30, 4], 910: [30, 5], 911: [30, 5], 912: [30, 6], 913: [30, 6], 914: [30, 7], 915: [30, 7], 916: [30, 8], 917: [30, 8], 918: [30, 9], 919: [30, 9], 920: [30, 10], 921: [30, 10], 922: [30, 11], 923: [30, 11], 924: [30, 12], 925: [30, 12], 926: [30, 13], 927: [30, 13], 928: [30, 14], 929: [30, 14], 930: [30, 15], 931: [30, 15], 932: [30, 16], 933: [30, 16], 934: [30, 17], 935: [30, 17], 936: [30, 18], 937: [30, 18], 938: [30, 19], 939: [30, 19], 940: [30, 20], 941: [30, 20], 942: [30, 21], 943: [30, 21], 944: [30, 22], 945: [30, 22], 946: [30, 23], 947: [30, 23], 948: [30, 24], 949: [30, 24], 950: [30, 25], 951: [30, 25], 952: [30, 26], 953: [30, 26], 954: [30, 27], 955: [30, 27], 956: [30, 28], 957: [30, 28], 958: [30, 29], 959: [30, 29], 961: [31, 0], 962: [31, 0], 963: [31, 1], 964: [31, 1], 965: [31, 2], 966: [31, 2], 967: [31, 3], 968: [31, 3], 969: [31, 4], 970: [31, 4], 971: [31, 5], 972: [31, 5], 973: [31, 6], 974: [31, 6], 975: [31, 7], 976: [31, 7], 977: [31, 8], 978: [31, 8], 979: [31, 9], 980: [31, 9], 981: [31, 10], 982: [31, 10], 983: [31, 11], 984: [31, 11], 985: [31, 12], 986: [31, 12], 987: [31, 13], 988: [31, 13], 989: [31, 14], 990: [31, 14], 991: [31, 15], 992: [31, 15], 993: [31, 16], 994: [31, 16], 995: [31, 17], 996: [31, 17], 997: [31, 18], 998: [31, 18], 999: [31, 19], 1000: [31, 19], 1001: [31, 20], 1002: [31, 20], 1003: [31, 21], 1004: [31, 21], 1005: [31, 22], 1006: [31, 22], 1007: [31, 23], 1008: [31, 23], 1009: [31, 24], 1010: [31, 24], 1011: [31, 25], 1012: [31, 25], 1013: [31, 26], 1014: [31, 26], 1015: [31, 27], 1016: [31, 27], 1017: [31, 28], 1018: [31, 28], 1019: [31, 29], 1020: [31, 29], 1021: [31, 30], 1022: [31, 30]}
+parse object graph:
+DiGraph with 1056 nodes and 1520 edges
+¡ú Using SABRE2 mapper (matches muss_schedule2 paper version)
+SABRE (Strict): Starting iterative optimization (20 rounds)...
+SABRE (Strict): Optimization Done. Best Forward Cost: 123
+init_qubit_layout:
+{0: [0, 1, 2, 3, 4, 5, 6, 7], 1: [15, 16, 17, 18, 19, 20, 21], 2: [22, 23, 24, 25, 26], 3: [27, 28, 29, 30, 31], 4: [8, 9, 10, 11, 12, 13, 14], 5: []}
+Using MUSS Scheduler (V2) with SABRE Mapping
+¡ú muss_schedule2.py old_vision
+Analyzer mode: aggregate shuttle fidelity (detected shuttle_id annotations)
+Program Finish Time: 74202 us
+OPCOUNTS Gate: 992 Split: 147 Move: 257 Merge: 147
+
+Two-qubit gate chain statistics
+Mean: 7.643145161290323 Max: 8.0
+Fidelity: 3.5126748114033065e-20
+[DBG SUMMARY] gates=992  gate_mult=9.75566e-20  avg_gate_nbar=43.8899
+[DBG SUMMARY] shuttles=147  shuttle_mult=0.360065  min_shuttle=0.98975
+[DBG SUMMARY] worst_B: Trap 2 -> 0.874685 (heat_state=133.891250, alpha_bg=0.001, move_bg_fraction=0.175, model=exp)
+
+========== ANALYSIS RESULT ==========
+{'fidelity': 3.5126748114033065e-20, 'total_shuttle': 147, 'time': 74202}
+
+========== SHUTTLE TRACE ==========
+[SHUTTLE 0] ion=0  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (1040 -> 1160)  ion 0: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=0, i2=7)
+    - MOVE   (1160 -> 1186)  ion 0: Seg0 -> Seg6 via J0
+    - MOVE   (1186 -> 1212)  ion 0: Seg6 -> Seg4 via J1
+    - MERGE  (1212 -> 1292)  ion 0: Seg4 -> T4
+[SHUTTLE 1] ion=8  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (1852 -> 1972)  ion 8: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=8, i2=0)
+    - MOVE   (1972 -> 1998)  ion 8: Seg4 -> Seg6 via J1
+    - MOVE   (1998 -> 2024)  ion 8: Seg6 -> Seg0 via J0
+    - MERGE  (2024 -> 2104)  ion 8: Seg0 -> T0
+[SHUTTLE 2] ion=1  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (2664 -> 2784)  ion 1: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=1, i2=8)
+    - MOVE   (2784 -> 2810)  ion 1: Seg0 -> Seg6 via J0
+    - MOVE   (2810 -> 2836)  ion 1: Seg6 -> Seg4 via J1
+    - MERGE  (2836 -> 2916)  ion 1: Seg4 -> T4
+[SHUTTLE 3] ion=9  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (3396 -> 3516)  ion 9: T4 -> Seg4 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=9, i2=1)
+    - MOVE   (3516 -> 3542)  ion 9: Seg4 -> Seg6 via J1
+    - MOVE   (3542 -> 3568)  ion 9: Seg6 -> Seg0 via J0
+    - MERGE  (3568 -> 3648)  ion 9: Seg0 -> T0
+[SHUTTLE 4] ion=2  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (4208 -> 4328)  ion 2: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=2, i2=9)
+    - MOVE   (4328 -> 4354)  ion 2: Seg0 -> Seg6 via J0
+    - MOVE   (4354 -> 4380)  ion 2: Seg6 -> Seg4 via J1
+    - MERGE  (4380 -> 4460)  ion 2: Seg4 -> T4
+[SHUTTLE 5] ion=10  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (4860 -> 4980)  ion 10: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=10, i2=2)
+    - MOVE   (4980 -> 5006)  ion 10: Seg4 -> Seg6 via J1
+    - MOVE   (5006 -> 5032)  ion 10: Seg6 -> Seg0 via J0
+    - MERGE  (5032 -> 5112)  ion 10: Seg0 -> T0
+[SHUTTLE 6] ion=3  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (5672 -> 5792)  ion 3: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=3, i2=10)
+    - MOVE   (5792 -> 5818)  ion 3: Seg0 -> Seg6 via J0
+    - MOVE   (5818 -> 5844)  ion 3: Seg6 -> Seg4 via J1
+    - MERGE  (5844 -> 5924)  ion 3: Seg4 -> T4
+[SHUTTLE 7] ion=11  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (6244 -> 6364)  ion 11: T4 -> Seg4 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=11, i2=3)
+    - MOVE   (6364 -> 6390)  ion 11: Seg4 -> Seg6 via J1
+    - MOVE   (6390 -> 6416)  ion 11: Seg6 -> Seg0 via J0
+    - MERGE  (6416 -> 6496)  ion 11: Seg0 -> T0
+[SHUTTLE 8] ion=0  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (7056 -> 7176)  ion 0: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=0, i2=3)
+    - MOVE   (7176 -> 7202)  ion 0: Seg4 -> Seg1 via J1
+    - MERGE  (7202 -> 7282)  ion 0: Seg1 -> T1
+[SHUTTLE 9] ion=4  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (7842 -> 7962)  ion 4: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=4, i2=11)
+    - MOVE   (7962 -> 7988)  ion 4: Seg0 -> Seg6 via J0
+    - MOVE   (7988 -> 8014)  ion 4: Seg6 -> Seg4 via J1
+    - MERGE  (8014 -> 8094)  ion 4: Seg4 -> T4
+[SHUTTLE 10] ion=15  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (8334 -> 8454)  ion 15: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=15, i2=0)
+    - MOVE   (8454 -> 8480)  ion 15: Seg1 -> Seg4 via J1
+    - MERGE  (8480 -> 8560)  ion 15: Seg4 -> T4
+[SHUTTLE 11] ion=12  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (8880 -> 9000)  ion 12: T4 -> Seg4 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=12, i2=15)
+    - MOVE   (9000 -> 9026)  ion 12: Seg4 -> Seg6 via J1
+    - MOVE   (9026 -> 9052)  ion 12: Seg6 -> Seg0 via J0
+    - MERGE  (9052 -> 9132)  ion 12: Seg0 -> T0
+[SHUTTLE 12] ion=1  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (9692 -> 9812)  ion 1: T4 -> Seg4 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=1, i2=15)
+    - MOVE   (9812 -> 9838)  ion 1: Seg4 -> Seg1 via J1
+    - MERGE  (9838 -> 9918)  ion 1: Seg1 -> T1
+[SHUTTLE 13] ion=5  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (10398 -> 10518)  ion 5: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=5, i2=12)
+    - MOVE   (10518 -> 10544)  ion 5: Seg0 -> Seg6 via J0
+    - MOVE   (10544 -> 10570)  ion 5: Seg6 -> Seg4 via J1
+    - MERGE  (10570 -> 10650)  ion 5: Seg4 -> T4
+[SHUTTLE 14] ion=16  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (10890 -> 11010)  ion 16: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=16, i2=1)
+    - MOVE   (11010 -> 11036)  ion 16: Seg1 -> Seg4 via J1
+    - MERGE  (11036 -> 11116)  ion 16: Seg4 -> T4
+[SHUTTLE 15] ion=13  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (11436 -> 11556)  ion 13: T4 -> Seg4 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=13, i2=16)
+    - MOVE   (11556 -> 11582)  ion 13: Seg4 -> Seg6 via J1
+    - MOVE   (11582 -> 11608)  ion 13: Seg6 -> Seg0 via J0
+    - MERGE  (11608 -> 11688)  ion 13: Seg0 -> T0
+[SHUTTLE 16] ion=2  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (12248 -> 12368)  ion 2: T4 -> Seg4 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=2, i2=16)
+    - MOVE   (12368 -> 12394)  ion 2: Seg4 -> Seg1 via J1
+    - MERGE  (12394 -> 12474)  ion 2: Seg1 -> T1
+[SHUTTLE 17] ion=6  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (12874 -> 12994)  ion 6: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=6, i2=13)
+    - MOVE   (12994 -> 13020)  ion 6: Seg0 -> Seg6 via J0
+    - MOVE   (13020 -> 13046)  ion 6: Seg6 -> Seg4 via J1
+    - MERGE  (13046 -> 13126)  ion 6: Seg4 -> T4
+[SHUTTLE 18] ion=17  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (13366 -> 13486)  ion 17: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=17, i2=2)
+    - MOVE   (13486 -> 13512)  ion 17: Seg1 -> Seg4 via J1
+    - MERGE  (13512 -> 13592)  ion 17: Seg4 -> T4
+[SHUTTLE 19] ion=14  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (13912 -> 14032)  ion 14: T4 -> Seg4 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=14, i2=17)
+    - MOVE   (14032 -> 14058)  ion 14: Seg4 -> Seg6 via J1
+    - MOVE   (14058 -> 14084)  ion 14: Seg6 -> Seg0 via J0
+    - MERGE  (14084 -> 14164)  ion 14: Seg0 -> T0
+[SHUTTLE 20] ion=3  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (14724 -> 14844)  ion 3: T4 -> Seg4 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=3, i2=17)
+    - MOVE   (14844 -> 14870)  ion 3: Seg4 -> Seg1 via J1
+    - MERGE  (14870 -> 14950)  ion 3: Seg1 -> T1
+[SHUTTLE 21] ion=7  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (15270 -> 15390)  ion 7: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=7, i2=14)
+    - MOVE   (15390 -> 15416)  ion 7: Seg0 -> Seg6 via J0
+    - MOVE   (15416 -> 15442)  ion 7: Seg6 -> Seg4 via J1
+    - MERGE  (15442 -> 15522)  ion 7: Seg4 -> T4
+[SHUTTLE 22] ion=18  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (15762 -> 15882)  ion 18: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=18, i2=3)
+    - MOVE   (15882 -> 15908)  ion 18: Seg1 -> Seg4 via J1
+    - MERGE  (15908 -> 15988)  ion 18: Seg4 -> T4
+[SHUTTLE 23] ion=0  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (16308 -> 16428)  ion 0: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=0, i2=3)
+    - MOVE   (16428 -> 16454)  ion 0: Seg1 -> Seg7 via J1
+    - MOVE   (16454 -> 16480)  ion 0: Seg7 -> Seg2 via J2
+    - MERGE  (16480 -> 16560)  ion 0: Seg2 -> T2
+[SHUTTLE 24] ion=15  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (16960 -> 17080)  ion 15: T4 -> Seg4 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=15, i2=18)
+    - MOVE   (17080 -> 17106)  ion 15: Seg4 -> Seg6 via J1
+    - MOVE   (17106 -> 17132)  ion 15: Seg6 -> Seg0 via J0
+    - MERGE  (17132 -> 17212)  ion 15: Seg0 -> T0
+[SHUTTLE 25] ion=19  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (17772 -> 17892)  ion 19: T1 -> Seg1 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=19, i2=3)
+    - MOVE   (17892 -> 17918)  ion 19: Seg1 -> Seg4 via J1
+    - MERGE  (17918 -> 17998)  ion 19: Seg4 -> T4
+[SHUTTLE 26] ion=1  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (18318 -> 18438)  ion 1: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=1, i2=3)
+    - MOVE   (18438 -> 18464)  ion 1: Seg1 -> Seg7 via J1
+    - MOVE   (18464 -> 18490)  ion 1: Seg7 -> Seg2 via J2
+    - MERGE  (18490 -> 18570)  ion 1: Seg2 -> T2
+[SHUTTLE 27] ion=9  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (18970 -> 19090)  ion 9: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=9, i2=15)
+    - MOVE   (19090 -> 19116)  ion 9: Seg0 -> Seg6 via J0
+    - MOVE   (19116 -> 19142)  ion 9: Seg6 -> Seg1 via J1
+    - MERGE  (19142 -> 19222)  ion 9: Seg1 -> T1
+[SHUTTLE 28] ion=17  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (19222 -> 19342)  ion 17: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=17, i2=19)
+    - MOVE   (19342 -> 19368)  ion 17: Seg4 -> Seg1 via J1
+    - MERGE  (19368 -> 19448)  ion 17: Seg1 -> T1
+[SHUTTLE 29] ion=8  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (19448 -> 19568)  ion 8: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=8, i2=15)
+    - MOVE   (19568 -> 19594)  ion 8: Seg0 -> Seg6 via J0
+    - MOVE   (19594 -> 19620)  ion 8: Seg6 -> Seg4 via J1
+    - MERGE  (19620 -> 19700)  ion 8: Seg4 -> T4
+[SHUTTLE 30] ion=4  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (19780 -> 19900)  ion 4: T4 -> Seg4 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=4, i2=8)
+    - MOVE   (19900 -> 19926)  ion 4: Seg4 -> Seg1 via J1
+    - MERGE  (19926 -> 20006)  ion 4: Seg1 -> T1
+[SHUTTLE 31] ion=2  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (20166 -> 20286)  ion 2: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=2, i2=4)
+    - MOVE   (20286 -> 20312)  ion 2: Seg1 -> Seg7 via J1
+    - MOVE   (20312 -> 20338)  ion 2: Seg7 -> Seg2 via J2
+    - MERGE  (20338 -> 20418)  ion 2: Seg2 -> T2
+[SHUTTLE 32] ion=16  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (20818 -> 20938)  ion 16: T4 -> Seg4 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=16, i2=8)
+    - MOVE   (20938 -> 20964)  ion 16: Seg4 -> Seg1 via J1
+    - MERGE  (20964 -> 21044)  ion 16: Seg1 -> T1
+[SHUTTLE 33] ion=17  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (21124 -> 21244)  ion 17: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=17, i2=16)
+    - MOVE   (21244 -> 21270)  ion 17: Seg1 -> Seg4 via J1
+    - MERGE  (21270 -> 21350)  ion 17: Seg4 -> T4
+[SHUTTLE 34] ion=20  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (21590 -> 21710)  ion 20: T1 -> Seg1 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=20, i2=16)
+    - MOVE   (21710 -> 21736)  ion 20: Seg1 -> Seg4 via J1
+    - MERGE  (21736 -> 21816)  ion 20: Seg4 -> T4
+[SHUTTLE 35] ion=22  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (22136 -> 22256)  ion 22: T2 -> Seg2 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=22, i2=2)
+    - MOVE   (22256 -> 22282)  ion 22: Seg2 -> Seg7 via J2
+    - MOVE   (22282 -> 22308)  ion 22: Seg7 -> Seg1 via J1
+    - MERGE  (22308 -> 22388)  ion 22: Seg1 -> T1
+[SHUTTLE 36] ion=16  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (22548 -> 22668)  ion 16: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=16, i2=22)
+    - MOVE   (22668 -> 22694)  ion 16: Seg1 -> Seg6 via J1
+    - MOVE   (22694 -> 22720)  ion 16: Seg6 -> Seg0 via J0
+    - MERGE  (22720 -> 22800)  ion 16: Seg0 -> T0
+[SHUTTLE 37] ion=17  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (23280 -> 23400)  ion 17: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=17, i2=20)
+    - MOVE   (23400 -> 23426)  ion 17: Seg4 -> Seg1 via J1
+    - MERGE  (23426 -> 23506)  ion 17: Seg1 -> T1
+[SHUTTLE 38] ion=21  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (23586 -> 23706)  ion 21: T1 -> Seg1 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=21, i2=17)
+    - MOVE   (23706 -> 23732)  ion 21: Seg1 -> Seg4 via J1
+    - MERGE  (23732 -> 23812)  ion 21: Seg4 -> T4
+[SHUTTLE 39] ion=3  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (24132 -> 24252)  ion 3: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=3, i2=17)
+    - MOVE   (24252 -> 24278)  ion 3: Seg1 -> Seg7 via J1
+    - MOVE   (24278 -> 24304)  ion 3: Seg7 -> Seg2 via J2
+    - MERGE  (24304 -> 24384)  ion 3: Seg2 -> T2
+[SHUTTLE 40] ion=17  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (24704 -> 24784)  ion 17: T1 -> Seg1 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (24784 -> 24810)  ion 17: Seg1 -> Seg6 via J1
+    - MOVE   (24810 -> 24836)  ion 17: Seg6 -> Seg0 via J0
+    - MERGE  (24836 -> 24916)  ion 17: Seg0 -> T0
+[SHUTTLE 41] ion=18  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (25476 -> 25596)  ion 18: T4 -> Seg4 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=18, i2=21)
+    - MOVE   (25596 -> 25622)  ion 18: Seg4 -> Seg1 via J1
+    - MERGE  (25622 -> 25702)  ion 18: Seg1 -> T1
+[SHUTTLE 42] ion=22  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (25782 -> 25902)  ion 22: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=22, i2=18)
+    - MOVE   (25902 -> 25928)  ion 22: Seg1 -> Seg4 via J1
+    - MERGE  (25928 -> 26008)  ion 22: Seg4 -> T4
+[SHUTTLE 43] ion=23  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (26328 -> 26448)  ion 23: T2 -> Seg2 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=23, i2=3)
+    - MOVE   (26448 -> 26474)  ion 23: Seg2 -> Seg7 via J2
+    - MOVE   (26474 -> 26500)  ion 23: Seg7 -> Seg1 via J1
+    - MERGE  (26500 -> 26580)  ion 23: Seg1 -> T1
+[SHUTTLE 44] ion=0  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (26660 -> 26780)  ion 0: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=0, i2=3)
+    - MOVE   (26780 -> 26806)  ion 0: Seg2 -> Seg3 via J2
+    - MERGE  (26806 -> 26886)  ion 0: Seg3 -> T3
+[SHUTTLE 45] ion=10  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (27286 -> 27406)  ion 10: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=10, i2=17)
+    - MOVE   (27406 -> 27432)  ion 10: Seg0 -> Seg6 via J0
+    - MOVE   (27432 -> 27458)  ion 10: Seg6 -> Seg1 via J1
+    - MERGE  (27458 -> 27538)  ion 10: Seg1 -> T1
+[SHUTTLE 46] ion=19  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (27618 -> 27738)  ion 19: T4 -> Seg4 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=19, i2=22)
+    - MOVE   (27738 -> 27764)  ion 19: Seg4 -> Seg1 via J1
+    - MERGE  (27764 -> 27844)  ion 19: Seg1 -> T1
+[SHUTTLE 47] ion=23  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (28004 -> 28124)  ion 23: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=23, i2=19)
+    - MOVE   (28124 -> 28150)  ion 23: Seg1 -> Seg4 via J1
+    - MERGE  (28150 -> 28230)  ion 23: Seg4 -> T4
+[SHUTTLE 48] ion=4  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (28550 -> 28670)  ion 4: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=4, i2=19)
+    - MOVE   (28670 -> 28696)  ion 4: Seg1 -> Seg7 via J1
+    - MOVE   (28696 -> 28722)  ion 4: Seg7 -> Seg2 via J2
+    - MERGE  (28722 -> 28802)  ion 4: Seg2 -> T2
+[SHUTTLE 49] ion=1  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (29042 -> 29162)  ion 1: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=1, i2=4)
+    - MOVE   (29162 -> 29188)  ion 1: Seg2 -> Seg3 via J2
+    - MERGE  (29188 -> 29268)  ion 1: Seg3 -> T3
+[SHUTTLE 50] ion=18  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (29668 -> 29788)  ion 18: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=18, i2=19)
+    - MOVE   (29788 -> 29814)  ion 18: Seg1 -> Seg6 via J1
+    - MOVE   (29814 -> 29840)  ion 18: Seg6 -> Seg0 via J0
+    - MERGE  (29840 -> 29920)  ion 18: Seg0 -> T0
+[SHUTTLE 51] ion=20  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (30480 -> 30600)  ion 20: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=20, i2=23)
+    - MOVE   (30600 -> 30626)  ion 20: Seg4 -> Seg1 via J1
+    - MERGE  (30626 -> 30706)  ion 20: Seg1 -> T1
+[SHUTTLE 52] ion=24  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (30866 -> 30986)  ion 24: T2 -> Seg2 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=24, i2=4)
+    - MOVE   (30986 -> 31012)  ion 24: Seg2 -> Seg7 via J2
+    - MOVE   (31012 -> 31038)  ion 24: Seg7 -> Seg4 via J1
+    - MERGE  (31038 -> 31118)  ion 24: Seg4 -> T4
+[SHUTTLE 53] ion=2  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (31438 -> 31558)  ion 2: T2 -> Seg2 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=2, i2=4)
+    - MOVE   (31558 -> 31584)  ion 2: Seg2 -> Seg3 via J2
+    - MERGE  (31584 -> 31664)  ion 2: Seg3 -> T3
+[SHUTTLE 54] ion=11  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (32064 -> 32184)  ion 11: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=11, i2=18)
+    - MOVE   (32184 -> 32210)  ion 11: Seg0 -> Seg6 via J0
+    - MOVE   (32210 -> 32236)  ion 11: Seg6 -> Seg1 via J1
+    - MERGE  (32236 -> 32316)  ion 11: Seg1 -> T1
+[SHUTTLE 55] ion=21  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (32476 -> 32596)  ion 21: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=21, i2=24)
+    - MOVE   (32596 -> 32622)  ion 21: Seg4 -> Seg1 via J1
+    - MERGE  (32622 -> 32702)  ion 21: Seg1 -> T1
+[SHUTTLE 56] ion=25  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (32942 -> 33062)  ion 25: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=25, i2=4)
+    - MOVE   (33062 -> 33088)  ion 25: Seg2 -> Seg7 via J2
+    - MOVE   (33088 -> 33114)  ion 25: Seg7 -> Seg4 via J1
+    - MERGE  (33114 -> 33194)  ion 25: Seg4 -> T4
+[SHUTTLE 57] ion=27  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (33514 -> 33634)  ion 27: T3 -> Seg3 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=27, i2=2)
+    - MOVE   (33634 -> 33660)  ion 27: Seg3 -> Seg2 via J2
+    - MERGE  (33660 -> 33740)  ion 27: Seg2 -> T2
+[SHUTTLE 58] ion=19  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (33900 -> 34020)  ion 19: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=19, i2=21)
+    - MOVE   (34020 -> 34046)  ion 19: Seg1 -> Seg6 via J1
+    - MOVE   (34046 -> 34072)  ion 19: Seg6 -> Seg0 via J0
+    - MERGE  (34072 -> 34152)  ion 19: Seg0 -> T0
+[SHUTTLE 59] ion=22  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (34712 -> 34832)  ion 22: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=22, i2=25)
+    - MOVE   (34832 -> 34858)  ion 22: Seg4 -> Seg1 via J1
+    - MERGE  (34858 -> 34938)  ion 22: Seg1 -> T1
+[SHUTTLE 60] ion=26  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (35178 -> 35298)  ion 26: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=26, i2=27)
+    - MOVE   (35298 -> 35324)  ion 26: Seg2 -> Seg7 via J2
+    - MOVE   (35324 -> 35350)  ion 26: Seg7 -> Seg4 via J1
+    - MERGE  (35350 -> 35430)  ion 26: Seg4 -> T4
+[SHUTTLE 61] ion=3  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (35750 -> 35870)  ion 3: T2 -> Seg2 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=3, i2=27)
+    - MOVE   (35870 -> 35896)  ion 3: Seg2 -> Seg3 via J2
+    - MERGE  (35896 -> 35976)  ion 3: Seg3 -> T3
+[SHUTTLE 62] ion=12  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (36296 -> 36416)  ion 12: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=12, i2=19)
+    - MOVE   (36416 -> 36442)  ion 12: Seg0 -> Seg6 via J0
+    - MOVE   (36442 -> 36468)  ion 12: Seg6 -> Seg1 via J1
+    - MERGE  (36468 -> 36548)  ion 12: Seg1 -> T1
+[SHUTTLE 63] ion=23  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (36788 -> 36908)  ion 23: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=23, i2=26)
+    - MOVE   (36908 -> 36934)  ion 23: Seg4 -> Seg1 via J1
+    - MERGE  (36934 -> 37014)  ion 23: Seg1 -> T1
+[SHUTTLE 64] ion=27  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (37334 -> 37414)  ion 27: T2 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (37414 -> 37440)  ion 27: Seg2 -> Seg7 via J2
+    - MOVE   (37440 -> 37466)  ion 27: Seg7 -> Seg4 via J1
+    - MERGE  (37466 -> 37546)  ion 27: Seg4 -> T4
+[SHUTTLE 65] ion=28  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (37866 -> 37986)  ion 28: T3 -> Seg3 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=28, i2=3)
+    - MOVE   (37986 -> 38012)  ion 28: Seg3 -> Seg2 via J2
+    - MERGE  (38012 -> 38092)  ion 28: Seg2 -> T2
+[SHUTTLE 66] ion=20  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (38172 -> 38292)  ion 20: T1 -> Seg1 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=20, i2=23)
+    - MOVE   (38292 -> 38318)  ion 20: Seg1 -> Seg6 via J1
+    - MOVE   (38318 -> 38344)  ion 20: Seg6 -> Seg0 via J0
+    - MERGE  (38344 -> 38424)  ion 20: Seg0 -> T0
+[SHUTTLE 67] ion=24  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (38984 -> 39104)  ion 24: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=24, i2=27)
+    - MOVE   (39104 -> 39130)  ion 24: Seg4 -> Seg1 via J1
+    - MERGE  (39130 -> 39210)  ion 24: Seg1 -> T1
+[SHUTTLE 68] ion=28  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (39530 -> 39610)  ion 28: T2 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (39610 -> 39636)  ion 28: Seg2 -> Seg7 via J2
+    - MOVE   (39636 -> 39662)  ion 28: Seg7 -> Seg4 via J1
+    - MERGE  (39662 -> 39742)  ion 28: Seg4 -> T4
+[SHUTTLE 69] ion=4  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (40062 -> 40142)  ion 4: T2 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (40142 -> 40168)  ion 4: Seg2 -> Seg3 via J2
+    - MERGE  (40168 -> 40248)  ion 4: Seg3 -> T3
+[SHUTTLE 70] ion=14  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (40488 -> 40608)  ion 14: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=14, i2=20)
+    - MOVE   (40608 -> 40634)  ion 14: Seg0 -> Seg6 via J0
+    - MOVE   (40634 -> 40660)  ion 14: Seg6 -> Seg7 via J1
+    - MOVE   (40660 -> 40686)  ion 14: Seg7 -> Seg2 via J2
+    - MERGE  (40686 -> 40766)  ion 14: Seg2 -> T2
+[SHUTTLE 71] ion=22  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (40766 -> 40886)  ion 22: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=22, i2=24)
+    - MOVE   (40886 -> 40912)  ion 22: Seg1 -> Seg7 via J1
+    - MOVE   (40912 -> 40938)  ion 22: Seg7 -> Seg2 via J2
+    - MERGE  (40938 -> 41018)  ion 22: Seg2 -> T2
+[SHUTTLE 72] ion=0  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (41018 -> 41138)  ion 0: T3 -> Seg3 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=0, i2=4)
+    - MOVE   (41138 -> 41164)  ion 0: Seg3 -> Seg2 via J2
+    - MERGE  (41164 -> 41244)  ion 0: Seg2 -> T2
+[SHUTTLE 73] ion=25  T4 -> T2  route=T4->J1->J2->T2
+    - SPLIT  (41244 -> 41364)  ion 25: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=25, i2=28)
+    - MOVE   (41364 -> 41390)  ion 25: Seg4 -> Seg7 via J1
+    - MOVE   (41390 -> 41416)  ion 25: Seg7 -> Seg2 via J2
+    - MERGE  (41416 -> 41496)  ion 25: Seg2 -> T2
+[SHUTTLE 74] ion=13  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (41496 -> 41616)  ion 13: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=13, i2=20)
+    - MOVE   (41616 -> 41642)  ion 13: Seg0 -> Seg6 via J0
+    - MOVE   (41642 -> 41668)  ion 13: Seg6 -> Seg1 via J1
+    - MERGE  (41668 -> 41748)  ion 13: Seg1 -> T1
+[SHUTTLE 75] ion=9  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (41828 -> 41948)  ion 9: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=9, i2=13)
+    - MOVE   (41948 -> 41974)  ion 9: Seg1 -> Seg7 via J1
+    - MOVE   (41974 -> 42000)  ion 9: Seg7 -> Seg2 via J2
+    - MERGE  (42000 -> 42080)  ion 9: Seg2 -> T2
+[SHUTTLE 76] ion=29  T3 -> T4  route=T3->J2->J1->T4
+    - SPLIT  (42160 -> 42280)  ion 29: T3 -> Seg3 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=29, i2=4)
+    - MOVE   (42280 -> 42306)  ion 29: Seg3 -> Seg7 via J2
+    - MOVE   (42306 -> 42332)  ion 29: Seg7 -> Seg4 via J1
+    - MERGE  (42332 -> 42412)  ion 29: Seg4 -> T4
+[SHUTTLE 77] ion=14  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (42732 -> 42852)  ion 14: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=14, i2=9)
+    - MOVE   (42852 -> 42878)  ion 14: Seg2 -> Seg7 via J2
+    - MOVE   (42878 -> 42904)  ion 14: Seg7 -> Seg1 via J1
+    - MERGE  (42904 -> 42984)  ion 14: Seg1 -> T1
+[SHUTTLE 78] ion=13  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (43064 -> 43184)  ion 13: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=13, i2=14)
+    - MOVE   (43184 -> 43210)  ion 13: Seg1 -> Seg7 via J1
+    - MOVE   (43210 -> 43236)  ion 13: Seg7 -> Seg2 via J2
+    - MERGE  (43236 -> 43316)  ion 13: Seg2 -> T2
+[SHUTTLE 79] ion=25  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (43396 -> 43516)  ion 25: T2 -> Seg2 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=25, i2=13)
+    - MOVE   (43516 -> 43542)  ion 25: Seg2 -> Seg7 via J2
+    - MOVE   (43542 -> 43568)  ion 25: Seg7 -> Seg1 via J1
+    - MERGE  (43568 -> 43648)  ion 25: Seg1 -> T1
+[SHUTTLE 80] ion=26  T4 -> T2  route=T4->J1->J2->T2
+    - SPLIT  (43888 -> 44008)  ion 26: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=26, i2=29)
+    - MOVE   (44008 -> 44034)  ion 26: Seg4 -> Seg7 via J1
+    - MOVE   (44034 -> 44060)  ion 26: Seg7 -> Seg2 via J2
+    - MERGE  (44060 -> 44140)  ion 26: Seg2 -> T2
+[SHUTTLE 81] ion=30  T3 -> T4  route=T3->J2->J1->T4
+    - SPLIT  (44220 -> 44340)  ion 30: T3 -> Seg3 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=30, i2=4)
+    - MOVE   (44340 -> 44366)  ion 30: Seg3 -> Seg7 via J2
+    - MOVE   (44366 -> 44392)  ion 30: Seg7 -> Seg4 via J1
+    - MERGE  (44392 -> 44472)  ion 30: Seg4 -> T4
+[SHUTTLE 82] ion=21  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (44792 -> 44912)  ion 21: T1 -> Seg1 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=21, i2=25)
+    - MOVE   (44912 -> 44938)  ion 21: Seg1 -> Seg6 via J1
+    - MOVE   (44938 -> 44964)  ion 21: Seg6 -> Seg0 via J0
+    - MERGE  (44964 -> 45044)  ion 21: Seg0 -> T0
+[SHUTTLE 83] ion=22  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (45524 -> 45644)  ion 22: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=22, i2=26)
+    - MOVE   (45644 -> 45670)  ion 22: Seg2 -> Seg7 via J2
+    - MOVE   (45670 -> 45696)  ion 22: Seg7 -> Seg1 via J1
+    - MERGE  (45696 -> 45776)  ion 22: Seg1 -> T1
+[SHUTTLE 84] ion=23  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (45856 -> 45976)  ion 23: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=23, i2=22)
+    - MOVE   (45976 -> 46002)  ion 23: Seg1 -> Seg7 via J1
+    - MOVE   (46002 -> 46028)  ion 23: Seg7 -> Seg2 via J2
+    - MERGE  (46028 -> 46108)  ion 23: Seg2 -> T2
+[SHUTTLE 85] ion=26  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (46188 -> 46308)  ion 26: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=26, i2=23)
+    - MOVE   (46308 -> 46334)  ion 26: Seg2 -> Seg7 via J2
+    - MOVE   (46334 -> 46360)  ion 26: Seg7 -> Seg1 via J1
+    - MERGE  (46360 -> 46440)  ion 26: Seg1 -> T1
+[SHUTTLE 86] ion=27  T4 -> T2  route=T4->J1->J2->T2
+    - SPLIT  (46680 -> 46800)  ion 27: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=27, i2=30)
+    - MOVE   (46800 -> 46826)  ion 27: Seg4 -> Seg7 via J1
+    - MOVE   (46826 -> 46852)  ion 27: Seg7 -> Seg2 via J2
+    - MERGE  (46852 -> 46932)  ion 27: Seg2 -> T2
+[SHUTTLE 87] ion=31  T3 -> T4  route=T3->J2->J1->T4
+    - SPLIT  (47012 -> 47132)  ion 31: T3 -> Seg3 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=31, i2=4)
+    - MOVE   (47132 -> 47158)  ion 31: Seg3 -> Seg7 via J2
+    - MOVE   (47158 -> 47184)  ion 31: Seg7 -> Seg4 via J1
+    - MERGE  (47184 -> 47264)  ion 31: Seg4 -> T4
+[SHUTTLE 88] ion=22  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (47584 -> 47704)  ion 22: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=22, i2=26)
+    - MOVE   (47704 -> 47730)  ion 22: Seg1 -> Seg6 via J1
+    - MOVE   (47730 -> 47756)  ion 22: Seg6 -> Seg0 via J0
+    - MERGE  (47756 -> 47836)  ion 22: Seg0 -> T0
+[SHUTTLE 89] ion=23  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (48396 -> 48516)  ion 23: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=23, i2=27)
+    - MOVE   (48516 -> 48542)  ion 23: Seg2 -> Seg7 via J2
+    - MOVE   (48542 -> 48568)  ion 23: Seg7 -> Seg1 via J1
+    - MERGE  (48568 -> 48648)  ion 23: Seg1 -> T1
+[SHUTTLE 90] ion=24  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (48728 -> 48848)  ion 24: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=24, i2=23)
+    - MOVE   (48848 -> 48874)  ion 24: Seg1 -> Seg7 via J1
+    - MOVE   (48874 -> 48900)  ion 24: Seg7 -> Seg2 via J2
+    - MERGE  (48900 -> 48980)  ion 24: Seg2 -> T2
+[SHUTTLE 91] ion=27  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (49060 -> 49180)  ion 27: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=27, i2=24)
+    - MOVE   (49180 -> 49206)  ion 27: Seg2 -> Seg7 via J2
+    - MOVE   (49206 -> 49232)  ion 27: Seg7 -> Seg1 via J1
+    - MERGE  (49232 -> 49312)  ion 27: Seg1 -> T1
+[SHUTTLE 92] ion=28  T4 -> T2  route=T4->J1->J2->T2
+    - SPLIT  (49552 -> 49672)  ion 28: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=28, i2=31)
+    - MOVE   (49672 -> 49698)  ion 28: Seg4 -> Seg7 via J1
+    - MOVE   (49698 -> 49724)  ion 28: Seg7 -> Seg2 via J2
+    - MERGE  (49724 -> 49804)  ion 28: Seg2 -> T2
+[SHUTTLE 93] ion=16  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (49884 -> 50004)  ion 16: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=16, i2=22)
+    - MOVE   (50004 -> 50030)  ion 16: Seg0 -> Seg6 via J0
+    - MOVE   (50030 -> 50056)  ion 16: Seg6 -> Seg7 via J1
+    - MOVE   (50056 -> 50082)  ion 16: Seg7 -> Seg2 via J2
+    - MERGE  (50082 -> 50162)  ion 16: Seg2 -> T2
+[SHUTTLE 94] ion=25  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (50162 -> 50282)  ion 25: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=25, i2=27)
+    - MOVE   (50282 -> 50308)  ion 25: Seg1 -> Seg7 via J1
+    - MOVE   (50308 -> 50334)  ion 25: Seg7 -> Seg2 via J2
+    - MERGE  (50334 -> 50414)  ion 25: Seg2 -> T2
+[SHUTTLE 95] ion=15  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (50414 -> 50534)  ion 15: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=15, i2=22)
+    - MOVE   (50534 -> 50560)  ion 15: Seg0 -> Seg6 via J0
+    - MOVE   (50560 -> 50586)  ion 15: Seg6 -> Seg1 via J1
+    - MERGE  (50586 -> 50666)  ion 15: Seg1 -> T1
+[SHUTTLE 96] ion=14  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (50746 -> 50866)  ion 14: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=14, i2=15)
+    - MOVE   (50866 -> 50892)  ion 14: Seg1 -> Seg7 via J1
+    - MOVE   (50892 -> 50918)  ion 14: Seg7 -> Seg2 via J2
+    - MERGE  (50918 -> 50998)  ion 14: Seg2 -> T2
+[SHUTTLE 97] ion=28  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (51158 -> 51278)  ion 28: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=28, i2=14)
+    - MOVE   (51278 -> 51304)  ion 28: Seg2 -> Seg7 via J2
+    - MOVE   (51304 -> 51330)  ion 28: Seg7 -> Seg1 via J1
+    - MERGE  (51330 -> 51410)  ion 28: Seg1 -> T1
+[SHUTTLE 98] ion=9  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (51650 -> 51770)  ion 9: T2 -> Seg2 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=9, i2=14)
+    - MOVE   (51770 -> 51796)  ion 9: Seg2 -> Seg7 via J2
+    - MOVE   (51796 -> 51822)  ion 9: Seg7 -> Seg4 via J1
+    - MERGE  (51822 -> 51902)  ion 9: Seg4 -> T4
+[SHUTTLE 99] ion=23  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (52142 -> 52262)  ion 23: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=23, i2=28)
+    - MOVE   (52262 -> 52288)  ion 23: Seg1 -> Seg7 via J1
+    - MOVE   (52288 -> 52314)  ion 23: Seg7 -> Seg2 via J2
+    - MERGE  (52314 -> 52394)  ion 23: Seg2 -> T2
+[SHUTTLE 100] ion=15  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (52474 -> 52594)  ion 15: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=15, i2=28)
+    - MOVE   (52594 -> 52620)  ion 15: Seg1 -> Seg7 via J1
+    - MOVE   (52620 -> 52646)  ion 15: Seg7 -> Seg2 via J2
+    - MERGE  (52646 -> 52726)  ion 15: Seg2 -> T2
+[SHUTTLE 101] ion=13  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (52966 -> 53086)  ion 13: T2 -> Seg2 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=13, i2=15)
+    - MOVE   (53086 -> 53112)  ion 13: Seg2 -> Seg7 via J2
+    - MOVE   (53112 -> 53138)  ion 13: Seg7 -> Seg1 via J1
+    - MERGE  (53138 -> 53218)  ion 13: Seg1 -> T1
+[SHUTTLE 102] ion=29  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (53458 -> 53578)  ion 29: T4 -> Seg4 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=29, i2=9)
+    - MOVE   (53578 -> 53604)  ion 29: Seg4 -> Seg1 via J1
+    - MERGE  (53604 -> 53684)  ion 29: Seg1 -> T1
+[SHUTTLE 103] ion=23  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (54004 -> 54124)  ion 23: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=23, i2=15)
+    - MOVE   (54124 -> 54150)  ion 23: Seg2 -> Seg7 via J2
+    - MOVE   (54150 -> 54176)  ion 23: Seg7 -> Seg6 via J1
+    - MOVE   (54176 -> 54202)  ion 23: Seg6 -> Seg0 via J0
+    - MERGE  (54202 -> 54282)  ion 23: Seg0 -> T0
+[SHUTTLE 104] ion=26  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (54762 -> 54882)  ion 26: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=26, i2=29)
+    - MOVE   (54882 -> 54908)  ion 26: Seg1 -> Seg7 via J1
+    - MOVE   (54908 -> 54934)  ion 26: Seg7 -> Seg2 via J2
+    - MERGE  (54934 -> 55014)  ion 26: Seg2 -> T2
+[SHUTTLE 105] ion=30  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (55254 -> 55374)  ion 30: T4 -> Seg4 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=30, i2=9)
+    - MOVE   (55374 -> 55400)  ion 30: Seg4 -> Seg1 via J1
+    - MERGE  (55400 -> 55480)  ion 30: Seg1 -> T1
+[SHUTTLE 106] ion=24  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (55800 -> 55920)  ion 24: T2 -> Seg2 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=24, i2=26)
+    - MOVE   (55920 -> 55946)  ion 24: Seg2 -> Seg7 via J2
+    - MOVE   (55946 -> 55972)  ion 24: Seg7 -> Seg6 via J1
+    - MOVE   (55972 -> 55998)  ion 24: Seg6 -> Seg0 via J0
+    - MERGE  (55998 -> 56078)  ion 24: Seg0 -> T0
+[SHUTTLE 107] ion=27  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (56638 -> 56758)  ion 27: T1 -> Seg1 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=27, i2=30)
+    - MOVE   (56758 -> 56784)  ion 27: Seg1 -> Seg7 via J1
+    - MOVE   (56784 -> 56810)  ion 27: Seg7 -> Seg2 via J2
+    - MERGE  (56810 -> 56890)  ion 27: Seg2 -> T2
+[SHUTTLE 108] ion=31  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (57130 -> 57250)  ion 31: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=31, i2=9)
+    - MOVE   (57250 -> 57276)  ion 31: Seg4 -> Seg1 via J1
+    - MERGE  (57276 -> 57356)  ion 31: Seg1 -> T1
+[SHUTTLE 109] ion=17  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (57676 -> 57796)  ion 17: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=17, i2=24)
+    - MOVE   (57796 -> 57822)  ion 17: Seg0 -> Seg6 via J0
+    - MOVE   (57822 -> 57848)  ion 17: Seg6 -> Seg7 via J1
+    - MOVE   (57848 -> 57874)  ion 17: Seg7 -> Seg2 via J2
+    - MERGE  (57874 -> 57954)  ion 17: Seg2 -> T2
+[SHUTTLE 110] ion=29  T1 -> T3  route=T1->J1->J2->T3
+    - SPLIT  (58194 -> 58314)  ion 29: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=29, i2=31)
+    - MOVE   (58314 -> 58340)  ion 29: Seg1 -> Seg7 via J1
+    - MOVE   (58340 -> 58366)  ion 29: Seg7 -> Seg3 via J2
+    - MERGE  (58366 -> 58446)  ion 29: Seg3 -> T3
+[SHUTTLE 111] ion=0  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (58446 -> 58566)  ion 0: T2 -> Seg2 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=0, i2=17)
+    - MOVE   (58566 -> 58592)  ion 0: Seg2 -> Seg3 via J2
+    - MERGE  (58592 -> 58672)  ion 0: Seg3 -> T3
+[SHUTTLE 112] ion=28  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (58672 -> 58792)  ion 28: T1 -> Seg1 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=28, i2=31)
+    - MOVE   (58792 -> 58818)  ion 28: Seg1 -> Seg7 via J1
+    - MOVE   (58818 -> 58844)  ion 28: Seg7 -> Seg2 via J2
+    - MERGE  (58844 -> 58924)  ion 28: Seg2 -> T2
+[SHUTTLE 113] ion=25  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (59244 -> 59364)  ion 25: T2 -> Seg2 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=25, i2=28)
+    - MOVE   (59364 -> 59390)  ion 25: Seg2 -> Seg7 via J2
+    - MOVE   (59390 -> 59416)  ion 25: Seg7 -> Seg6 via J1
+    - MOVE   (59416 -> 59442)  ion 25: Seg6 -> Seg0 via J0
+    - MERGE  (59442 -> 59522)  ion 25: Seg0 -> T0
+[SHUTTLE 114] ion=29  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (60082 -> 60202)  ion 29: T3 -> Seg3 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=29, i2=0)
+    - MOVE   (60202 -> 60228)  ion 29: Seg3 -> Seg2 via J2
+    - MERGE  (60228 -> 60308)  ion 29: Seg2 -> T2
+[SHUTTLE 115] ion=19  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (60628 -> 60748)  ion 19: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=19, i2=25)
+    - MOVE   (60748 -> 60774)  ion 19: Seg0 -> Seg6 via J0
+    - MOVE   (60774 -> 60800)  ion 19: Seg6 -> Seg1 via J1
+    - MERGE  (60800 -> 60880)  ion 19: Seg1 -> T1
+[SHUTTLE 116] ion=27  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (60880 -> 61000)  ion 27: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=27, i2=29)
+    - MOVE   (61000 -> 61026)  ion 27: Seg2 -> Seg3 via J2
+    - MERGE  (61026 -> 61106)  ion 27: Seg3 -> T3
+[SHUTTLE 117] ion=18  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (61106 -> 61226)  ion 18: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=18, i2=25)
+    - MOVE   (61226 -> 61252)  ion 18: Seg0 -> Seg6 via J0
+    - MOVE   (61252 -> 61278)  ion 18: Seg6 -> Seg7 via J1
+    - MOVE   (61278 -> 61304)  ion 18: Seg7 -> Seg2 via J2
+    - MERGE  (61304 -> 61384)  ion 18: Seg2 -> T2
+[SHUTTLE 118] ion=14  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (61464 -> 61584)  ion 14: T2 -> Seg2 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=14, i2=18)
+    - MOVE   (61584 -> 61610)  ion 14: Seg2 -> Seg7 via J2
+    - MOVE   (61610 -> 61636)  ion 14: Seg7 -> Seg1 via J1
+    - MERGE  (61636 -> 61716)  ion 14: Seg1 -> T1
+[SHUTTLE 119] ion=19  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (61876 -> 61996)  ion 19: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=19, i2=14)
+    - MOVE   (61996 -> 62022)  ion 19: Seg1 -> Seg7 via J1
+    - MOVE   (62022 -> 62048)  ion 19: Seg7 -> Seg2 via J2
+    - MERGE  (62048 -> 62128)  ion 19: Seg2 -> T2
+[SHUTTLE 120] ion=18  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (62208 -> 62328)  ion 18: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=18, i2=19)
+    - MOVE   (62328 -> 62354)  ion 18: Seg2 -> Seg3 via J2
+    - MERGE  (62354 -> 62434)  ion 18: Seg3 -> T3
+[SHUTTLE 121] ion=30  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (62514 -> 62634)  ion 30: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=30, i2=14)
+    - MOVE   (62634 -> 62660)  ion 30: Seg1 -> Seg7 via J1
+    - MOVE   (62660 -> 62686)  ion 30: Seg7 -> Seg2 via J2
+    - MERGE  (62686 -> 62766)  ion 30: Seg2 -> T2
+[SHUTTLE 122] ion=26  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (63006 -> 63126)  ion 26: T2 -> Seg2 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=26, i2=30)
+    - MOVE   (63126 -> 63152)  ion 26: Seg2 -> Seg7 via J2
+    - MOVE   (63152 -> 63178)  ion 26: Seg7 -> Seg6 via J1
+    - MOVE   (63178 -> 63204)  ion 26: Seg6 -> Seg0 via J0
+    - MERGE  (63204 -> 63284)  ion 26: Seg0 -> T0
+[SHUTTLE 123] ion=27  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (63764 -> 63884)  ion 27: T3 -> Seg3 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=27, i2=18)
+    - MOVE   (63884 -> 63910)  ion 27: Seg3 -> Seg2 via J2
+    - MERGE  (63910 -> 63990)  ion 27: Seg2 -> T2
+[SHUTTLE 124] ion=28  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (64070 -> 64190)  ion 28: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=28, i2=27)
+    - MOVE   (64190 -> 64216)  ion 28: Seg2 -> Seg3 via J2
+    - MERGE  (64216 -> 64296)  ion 28: Seg3 -> T3
+[SHUTTLE 125] ion=31  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (64376 -> 64496)  ion 31: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=31, i2=14)
+    - MOVE   (64496 -> 64522)  ion 31: Seg1 -> Seg7 via J1
+    - MOVE   (64522 -> 64548)  ion 31: Seg7 -> Seg2 via J2
+    - MERGE  (64548 -> 64628)  ion 31: Seg2 -> T2
+[SHUTTLE 126] ion=27  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (64868 -> 64988)  ion 27: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=27, i2=31)
+    - MOVE   (64988 -> 65014)  ion 27: Seg2 -> Seg7 via J2
+    - MOVE   (65014 -> 65040)  ion 27: Seg7 -> Seg6 via J1
+    - MOVE   (65040 -> 65066)  ion 27: Seg6 -> Seg0 via J0
+    - MERGE  (65066 -> 65146)  ion 27: Seg0 -> T0
+[SHUTTLE 127] ion=28  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (65706 -> 65786)  ion 28: T3 -> Seg3 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (65786 -> 65812)  ion 28: Seg3 -> Seg2 via J2
+    - MERGE  (65812 -> 65892)  ion 28: Seg2 -> T2
+[SHUTTLE 128] ion=29  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (65972 -> 66092)  ion 29: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=29, i2=28)
+    - MOVE   (66092 -> 66118)  ion 29: Seg2 -> Seg3 via J2
+    - MERGE  (66118 -> 66198)  ion 29: Seg3 -> T3
+[SHUTTLE 129] ion=20  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (66278 -> 66398)  ion 20: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=20, i2=27)
+    - MOVE   (66398 -> 66424)  ion 20: Seg0 -> Seg6 via J0
+    - MOVE   (66424 -> 66450)  ion 20: Seg6 -> Seg7 via J1
+    - MOVE   (66450 -> 66476)  ion 20: Seg7 -> Seg2 via J2
+    - MERGE  (66476 -> 66556)  ion 20: Seg2 -> T2
+[SHUTTLE 130] ion=19  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (66636 -> 66756)  ion 19: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=19, i2=20)
+    - MOVE   (66756 -> 66782)  ion 19: Seg2 -> Seg3 via J2
+    - MERGE  (66782 -> 66862)  ion 19: Seg3 -> T3
+[SHUTTLE 131] ion=18  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (66942 -> 67062)  ion 18: T3 -> Seg3 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=18, i2=19)
+    - MOVE   (67062 -> 67088)  ion 18: Seg3 -> Seg2 via J2
+    - MERGE  (67088 -> 67168)  ion 18: Seg2 -> T2
+[SHUTTLE 132] ion=28  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (67328 -> 67448)  ion 28: T2 -> Seg2 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=28, i2=18)
+    - MOVE   (67448 -> 67474)  ion 28: Seg2 -> Seg7 via J2
+    - MOVE   (67474 -> 67500)  ion 28: Seg7 -> Seg6 via J1
+    - MOVE   (67500 -> 67526)  ion 28: Seg6 -> Seg0 via J0
+    - MERGE  (67526 -> 67606)  ion 28: Seg0 -> T0
+[SHUTTLE 133] ion=29  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (68166 -> 68286)  ion 29: T3 -> Seg3 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=29, i2=19)
+    - MOVE   (68286 -> 68312)  ion 29: Seg3 -> Seg2 via J2
+    - MERGE  (68312 -> 68392)  ion 29: Seg2 -> T2
+[SHUTTLE 134] ion=30  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (68472 -> 68592)  ion 30: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=30, i2=29)
+    - MOVE   (68592 -> 68618)  ion 30: Seg2 -> Seg3 via J2
+    - MERGE  (68618 -> 68698)  ion 30: Seg3 -> T3
+[SHUTTLE 135] ion=21  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (68778 -> 68898)  ion 21: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=21, i2=28)
+    - MOVE   (68898 -> 68924)  ion 21: Seg0 -> Seg6 via J0
+    - MOVE   (68924 -> 68950)  ion 21: Seg6 -> Seg7 via J1
+    - MOVE   (68950 -> 68976)  ion 21: Seg7 -> Seg2 via J2
+    - MERGE  (68976 -> 69056)  ion 21: Seg2 -> T2
+[SHUTTLE 136] ion=20  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (69136 -> 69256)  ion 20: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=20, i2=21)
+    - MOVE   (69256 -> 69282)  ion 20: Seg2 -> Seg3 via J2
+    - MERGE  (69282 -> 69362)  ion 20: Seg3 -> T3
+[SHUTTLE 137] ion=19  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (69442 -> 69562)  ion 19: T3 -> Seg3 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=19, i2=20)
+    - MOVE   (69562 -> 69588)  ion 19: Seg3 -> Seg2 via J2
+    - MERGE  (69588 -> 69668)  ion 19: Seg2 -> T2
+[SHUTTLE 138] ion=29  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (69748 -> 69868)  ion 29: T2 -> Seg2 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=29, i2=19)
+    - MOVE   (69868 -> 69894)  ion 29: Seg2 -> Seg7 via J2
+    - MOVE   (69894 -> 69920)  ion 29: Seg7 -> Seg6 via J1
+    - MOVE   (69920 -> 69946)  ion 29: Seg6 -> Seg0 via J0
+    - MERGE  (69946 -> 70026)  ion 29: Seg0 -> T0
+[SHUTTLE 139] ion=30  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (70586 -> 70706)  ion 30: T3 -> Seg3 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=30, i2=20)
+    - MOVE   (70706 -> 70732)  ion 30: Seg3 -> Seg2 via J2
+    - MERGE  (70732 -> 70812)  ion 30: Seg2 -> T2
+[SHUTTLE 140] ion=31  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (70892 -> 71012)  ion 31: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=31, i2=30)
+    - MOVE   (71012 -> 71038)  ion 31: Seg2 -> Seg3 via J2
+    - MERGE  (71038 -> 71118)  ion 31: Seg3 -> T3
+[SHUTTLE 141] ion=22  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (71198 -> 71318)  ion 22: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=22, i2=29)
+    - MOVE   (71318 -> 71344)  ion 22: Seg0 -> Seg6 via J0
+    - MOVE   (71344 -> 71370)  ion 22: Seg6 -> Seg7 via J1
+    - MOVE   (71370 -> 71396)  ion 22: Seg7 -> Seg2 via J2
+    - MERGE  (71396 -> 71476)  ion 22: Seg2 -> T2
+[SHUTTLE 142] ion=21  T2 -> T3  route=T2->J2->T3
+    - SPLIT  (71556 -> 71676)  ion 21: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=21, i2=22)
+    - MOVE   (71676 -> 71702)  ion 21: Seg2 -> Seg3 via J2
+    - MERGE  (71702 -> 71782)  ion 21: Seg3 -> T3
+[SHUTTLE 143] ion=30  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (71862 -> 71982)  ion 30: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=30, i2=22)
+    - MOVE   (71982 -> 72008)  ion 30: Seg2 -> Seg7 via J2
+    - MOVE   (72008 -> 72034)  ion 30: Seg7 -> Seg6 via J1
+    - MOVE   (72034 -> 72060)  ion 30: Seg6 -> Seg0 via J0
+    - MERGE  (72060 -> 72140)  ion 30: Seg0 -> T0
+[SHUTTLE 144] ion=31  T3 -> T2  route=T3->J2->T2
+    - SPLIT  (72700 -> 72820)  ion 31: T3 -> Seg3 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=31, i2=21)
+    - MOVE   (72820 -> 72846)  ion 31: Seg3 -> Seg2 via J2
+    - MERGE  (72846 -> 72926)  ion 31: Seg2 -> T2
+[SHUTTLE 145] ion=23  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (73006 -> 73126)  ion 23: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=23, i2=30)
+    - MOVE   (73126 -> 73152)  ion 23: Seg0 -> Seg6 via J0
+    - MOVE   (73152 -> 73178)  ion 23: Seg6 -> Seg7 via J1
+    - MOVE   (73178 -> 73204)  ion 23: Seg7 -> Seg2 via J2
+    - MERGE  (73204 -> 73284)  ion 23: Seg2 -> T2
+[SHUTTLE 146] ion=31  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (73364 -> 73484)  ion 31: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=31, i2=23)
+    - MOVE   (73484 -> 73510)  ion 31: Seg2 -> Seg7 via J2
+    - MOVE   (73510 -> 73536)  ion 31: Seg7 -> Seg6 via J1
+    - MOVE   (73536 -> 73562)  ion 31: Seg6 -> Seg0 via J0
+    - MERGE  (73562 -> 73642)  ion 31: Seg0 -> T0
+SplitSWAP: 142
+TotalShuttle: 147
+----------------
