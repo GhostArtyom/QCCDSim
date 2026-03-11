@@ -31,10 +31,18 @@ class Schedule:
         self.events = SortedCollection(key=itemgetter(3))  # sorted by finish time
         self.machine = machine
 
-    def add_gate(self, start_time, end_time, ions, trap_id):
+    def add_gate(self, start_time, end_time, ions, trap_id, gate_type=None, is_fiber=False, zone_type=None, gate_id=None):
         gate_dict = {}
         gate_dict["ions"] = ions
         gate_dict["trap"] = trap_id
+        if gate_type is not None:
+            gate_dict["gate_type"] = gate_type
+        if is_fiber:
+            gate_dict["is_fiber"] = True
+        if zone_type is not None:
+            gate_dict["zone_type"] = zone_type
+        if gate_id is not None:
+            gate_dict["gate_id"] = gate_id
         self.events.insert((self.event_id, Schedule.Gate, start_time, end_time, gate_dict))
         self.event_id += 1
 

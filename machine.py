@@ -32,9 +32,11 @@ class Trap:
         self.id = idx
         self.capacity = capacity
         self.ions = []  # （旧逻辑保留）可能用于一些调试/展示
-        # orientation: seg_id -> "L"/"R"
-        # 表示该 segment 连接到 trap 的左端或右端，用于 split 时判断链端离子
         self.orientation = {}
+        # MUSS-TI partition / zone metadata
+        self.qccd_id = 0
+        self.zone_type = "storage"
+        self.zone_level = 0
 
     def show(self):
         return "T" + str(self.id)
@@ -107,6 +109,8 @@ class MachineParams:
         # ===== gate/swap type flags =====
         self.gate_type = "PM"                  # "FM"/"PM"/"Duan"/"Trout"
         self.swap_type = "PaperSwapDirect"     # "PaperSwapDirect"/"GateSwap"/"IonSwap"
+        self.enable_partition = False
+        self.partition_strategy = "none"
 
 
 # =========================
@@ -175,6 +179,25 @@ class Machine:
 
         self.graph.add_edge(obj1, obj2, seg=new_seg)
         return new_seg
+
+
+    def set_trap_role(self, trap_id: int, qccd_id: int, zone_type: str, zone_level: int):
+        for tr in self.traps:
+            if tr.id == trap_id:
+                tr.qccd_id = int(qccd_id)
+                tr.zone_type = str(zone_type)
+                tr.zone_level = int(zone_level)
+                return tr
+        raise KeyError(f"trap {trap_id} not found")
+
+    def get_trap(self, trap_id: int):
+        for tr in self.traps:
+            if tr.id == trap_id:
+                return tr
+        raise KeyError(f"trap {trap_id} not found")
+
+    def traps_in_qccd(self, qccd_id: int):
+        return [tr for tr in self.traps if getattr(tr, "qccd_id", 0) == qccd_id]
 
     def get_segment_length_um(self, seg_id: int) -> float:
         """

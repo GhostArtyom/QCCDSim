@@ -384,7 +384,7 @@ class MUSSSchedule:
         用 trap-to-trap hop 距离做一个折扣累计。
         """
         score = 0
-        gamma = 0.7
+        gamma = 1.0
         weight = 1.0
         lookahead_depth = 8
         found_count = 0
@@ -425,7 +425,7 @@ class MUSSSchedule:
           - capacity 约束
         """
         m = self.machine
-        ALPHA = 0.8
+        ALPHA = 1
 
         if current_gate_idx is None:
             return ion1_trap, ion2_trap
@@ -698,48 +698,103 @@ class MUSSSchedule:
 
         return fin_time
 
+
+    def _gate_payload(self, gate):
+        data = self.gate_info.get(gate, None)
+        if data is None:
+            return None, [], "unknown"
+        if isinstance(data, dict):
+            return data, list(data.get("qubits", [])), data.get("type", "unknown")
+        return {"qubits": list(data), "type": "cx" if len(data) == 2 else "u"}, list(data), "cx" if len(data) == 2 else "u"
+
+    def _candidate_meeting_traps(self, trap_a, trap_b):
+        if not getattr(self.machine.mparams, "enable_partition", False):
+            return [trap_a, trap_b]
+        try:
+            ta = self.machine.get_trap(trap_a)
+            tb = self.machine.get_trap(trap_b)
+        except Exception:
+            return [trap_a, trap_b]
+        candidates = []
+        seen = set()
+        # same-QCCD case: prefer operation zone, then optical, then storage
+        qccds = []
+        if ta.qccd_id == tb.qccd_id:
+            qccds = [ta.qccd_id]
+        else:
+            qccds = [ta.qccd_id, tb.qccd_id]
+        order = {"operation": 0, "optical": 1, "storage": 2}
+        for qid in qccds:
+            traps = sorted(self.machine.traps_in_qccd(qid), key=lambda tr: (order.get(getattr(tr, "zone_type", "storage"), 9), self.machine.trap_distance(tr.id, trap_a) + self.machine.trap_distance(tr.id, trap_b), tr.id))
+            for tr in traps:
+                if tr.id not in seen:
+                    candidates.append(tr.id)
+                    seen.add(tr.id)
+        for tid in [trap_a, trap_b]:
+            if tid not in seen:
+                candidates.append(tid)
+        return candidates
+
+    def _choose_partition_target(self, ion1_trap, ion2_trap, ion1, ion2, current_gate_idx):
+        candidates = self._candidate_meeting_traps(ion1_trap, ion2_trap)
+        best = None
+        best_score = None
+        for target in candidates:
+            free_slots = self.machine.get_trap(target).capacity - len(self.sys_state.trap_ions[target])
+            if target not in (ion1_trap, ion2_trap) and free_slots < 2:
+                continue
+            if target == ion1_trap:
+                moving = ion2
+                score = self.machine.trap_distance(ion2_trap, target) + self.get_future_score(ion1, current_gate_idx, target) + self.get_future_score(ion2, current_gate_idx, target)
+            elif target == ion2_trap:
+                moving = ion1
+                score = self.machine.trap_distance(ion1_trap, target) + self.get_future_score(ion1, current_gate_idx, target) + self.get_future_score(ion2, current_gate_idx, target)
+            else:
+                # pick the cheaper ion to move into dedicated operation/optical zone
+                cost1 = self.machine.trap_distance(ion1_trap, target)
+                cost2 = self.machine.trap_distance(ion2_trap, target)
+                if cost1 <= cost2:
+                    moving = ion1
+                    score = cost1 + self.get_future_score(ion1, current_gate_idx, target) + self.get_future_score(ion2, current_gate_idx, target)
+                else:
+                    moving = ion2
+                    score = cost2 + self.get_future_score(ion1, current_gate_idx, target) + self.get_future_score(ion2, current_gate_idx, target)
+            if best_score is None or score < best_score:
+                best = (moving, target)
+                best_score = score
+        return best
+
     # ==========================================================
     # Gate scheduling：按 frontier 逐个 gate 执行（MUSS strict）
     # ==========================================================
     def schedule_gate(self, gate, specified_time=0, gate_idx=None):
         """
         调度一个 gate：
-          - 1Q gate：原地执行
+          - 1Q gate：原地执行并进入 schedule / analyzer
           - 2Q gate：
               * 同阱：原地执行
               * 异阱：先检查是否需要 rebalance，否则决定方向并 fire_shuttle，再 gate
         """
-        if gate not in self.gate_info:
+        gate_data, qubits, gate_type = self._gate_payload(gate)
+        if gate_data is None:
+            self.gate_finish_times[gate] = self.gate_ready_time(gate)
             return
 
-        gate_data = self.gate_info[gate]
-        qubits = gate_data if isinstance(gate_data, list) else gate_data["qubits"]
-
-        # 保护当前 gate 的离子，防止 rebalance 把它们搬走
         self.protected_ions = set(qubits)
-
         finish_time = 0
 
-        # -------- 1-qubit gate --------
         if len(qubits) == 1:
             ion1 = qubits[0]
             ready = self.gate_ready_time(gate)
             ion1_time, ion1_trap = self.ion_ready_info(ion1)
             fire_time = max(ready, ion1_time, specified_time)
-
-            duration = 5
-            if hasattr(self.machine, "single_qubit_gate_time"):
-                gtype = gate_data.get("type", "u3") if isinstance(gate_data, dict) else "u3"
-                duration = self.machine.single_qubit_gate_time(gtype)
-
-            self.schedule.add_gate(fire_time, fire_time + duration, [ion1], ion1_trap)
+            duration = self.machine.single_qubit_gate_time(gate_type)
+            zone_type = getattr(self.machine.get_trap(ion1_trap), "zone_type", None) if hasattr(self.machine, "get_trap") else None
+            self.schedule.add_gate(fire_time, fire_time + duration, [ion1], ion1_trap, gate_type=gate_type, zone_type=zone_type, gate_id=gate)
             self.gate_finish_times[gate] = fire_time + duration
             finish_time = fire_time + duration
-
-            # LRU update
             self.ion_last_used[ion1] = finish_time
 
-        # -------- 2-qubit gate --------
         elif len(qubits) == 2:
             ion1, ion2 = qubits[0], qubits[1]
             ready = self.gate_ready_time(gate)
@@ -748,48 +803,43 @@ class MUSSSchedule:
             fire_time = max(ready, ion1_time, ion2_time, specified_time)
 
             if ion1_trap == ion2_trap:
-                # 同阱直接执行
                 gate_duration = self.machine.gate_time(self.sys_state, ion1_trap, ion1, ion2)
-                self.schedule.add_gate(fire_time, fire_time + gate_duration, [ion1, ion2], ion1_trap)
+                zone_type = getattr(self.machine.get_trap(ion1_trap), "zone_type", None) if hasattr(self.machine, "get_trap") else None
+                self.schedule.add_gate(fire_time, fire_time + gate_duration, [ion1, ion2], ion1_trap, gate_type=gate_type, zone_type=zone_type, gate_id=gate)
                 self.gate_finish_times[gate] = fire_time + gate_duration
                 finish_time = fire_time + gate_duration
             else:
-                # 异阱：先 rebalance 再 shuttle
                 rebal_flag, new_fin_time = self.rebalance_traps(focus_traps=[ion1_trap, ion2_trap], fire_time=fire_time)
-
                 if not rebal_flag:
-                    # 决定移动哪一个离子到对方阱
-                    source_trap, dest_trap = self.shuttling_direction(
-                        ion1_trap, ion2_trap, ion1, ion2, gate_idx
-                    )
-                    moving_ion = ion1 if source_trap == ion1_trap else ion2
-
+                    meet_choice = self._choose_partition_target(ion1_trap, ion2_trap, ion1, ion2, gate_idx)
+                    if meet_choice is not None:
+                        moving_ion, dest_trap = meet_choice
+                        source_trap = ion1_trap if moving_ion == ion1 else ion2_trap
+                    else:
+                        source_trap, dest_trap = self.shuttling_direction(ion1_trap, ion2_trap, ion1, ion2, gate_idx)
+                        moving_ion = ion1 if source_trap == ion1_trap else ion2
                     clk = self.fire_shuttle(source_trap, dest_trap, moving_ion, fire_time)
-
                     gate_duration = self.machine.gate_time(self.sys_state, dest_trap, ion1, ion2)
-                    self.schedule.add_gate(clk, clk + gate_duration, [ion1, ion2], dest_trap)
+                    zone_type = getattr(self.machine.get_trap(dest_trap), "zone_type", None) if hasattr(self.machine, "get_trap") else None
+                    self.schedule.add_gate(clk, clk + gate_duration, [ion1, ion2], dest_trap, gate_type=gate_type, zone_type=zone_type, gate_id=gate)
                     self.gate_finish_times[gate] = clk + gate_duration
                     finish_time = clk + gate_duration
                 else:
-                    # 递归重试
                     self.protected_ions = set()
                     self.schedule_gate(gate, specified_time=new_fin_time, gate_idx=gate_idx)
                     return
 
-            # LRU update
             self.ion_last_used[ion1] = finish_time
             self.ion_last_used[ion2] = finish_time
 
-        # 清除保护
+        else:
+            self.gate_finish_times[gate] = self.gate_ready_time(gate)
+
         self.protected_ions = set()
 
     def is_executable_local(self, gate):
         """Helper：gate 是否无需移动即可执行（两比特在同一 trap）。"""
-        if gate not in self.gate_info:
-            return True
-        qubits = self.gate_info[gate]
-        if isinstance(qubits, dict):
-            qubits = qubits["qubits"]
+        _, qubits, _ = self._gate_payload(gate)
         if len(qubits) < 2:
             return True
         _, t1 = self.ion_ready_info(qubits[0])

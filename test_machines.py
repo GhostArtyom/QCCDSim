@@ -23,6 +23,39 @@ from machine import Machine, MachineParams
 # ISCA / MUSS-TI 论文常用测试拓扑
 # ─────────────────────────────────────────────────────────────
 
+
+def _tag_qccd_roles_2x2(m):
+    """Assign paper-aligned zone roles for a 2x2 logical QCCD tile.
+    Trap ids: 0/2 storage, 1 operation, 3 optical.
+    """
+    roles = {
+        0: (0, "storage", 0),
+        1: (0, "operation", 1),
+        2: (0, "storage", 0),
+        3: (0, "optical", 2),
+    }
+    for tid, (qid, zt, zl) in roles.items():
+        m.set_trap_role(tid, qid, zt, zl)
+    return m
+
+
+def _tag_qccd_roles_2x3(m):
+    """Assign paper-aligned zone roles for a 2x3 small-grid proxy.
+    Uses one operation zone, one optical zone, and four storage zones.
+    """
+    roles = {
+        0: (0, "storage", 0),
+        1: (0, "operation", 1),
+        2: (0, "storage", 0),
+        3: (0, "storage", 0),
+        4: (0, "optical", 2),
+        5: (0, "storage", 0),
+    }
+    for tid, (qid, zt, zl) in roles.items():
+        m.set_trap_role(tid, qid, zt, zl)
+    return m
+
+
 def test_trap_2x3(capacity, mparams):
     """
     2x3 网格：6 个 Trap + 3 个 Junction
@@ -47,7 +80,7 @@ def test_trap_2x3(capacity, mparams):
     m.add_segment(6, j[0], j[1])
     m.add_segment(7, j[1], j[2])
 
-    return m
+    return _tag_qccd_roles_2x3(m) if getattr(mparams, "enable_partition", False) else m
 
 
 def test_trap_2x2(capacity, mparams):
@@ -75,7 +108,7 @@ def test_trap_2x2(capacity, mparams):
     # Spine (J0 <-> J1)
     m.add_segment(4, j[0], j[1])
 
-    return m
+    return _tag_qccd_roles_2x2(m) if getattr(mparams, "enable_partition", False) else m
 
 
 def make_linear_machine(zones, capacity, mparams):

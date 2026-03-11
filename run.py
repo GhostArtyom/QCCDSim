@@ -12,8 +12,14 @@ from qiskit.visualization import dag_drawer
 
 # 导入三个版本的 MUSS 调度器
 from muss_schedule2 import MUSSSchedule as MUSSScheduleV2   # 论文版本调度
-from muss_schedule3 import MUSSSchedule as MUSSScheduleV3   # 创新版本调度
-from muss_schedule4 import MUSSSchedule as MUSSScheduleV4   # 创新版本 + 降低加热版本
+try:
+    from muss_schedule3 import MUSSSchedule as MUSSScheduleV3
+except Exception:
+    MUSSScheduleV3 = None
+try:
+    from muss_schedule4 import MUSSSchedule as MUSSScheduleV4
+except Exception:
+    MUSSScheduleV4 = None
 
 np.random.seed(12345)
 
@@ -97,6 +103,7 @@ mpar.move_speed_um_per_us = 2.0       # Table 1: Move speed 2 μm/us
 mpar.segment_length_um = 45.0         # 默认段长；后续可按机器类型再调
 mpar.inter_ion_spacing_um = 1.0       # gate_time 距离项使用
 mpar.alpha_bg = 0.0                   # 论文对准时通常先关掉背景 Bi
+mpar.enable_partition = True          # 小规模 faithful 复现建议开启 zone 标签
 
 # ---- Analyzer 会读到的物理参数（兼容保留）----
 mpar.T1 = 600e6                       # us
@@ -230,19 +237,19 @@ if sched_family in ["MUSS", "MUSS-TI", "MUSS_TI_MODE"]:
     if sched_version in ["V2", "2", "MUSS_SCHEDULE2", "PAPER"]:
         print("→ muss_schedule2.py old_vision")
         scheduler = MUSSScheduleV2(
-            ip.gate_graph, ip.cx_gate_map, m, init_qubit_layout,
+            ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     elif sched_version in ["V3", "3", "MUSS_SCHEDULE3", "INNOV"]:
         print("→ muss_schedule3.py new_vision")
         scheduler = MUSSScheduleV3(
-            ip.gate_graph, ip.cx_gate_map, m, init_qubit_layout,
+            ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     elif sched_version in ["V4", "4", "MUSS_SCHEDULE4", "INNOV2"]:
         print("→ muss_schedule4.py new_vision")
         scheduler = MUSSScheduleV4(
-            ip.gate_graph, ip.cx_gate_map, m, init_qubit_layout,
+            ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     else:
@@ -282,7 +289,7 @@ knobs = AnalyzerKnobs(
     gate_env_time_mode="duration",
     gate_use_env=False, 
     gate_use_bg=True,
-    shuttle_fidelity_mode="aggregate",
+    shuttle_fidelity_mode=("aggregate" if use_aggregate else "per_event"),
     merge_equalize=True,
     debug_events=False,
     debug_summary=True,
