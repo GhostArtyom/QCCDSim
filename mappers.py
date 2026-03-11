@@ -1696,3 +1696,352 @@ class QubitMapSABRE7:
 
         # 直接返回超载的 Map
         return best_mapping
+
+#严格实现sabre版本。
+class QubitMapSABRE8:
+    """
+    MUSS-TI paper-style SABRE initial mapper, implemented with true SABRE principles.
+
+    Key properties:
+      1. Build a 2Q-only DAG for mapping
+      2. Start from trivial mapping
+      3. Forward pass on original 2Q DAG
+      4. Backward pass on reversed 2Q DAG
+      5. Return the final layout after backward pass
+
+    Inside each pass:
+      - Execute all currently local/executable 2Q gates first
+      - If none executable, choose one relocation action using SABRE-style heuristic:
+            H = avg(front_layer_distance) + W * avg(extended_set_distance)
+      - Respect trap capacity strictly
+      - Resolve full-target conflict by LRU replacement
+    """
+
+    def __init__(self, parse_obj, machine_obj, excess_capacity=0,
+                 extended_set_size=20, extended_weight=0.5):
+        self.parse_obj = parse_obj
+        self.machine_obj = machine_obj
+        self.excess_capacity = excess_capacity
+        self.extended_set_size = extended_set_size
+        self.extended_weight = extended_weight
+
+        if not hasattr(self.machine_obj, "dist_cache") or not self.machine_obj.dist_cache:
+            self.machine_obj.precompute_distances()
+
+    # -----------------------------
+    # Basic helpers
+    # -----------------------------
+    def _effective_capacity(self, trap_id):
+        return self.machine_obj.traps[trap_id].capacity - self.excess_capacity
+
+    def _all_trap_ids(self):
+        return list(range(len(self.machine_obj.traps)))
+
+    def _trap_distance(self, t1, t2):
+        if t1 == t2:
+            return 0
+        return self.machine_obj.dist_cache.get((t1, t2), float("inf"))
+
+    def _gate_qubits(self, gate_id):
+        return tuple(self.parse_obj.cx_gate_map[gate_id])
+
+    def _is_two_qubit_gate(self, gate_id):
+        return gate_id in self.parse_obj.cx_gate_map
+
+    def _load_layout(self, mapping):
+        loads = {t: 0 for t in self._all_trap_ids()}
+        trap_to_qubits = {t: [] for t in self._all_trap_ids()}
+        for q, t in mapping.items():
+            loads[t] += 1
+            trap_to_qubits[t].append(q)
+        return loads, trap_to_qubits
+
+    def _build_two_qubit_dag(self):
+        """
+        Build a 2Q-only DAG by taking the induced subgraph of gate_graph on cx_gate_map keys.
+        """
+        dag = self.parse_obj.gate_graph.subgraph(list(self.parse_obj.cx_gate_map.keys())).copy()
+        if not nx.is_directed_acyclic_graph(dag):
+            raise ValueError("2Q induced gate graph is not a DAG.")
+        return dag
+
+    def _build_reversed_two_qubit_dag(self, dag_2q):
+        """
+        True reversed DAG, not just reversed topo list.
+        """
+        rev = dag_2q.reverse(copy=True)
+        if not nx.is_directed_acyclic_graph(rev):
+            raise ValueError("Reversed 2Q DAG is not a DAG.")
+        return rev
+
+    def _trivial_seed_mapping(self):
+        """
+        Paper-style seed entry point.
+        Reuse current trivial mapper interface.
+        """
+        trivial_mapper = QubitMapTrivial(self.parse_obj, self.machine_obj, self.excess_capacity)
+        return trivial_mapper.compute_mapping()
+
+    # -----------------------------
+    # SABRE scoring
+    # -----------------------------
+    def _gate_distance_under_layout(self, gate_id, layout):
+        q1, q2 = self._gate_qubits(gate_id)
+        t1 = layout[q1]
+        t2 = layout[q2]
+        return self._trap_distance(t1, t2)
+
+    def _front_layer(self, dag, indegree_map, done_set):
+        """
+        Nodes with indegree 0 and not yet executed.
+        """
+        out = []
+        for g in dag.nodes:
+            if g not in done_set and indegree_map[g] == 0:
+                out.append(g)
+        return out
+
+    def _extended_set(self, dag, front, done_set, indegree_map):
+        """
+        Collect a bounded look-ahead set behind the front layer, using BFS over successors.
+        """
+        ext = []
+        seen = set(front)
+        queue = list(front)
+
+        while queue and len(ext) < self.extended_set_size:
+            cur = queue.pop(0)
+            for succ in dag.successors(cur):
+                if succ in seen or succ in done_set:
+                    continue
+                seen.add(succ)
+                ext.append(succ)
+                queue.append(succ)
+                if len(ext) >= self.extended_set_size:
+                    break
+        return ext
+
+    def _heuristic_cost(self, layout, front, ext):
+        """
+        SABRE-style heuristic:
+            H = average distance(front) + W * average distance(ext)
+        """
+        if not front:
+            return 0.0
+
+        front_cost = 0.0
+        for g in front:
+            front_cost += self._gate_distance_under_layout(g, layout)
+        front_cost /= float(len(front))
+
+        if not ext:
+            return front_cost
+
+        ext_cost = 0.0
+        for g in ext:
+            ext_cost += self._gate_distance_under_layout(g, layout)
+        ext_cost /= float(len(ext))
+
+        return front_cost + self.extended_weight * ext_cost
+
+    # -----------------------------
+    # LRU-based relocation
+    # -----------------------------
+    def _select_lru_victim(self, target_trap, trap_to_qubits, last_used, forbidden=None):
+        """
+        Pick the least recently used qubit in target_trap, excluding any forbidden qubits.
+        """
+        if forbidden is None:
+            forbidden = set()
+        candidates = [q for q in trap_to_qubits[target_trap] if q not in forbidden]
+        if not candidates:
+            return None
+        return min(candidates, key=lambda q: last_used.get(q, -1))
+
+    def _apply_relocation(self, layout, loads, trap_to_qubits, last_used,
+                          moving_qubit, target_trap, partner_qubit=None):
+        """
+        Relocate moving_qubit to target_trap while respecting strict capacity.
+
+        If target_trap has room:
+            move directly.
+
+        If target_trap is full:
+            evict one LRU victim from target_trap to the source_trap of moving_qubit.
+            This is capacity-safe because moving_qubit leaves source_trap first.
+
+        Returns:
+            new_layout, new_loads, new_trap_to_qubits
+        """
+        new_layout = dict(layout)
+        new_loads = dict(loads)
+        new_trap_to_qubits = {t: list(qs) for t, qs in trap_to_qubits.items()}
+
+        src_trap = new_layout[moving_qubit]
+        if src_trap == target_trap:
+            return new_layout, new_loads, new_trap_to_qubits
+
+        # direct move if space exists
+        if new_loads[target_trap] < self._effective_capacity(target_trap):
+            new_trap_to_qubits[src_trap].remove(moving_qubit)
+            new_trap_to_qubits[target_trap].append(moving_qubit)
+            new_loads[src_trap] -= 1
+            new_loads[target_trap] += 1
+            new_layout[moving_qubit] = target_trap
+            return new_layout, new_loads, new_trap_to_qubits
+
+        # full target -> LRU replacement
+        forbidden = {partner_qubit} if partner_qubit is not None else set()
+        victim = self._select_lru_victim(target_trap, new_trap_to_qubits, last_used, forbidden=forbidden)
+        if victim is None:
+            # if partner is the only qubit or all are forbidden, relocation is impossible
+            return None, None, None
+
+        # Step 1: victim target_trap -> src_trap
+        new_trap_to_qubits[target_trap].remove(victim)
+        new_trap_to_qubits[src_trap].append(victim)
+        new_layout[victim] = src_trap
+
+        # Step 2: moving_qubit src_trap -> target_trap
+        new_trap_to_qubits[src_trap].remove(moving_qubit)
+        new_trap_to_qubits[target_trap].append(moving_qubit)
+        new_layout[moving_qubit] = target_trap
+
+        # loads unchanged overall under replacement
+        return new_layout, new_loads, new_trap_to_qubits
+
+    def _generate_candidate_actions(self, front, layout, loads, trap_to_qubits, last_used):
+        """
+        Generate SABRE candidate actions from the front layer.
+
+        For every non-local front gate (q1,q2), generate:
+            - move q1 to trap(q2)
+            - move q2 to trap(q1)
+
+        Each candidate is materialized as a resulting temporary layout.
+        """
+        candidates = []
+
+        for g in front:
+            q1, q2 = self._gate_qubits(g)
+            t1 = layout[q1]
+            t2 = layout[q2]
+            if t1 == t2:
+                continue
+
+            # candidate: move q1 -> t2
+            cand_layout, cand_loads, cand_trap_to_qubits = self._apply_relocation(
+                layout, loads, trap_to_qubits, last_used,
+                moving_qubit=q1, target_trap=t2, partner_qubit=q2
+            )
+            if cand_layout is not None:
+                candidates.append((g, q1, t2, cand_layout, cand_loads, cand_trap_to_qubits))
+
+            # candidate: move q2 -> t1
+            cand_layout, cand_loads, cand_trap_to_qubits = self._apply_relocation(
+                layout, loads, trap_to_qubits, last_used,
+                moving_qubit=q2, target_trap=t1, partner_qubit=q1
+            )
+            if cand_layout is not None:
+                candidates.append((g, q2, t1, cand_layout, cand_loads, cand_trap_to_qubits))
+
+        return candidates
+
+    # -----------------------------
+    # Pass execution
+    # -----------------------------
+    def _simulate_pass(self, dag, initial_mapping):
+        """
+        True SABRE-style pass:
+          - maintain front layer from DAG
+          - execute all local gates immediately
+          - otherwise choose one best relocation by SABRE heuristic
+          - continue until DAG exhausted
+
+        Returns the final layout after this pass.
+        """
+        layout = dict(initial_mapping)
+        loads, trap_to_qubits = self._load_layout(layout)
+
+        indegree_map = {g: dag.in_degree(g) for g in dag.nodes}
+        done_set = set()
+
+        # initialize LRU timestamps for all qubits in layout
+        last_used = {q: -1 for q in layout.keys()}
+        timestamp = 0
+
+        while len(done_set) < dag.number_of_nodes():
+            front = self._front_layer(dag, indegree_map, done_set)
+
+            # 1) execute all currently local gates
+            executable = []
+            for g in front:
+                q1, q2 = self._gate_qubits(g)
+                if layout[q1] == layout[q2]:
+                    executable.append(g)
+
+            if executable:
+                # execute all local gates in current front
+                for g in executable:
+                    q1, q2 = self._gate_qubits(g)
+                    timestamp += 1
+                    last_used[q1] = timestamp
+                    last_used[q2] = timestamp
+
+                    done_set.add(g)
+                    for succ in dag.successors(g):
+                        indegree_map[succ] -= 1
+                continue
+
+            # 2) no executable gate -> choose best SABRE relocation
+            ext = self._extended_set(dag, front, done_set, indegree_map)
+            candidates = self._generate_candidate_actions(front, layout, loads, trap_to_qubits, last_used)
+
+            if not candidates:
+                raise RuntimeError("SABRE2: no executable gate and no valid relocation candidate.")
+
+            best_score = float("inf")
+            best_payload = None
+
+            for (_gate_id, moving_q, target_t, cand_layout, cand_loads, cand_trap_to_qubits) in candidates:
+                score = self._heuristic_cost(cand_layout, front, ext)
+
+                # deterministic tie-break:
+                # 1. smaller score
+                # 2. smaller moving qubit id
+                # 3. smaller target trap id
+                key = (score, moving_q, target_t)
+
+                if best_payload is None:
+                    best_score = score
+                    best_payload = (_gate_id, moving_q, target_t, cand_layout, cand_loads, cand_trap_to_qubits, key)
+                else:
+                    if key < best_payload[-1]:
+                        best_score = score
+                        best_payload = (_gate_id, moving_q, target_t, cand_layout, cand_loads, cand_trap_to_qubits, key)
+
+            _, moved_q, _, layout, loads, trap_to_qubits, _ = best_payload
+            timestamp += 1
+            last_used[moved_q] = timestamp
+
+        return layout
+
+    # -----------------------------
+    # Public API
+    # -----------------------------
+    def compute_mapping(self):
+        """
+        Paper-style:
+          1. trivial seed π
+          2. forward pass on G -> π'
+          3. backward pass on reversed G -> π''
+          4. return π''
+        """
+        dag_2q = self._build_two_qubit_dag()
+        dag_2q_rev = self._build_reversed_two_qubit_dag(dag_2q)
+
+        seed_mapping = self._trivial_seed_mapping()
+        mapping_after_forward = self._simulate_pass(dag_2q, seed_mapping)
+        mapping_after_backward = self._simulate_pass(dag_2q_rev, mapping_after_forward)
+
+        return mapping_after_backward

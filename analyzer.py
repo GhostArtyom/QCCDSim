@@ -20,7 +20,7 @@ class AnalyzerKnobs:
     def __init__(
         self,
         bg_model: str = "exp",
-        alpha_bg: float = 0.001,
+        alpha_bg: float = 0.005,
         inject_norm: str = "none",
         swap_norm: str = "none",
         move_heat_use_distance: bool = True,

@@ -103,7 +103,7 @@ mpar.move_speed_um_per_us = 2.0       # Table 1: Move speed 2 μm/us
 # ---- 这些是实现/拟合相关参数 ----
 mpar.segment_length_um = 28.0         # 默认段长；后续可按机器类型再调
 mpar.inter_ion_spacing_um = 1.0       # gate_time 距离项使用
-mpar.alpha_bg = 0.0                   # 论文对准时通常先关掉背景 Bi
+mpar.alpha_bg = 0.0                 # 论文对准时通常先关掉背景 Bi
 mpar.enable_partition = True          # 小规模 faithful 复现建议开启 zone 标签
 
 # ---- Analyzer 会读到的物理参数（兼容保留）----
@@ -190,8 +190,8 @@ elif mapper_choice == "SABRE":
     # 根据调度器版本选择对应 SABRE 变体
     if sched_family in ["MUSS", "MUSS-TI", "MUSS_TI_MODE"]:
         if sched_version in ["V2", "2", "MUSS_SCHEDULE2", "PAPER"]:
-            print("→ Using SABRE2 mapper (matches muss_schedule2 paper version)")
-            qm = QubitMapSABRE2(ip, m)
+            print("→ Using SABRE8 mapper (matches muss_schedule2 paper version)")
+            qm = QubitMapSABRE8(ip, m)
         elif sched_version in ["V3", "3", "MUSS_SCHEDULE3", "INNOV"]:
             print("→ Using SABRE6 mapper (matches muss_schedule3 improved version)")
             qm = QubitMapSABRE3(ip, m)
