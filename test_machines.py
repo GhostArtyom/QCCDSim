@@ -19,12 +19,22 @@
 from machine import Machine, MachineParams
 
 
+def _is_large_arch(mparams):
+    return str(getattr(mparams, "architecture_scale", "small")).lower() == "large"
+
+
+def _is_small_arch(mparams):
+    return not _is_large_arch(mparams)
+
+
 # ─────────────────────────────────────────────────────────────
 # ISCA / MUSS-TI 论文常用测试拓扑
 # ─────────────────────────────────────────────────────────────
 
 
 def _tag_qccd_roles_2x2(m):
+    if _is_small_arch(m.mparams):
+        return m
     """Assign paper-aligned zone roles for a 2x2 logical QCCD tile.
     Trap ids: 0/2 storage, 1 operation, 3 optical.
     """
@@ -40,6 +50,8 @@ def _tag_qccd_roles_2x2(m):
 
 
 def _tag_qccd_roles_2x3(m):
+    if _is_small_arch(m.mparams):
+        return m
     """Assign paper-aligned zone roles for a 2x3 small-grid proxy.
     Uses one operation zone, one optical zone, and four storage zones.
     """
@@ -80,7 +92,7 @@ def test_trap_2x3(capacity, mparams):
     m.add_segment(6, j[0], j[1])
     m.add_segment(7, j[1], j[2])
 
-    return _tag_qccd_roles_2x3(m) if getattr(mparams, "enable_partition", False) else m
+    return _tag_qccd_roles_2x3(m) if _is_large_arch(mparams) else m
 
 
 def test_trap_2x2(capacity, mparams):
@@ -108,7 +120,7 @@ def test_trap_2x2(capacity, mparams):
     # Spine (J0 <-> J1)
     m.add_segment(4, j[0], j[1])
 
-    return _tag_qccd_roles_2x2(m) if getattr(mparams, "enable_partition", False) else m
+    return _tag_qccd_roles_2x2(m) if _is_large_arch(mparams) else m
 
 
 def make_linear_machine(zones, capacity, mparams):

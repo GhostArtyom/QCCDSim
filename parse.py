@@ -1,10 +1,12 @@
 """
-Parser for an extremely simplified version of OpenQASM
-Extracts only two-qubit gates
-Creates two objects:
-    cx_graph: a network graph which has two qubit gates as nodes and edges denote among between the gates
-              each cx gate in the program has a unique id (tracked using global_gate_id)
-    cx_gate_map: gate id of a cx gate -> [ctrl_qubit, target_qubit]
+Parser for a simplified OpenQASM subset used by the QCCD / MUSS experiments.
+
+Design goals for the paper-faithful flow:
+1) Preserve the full gate dependency DAG (1Q + 2Q) for timing / fidelity replay.
+2) Build an explicit 2Q-only DAG for MUSS scheduling and SABRE2 mapping.
+3) Keep every gate's metadata in all_gate_map:
+      gate_id -> {"type": <str>, "qubits": [..]}
+4) Keep the original cx interaction graph for legacy mappers / reorderers.
 """
 
 import sys
@@ -20,45 +22,47 @@ class InputParse:
         self.cx_graph = nx.Graph()
         self.cx_graph.graph["edge_weight_attr"] = "weight"
         self.cx_graph.graph["node_weight_attr"] = "node_weight"
+
         self.edge_weights = {}
         self.prev_gate = {}
         self.global_gate_id = 0
+
         self.cx_gate_map = {}
+        self.oneq_gate_map = {}
+        self.all_gate_map = {}
+
         self.gate_graph = nx.DiGraph()
+        self.twoq_gate_graph = nx.DiGraph()
+
         self.gset = []
         self.gset.extend(gset1)
         self.gset.extend(gset2)
         self.gset.extend(gset3)
+
         self.qbit_count = 0
-        # make note of every two qubit gate's global gate id
-        # even so, how will the mapper know the ids of the gates it receives from
-        # InputParse?
         self.two_qubit_gate_list = []
-        self.all_gate_map = {}
+        self.one_qubit_gate_list = []
 
     def find_dep_gate(self, qbit):
-        if qbit in self.prev_gate.keys():
+        if qbit in self.prev_gate:
             return [self.prev_gate[qbit]]
-        else:
-            return []
+        return []
 
     def update_dep_gate(self, qbit, gate_id):
         self.prev_gate[qbit] = gate_id
 
     def check_valid_gate(self, line):
-        flag = 0
         for g in self.gset:
             if line.startswith(g):
-                flag = 1
-                break
-        return flag
+                return 1
+        return 0
 
     def add_edge_pair(self, q1, q2):
         c = min(q1, q2)
         t = max(q1, q2)
-        if not c in self.edge_weights.keys():
+        if c not in self.edge_weights:
             self.edge_weights[c] = {}
-        if not t in self.edge_weights[c].keys():
+        if t not in self.edge_weights[c]:
             self.edge_weights[c][t] = 0
         self.edge_weights[c][t] += 1
         self.cx_graph.add_edge(c, t)
@@ -67,92 +71,112 @@ class InputParse:
         self.cx_graph.nodes[t]["node_weight"] = 1
 
     def process_gate(self, line):
-        # --- 处理单比特门 (Group 1: x, y, z, h, s, sdg, t, tdg, measure) ---
         for g in gset1:
             if line.startswith(g):
                 qbit = int(line.split("[")[1].split("]")[0])
                 if not self.check_valid_qbit(qbit):
                     sys.exit("qbit " + str(qbit) + " not in range")
 
+                gate_id = self.global_gate_id
                 dep_gates = self.find_dep_gate(qbit)
-                self.update_dep_gate(qbit, self.global_gate_id)
+
+                self.gate_graph.add_node(gate_id)
                 for dgate in dep_gates:
-                    print("qbit " + str(qbit) + " dep gates: " + str(dgate))
-                    self.gate_graph.add_edge(dgate, self.global_gate_id)
+                    self.gate_graph.add_edge(dgate, gate_id)
 
-                # === 新增：记录单比特门信息 ===
-                self.all_gate_map[self.global_gate_id] = {"type": g, "qubits": [qbit]}
+                self.oneq_gate_map[gate_id] = [qbit]
+                self.all_gate_map[gate_id] = {"type": g, "qubits": [qbit]}
+                self.one_qubit_gate_list.append(gate_id)
 
+                self.update_dep_gate(qbit, gate_id)
                 self.global_gate_id += 1
-                return  # 找到并处理后直接返回，避免多次匹配
+                return
 
-        # --- 处理带参数的单比特门 (Group 2: rx, ry, rz) ---
         for g in gset2:
             if line.startswith(g):
                 qbit = int(line.split("[")[1].split("]")[0])
                 if not self.check_valid_qbit(qbit):
                     sys.exit("qbit " + str(qbit) + " not in range")
-                # theta = float(line.split('(')[1].split(')')[0])
 
+                gate_id = self.global_gate_id
                 dep_gates = self.find_dep_gate(qbit)
-                self.update_dep_gate(qbit, self.global_gate_id)
+
+                self.gate_graph.add_node(gate_id)
                 for dgate in dep_gates:
-                    print("qbit " + str(qbit) + " dep gates: " + str(dgate))
-                    self.gate_graph.add_edge(dgate, self.global_gate_id)
+                    self.gate_graph.add_edge(dgate, gate_id)
 
-                # === 新增：记录带参数单比特门信息 ===
-                self.all_gate_map[self.global_gate_id] = {"type": g, "qubits": [qbit]}
+                self.oneq_gate_map[gate_id] = [qbit]
+                self.all_gate_map[gate_id] = {"type": g, "qubits": [qbit]}
+                self.one_qubit_gate_list.append(gate_id)
 
+                self.update_dep_gate(qbit, gate_id)
                 self.global_gate_id += 1
                 return
 
-        # --- 处理双比特门 (Group 3: cx) ---
         for g in gset3:
             if line.startswith(g):
                 base = "".join(line.split()).split(",")
                 qbit1 = int(base[0].split("[")[1].split("]")[0])
                 qbit2 = int(base[1].split("[")[1].split("]")[0])
+
+                if not self.check_valid_qbit(qbit1):
+                    sys.exit("qbit " + str(qbit1) + " not in range")
+                if not self.check_valid_qbit(qbit2):
+                    sys.exit("qbit " + str(qbit2) + " not in range")
+
+                gate_id = self.global_gate_id
                 self.add_edge_pair(qbit1, qbit2)
-                dep_gates1 = self.find_dep_gate(qbit1)
-                dep_gates2 = self.find_dep_gate(qbit2)
-                dep_gates1.extend(dep_gates2)
-                self.update_dep_gate(qbit1, self.global_gate_id)
-                self.update_dep_gate(qbit2, self.global_gate_id)
 
-                self.cx_gate_map[self.global_gate_id] = [qbit1, qbit2]
+                dep_gates = []
+                dep_gates.extend(self.find_dep_gate(qbit1))
+                dep_gates.extend(self.find_dep_gate(qbit2))
+                dep_gates = list(dict.fromkeys(dep_gates))
 
-                # === 新增：记录双比特门信息 ===
-                self.all_gate_map[self.global_gate_id] = {"type": g, "qubits": [qbit1, qbit2]}
+                self.gate_graph.add_node(gate_id)
+                self.twoq_gate_graph.add_node(gate_id)
+                for dgate in dep_gates:
+                    self.gate_graph.add_edge(dgate, gate_id)
+                    if dgate in self.cx_gate_map:
+                        self.twoq_gate_graph.add_edge(dgate, gate_id)
 
-                for dgate in dep_gates1:
-                    print("qbit 1: " + str(qbit1) + " qbit 2: " + str(qbit2) + " dep gates: " + str(dgate))
-                    self.gate_graph.add_edge(dgate, self.global_gate_id)
+                self.cx_gate_map[gate_id] = [qbit1, qbit2]
+                self.all_gate_map[gate_id] = {"type": g, "qubits": [qbit1, qbit2]}
+                self.two_qubit_gate_list.append(gate_id)
+
+                self.update_dep_gate(qbit1, gate_id)
+                self.update_dep_gate(qbit2, gate_id)
                 self.global_gate_id += 1
                 return
 
     def parse_ir(self, fname):
-        f = open(fname, "r")
-        l = f.readlines()
-        for line in l:
-            line = " ".join(line.split())
-            if line.startswith("OPENQASM"):
-                continue
-            elif line.startswith("include"):
-                continue
-            elif line.startswith("qreg"):
-                self.qbit_count = int(line.split("[")[1].split("]")[0])
-            elif line.startswith("creg"):
-                continue
-            else:
-                if self.check_valid_gate(line):
-                    self.process_gate(line)
+        with open(fname, "r") as f:
+            for raw_line in f.readlines():
+                line = " ".join(raw_line.split())
+                if not line:
+                    continue
+                if line.startswith("OPENQASM"):
+                    continue
+                elif line.startswith("include"):
+                    continue
+                elif line.startswith("qreg"):
+                    self.qbit_count = int(line.split("[")[1].split("]")[0])
+                elif line.startswith("creg"):
+                    continue
+                else:
+                    if self.check_valid_gate(line):
+                        self.process_gate(line)
+
+        if not nx.is_directed_acyclic_graph(self.gate_graph):
+            raise ValueError("Full gate dependency graph is not a DAG.")
+        if not nx.is_directed_acyclic_graph(self.twoq_gate_graph):
+            raise ValueError("2Q-only gate dependency graph is not a DAG.")
 
     def print_gates(self):
         for edge in self.gate_graph.edges:
             print(edge)
 
     def get_ir(self):
-        return self.cx_gate_map, self.gate_graph
+        return self.cx_gate_map, self.twoq_gate_graph
 
     def visualize_graph(self, fname):
         nx.write_gexf(self.cx_graph, fname)

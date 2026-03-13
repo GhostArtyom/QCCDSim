@@ -84,6 +84,7 @@ swap_type = sys.argv[10]             # PaperSwapDirect / GateSwap / IonSwap
 sched_family = get_arg(11, "MUSS").upper()
 sched_version = get_arg(12, "V2").upper()   # 不锁死 V2，保留你原来的默认习惯
 analyzer_mode = get_arg(13, "PAPER").upper()
+architecture_scale = get_arg(14, None)
 
 
 # ============================================================
@@ -104,7 +105,8 @@ mpar.move_speed_um_per_us = 2.0       # Table 1: Move speed 2 μm/us
 mpar.segment_length_um = 28.0         # 默认段长；后续可按机器类型再调
 mpar.inter_ion_spacing_um = 1.0       # gate_time 距离项使用
 mpar.alpha_bg = 0.0                 # 论文对准时通常先关掉背景 Bi
-mpar.enable_partition = True          # 小规模 faithful 复现建议开启 zone 标签
+mpar.architecture_scale = "small"
+mpar.enable_partition = False         # small: no partition, all traps can execute 2Q
 
 # ---- Analyzer 会读到的物理参数（兼容保留）----
 mpar.T1 = 600e6                       # us
@@ -117,6 +119,27 @@ mpar.swap_type = swap_type
 
 machine_model = "MUSS_Params"
 
+
+# ============================================================
+# Architecture scale: explicit small / large switch
+# ============================================================
+if architecture_scale is None:
+    if machine_type in ["G2x2", "G2x3"]:
+        architecture_scale = "SMALL"
+    else:
+        architecture_scale = "LARGE"
+architecture_scale = architecture_scale.upper()
+
+if architecture_scale in ["SMALL", "S", "TABLE2"]:
+    mpar.architecture_scale = "small"
+    mpar.enable_partition = False
+elif architecture_scale in ["LARGE", "L", "EML", "EML-QCCD"]:
+    mpar.architecture_scale = "large"
+    mpar.enable_partition = True
+else:
+    print(f"Warning: unknown architecture_scale '{architecture_scale}', fallback SMALL")
+    mpar.architecture_scale = "small"
+    mpar.enable_partition = False
 
 # ============================================================
 # 打印基本信息
@@ -136,6 +159,7 @@ print("SwapType:         ", swap_type)
 print("Scheduler Family: ", sched_family)
 print("Scheduler Version:", sched_version)
 print("Analyzer Mode:    ", analyzer_mode)
+print("Arch Scale:       ", architecture_scale)
 
 
 # ============================================================
@@ -190,8 +214,8 @@ elif mapper_choice == "SABRE":
     # 根据调度器版本选择对应 SABRE 变体
     if sched_family in ["MUSS", "MUSS-TI", "MUSS_TI_MODE"]:
         if sched_version in ["V2", "2", "MUSS_SCHEDULE2", "PAPER"]:
-            print("→ Using SABRE8 mapper (matches muss_schedule2 paper version)")
-            qm = QubitMapSABRE8(ip, m)
+            print("→ Using SABRE2 mapper (matches muss_schedule2 paper version)")
+            qm = QubitMapSABRE2(ip, m)
         elif sched_version in ["V3", "3", "MUSS_SCHEDULE3", "INNOV"]:
             print("→ Using SABRE6 mapper (matches muss_schedule3 improved version)")
             qm = QubitMapSABRE3(ip, m)
@@ -239,7 +263,7 @@ if sched_family in ["MUSS", "MUSS-TI", "MUSS_TI_MODE"]:
     if sched_version in ["V2", "2", "MUSS_SCHEDULE2", "PAPER"]:
         print("→ muss_schedule2.py old_vision")
         scheduler = MUSSScheduleV2(
-            ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
+            ip, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     elif sched_version in ["V3", "3", "MUSS_SCHEDULE3", "INNOV"]:
