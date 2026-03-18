@@ -21,6 +21,7 @@ try:
 except Exception:
     MUSSScheduleV4 = None
 from muss2_debug import MUSSSchedule as MUSSScheduledebug
+
 np.random.seed(12345)
 
 
@@ -54,16 +55,92 @@ def has_shuttle_id_annotations(scheduler) -> bool:
     return False
 
 
+def should_run_qubit_ordering(mapper_choice: str) -> bool:
+    """
+    决定是否执行额外的 qubit ordering。
+    设计原则：
+      - 老 QCCD 项目附带的 mapper：保留历史行为，继续做 ordering
+      - 新增的论文复现 mapper（Trivial / SABRE）：不再做 ordering
+    """
+    return mapper_choice not in ["Trivial", "SABRE"]
+
+
+def is_trap_layout(mapping, machine_obj) -> bool:
+    """
+    判断 mapping 是否已经是 trap_id -> [ion_ids...] 这种布局格式。
+    """
+    if not isinstance(mapping, dict):
+        return False
+
+    trap_ids = set(t.id for t in machine_obj.traps)
+
+    for k, v in mapping.items():
+        if k not in trap_ids:
+            return False
+        if not isinstance(v, list):
+            return False
+
+    return True
+
+
+def canonicalize_mapping_to_layout(mapping, machine_obj):
+    """
+    将 mapper 输出统一转换成 scheduler 可接受的 trap_id -> [ion_ids...] 格式。
+
+    支持两类输入：
+      1) trap_id -> [ion_ids...]      （例如 Greedy）
+      2) qubit_id -> trap_id          （例如 Trivial / SABRE2 / LPFS / PO / Random / Agg）
+
+    转换原则：
+      - 如果已经是 trap->list，则只补齐空 trap，并复制列表
+      - 如果是 qubit->trap，则按 mapping 的遍历顺序稳定地装入 trap
+        （Python 3.7+ dict 保持插入顺序）
+    """
+    trap_ids = [t.id for t in machine_obj.traps]
+
+    # 情况1：已经是 scheduler 需要的格式
+    if is_trap_layout(mapping, machine_obj):
+        output_layout = {}
+        for tid in trap_ids:
+            output_layout[tid] = list(mapping.get(tid, []))
+        return output_layout
+
+    # 情况2：认为它是 qubit -> trap
+    output_layout = {tid: [] for tid in trap_ids}
+
+    if not isinstance(mapping, dict):
+        raise TypeError("Mapping must be a dict.")
+
+    trap_id_set = set(trap_ids)
+    for qubit_id, trap_id in mapping.items():
+        if trap_id not in trap_id_set:
+            raise RuntimeError(
+                f"Invalid raw mapping: qubit {qubit_id} assigned to unknown trap {trap_id}."
+            )
+        output_layout[trap_id].append(qubit_id)
+
+    return output_layout
+
+
+def describe_layout_policy(mapper_choice: str, reorder_choice: str) -> str:
+    """
+    用于日志打印，描述本次 initial layout 的生成策略。
+    """
+    if should_run_qubit_ordering(mapper_choice):
+        return f"mapping + qubit_ordering({reorder_choice})"
+    return "mapping_only + canonicalize_to_trap_layout"
+
+
 # ============================================================
 # Command line args
 # ============================================================
 if len(sys.argv) < 11:
-    print("用法:")
+    print("Usage:")
     print("python run.py <qasm> <machine_type> <ions_per_region> <mapper> <reorder> "
           "<serial_trap_ops> <serial_comm> <serial_all> <gate_type> <swap_type> "
           "[sched_family] [sched_version] [analyzer_mode] [architecture_scale]")
     print("")
-    print("示例:")
+    print("Example:")
     print("python run.py ghz32.qasm G2x2 12 SABRE Fidelity 1 1 0 FM PaperSwapDirect MUSS V2 PAPER SMALL")
     sys.exit(1)
 
@@ -144,6 +221,7 @@ else:
     mpar.architecture_scale = "small"
     mpar.enable_partition = False
 
+
 # ============================================================
 # 打印基本信息
 # ============================================================
@@ -177,7 +255,7 @@ elif machine_type == "L6":
 elif machine_type == "H6":
     m = make_single_hexagon_machine(num_ions_per_region, mpar)
 else:
-    print(f"不支持的机器类型: {machine_type}")
+    print(f"Error: Unsupported machine type '{machine_type}'")
     sys.exit(1)
 
 
@@ -189,17 +267,17 @@ ip.parse_ir(openqasm_file_name)
 ip.visualize_graph("visualize_graph_2.gexf")
 
 qc = QuantumCircuit.from_qasm_file(openqasm_file_name)
-dag = circuit_to_dag(qc)
+dag = circuit_to_dag(qc)  #后续均没用到qc，这是对比遗留
 # dag_drawer(dag, filename=f"{openqasm_file_name[:-5]}.svg")
 
-print("parse object map:")
+print("Parse object map:")
 print(ip.cx_gate_map)
-print("parse object graph:")
+print("Parse object graph:")
 print(ip.gate_graph)
 
 
 # ============================================================
-# 初始映射
+# 初始映射：选择 mapper
 # ============================================================
 if mapper_choice == "LPFS":
     qm = QubitMapLPFS(ip, m)
@@ -216,43 +294,67 @@ elif mapper_choice == "Trivial":
 elif mapper_choice == "SABRE":
     if sched_family in ["MUSS", "MUSS-TI", "MUSS_TI_MODE"]:
         if sched_version in ["V2", "2", "MUSS_SCHEDULE2", "PAPER"]:
-            print("→ Using QubitMapSABRE2 mapper (matches muss_schedule2 paper version)")
+            print("Using QubitMapSABRE2 mapper (matches muss_schedule2 paper version)")
             qm = QubitMapSABRE2(ip, m)
         elif sched_version in ["V3", "3", "MUSS_SCHEDULE3", "INNOV"]:
-            print("→ Using QubitMapSABRE2 mapper (matches muss_schedule3 improved version)")
-            qm = QubitMapSABRE2(ip, m)
+            print("Using QubitMapSABRE6 mapper (matches muss_schedule3 improved version)")
+            qm = QubitMapSABRE6(ip, m)
         elif sched_version in ["V4", "4", "MUSS_SCHEDULE4", "INNOV2"]:
-            print("→ Using SABRE6 mapper (matches muss_schedule4 improved version)")
+            print("Using SABRE6 mapper (matches muss_schedule4 improved version)")
             qm = QubitMapSABRE6(ip, m)
         else:
             print(f"Warning: Unknown scheduler version '{sched_version}', fallback to SABRE2")
             qm = QubitMapSABRE2(ip, m)
     else:
-        print("→ Using default SABRE2 mapper (non-MUSS scheduler)")
+        print("Using default SABRE2 mapper (non-MUSS scheduler)")
         qm = QubitMapSABRE2(ip, m)
 else:
     print(f"Error: Unsupported mapper choice '{mapper_choice}'")
     sys.exit(1)
 
-mapping = qm.compute_mapping()
+raw_mapping = qm.compute_mapping()
+
+print("Raw mapping:")
+print(raw_mapping)
 
 
 # ============================================================
-# 阱内重排序
+# 初始布局生成：
+#   - 老 mapper：mapping -> QubitOrdering -> trap_id -> [ion_ids]
+#   - Trivial/SABRE：跳过 ordering，但仍要 canonicalize 成 trap_id -> [ion_ids]
 # ============================================================
-if mapper_choice == "Greedy":
-    init_qubit_layout = mapping
+print(f"Initial layout policy: {describe_layout_policy(mapper_choice, reorder_choice)}")
+
+run_ordering = should_run_qubit_ordering(mapper_choice)
+
+if not run_ordering:
+    # 对论文复现路径，不做额外 ordering
+    # 但必须把 qubit->trap 形式转成 scheduler 所需的 trap->list 形式
+    if reorder_choice not in [None, "", "None", "NONE", "Disabled", "DISABLED"]:
+        print(f"Note: reorder_choice='{reorder_choice}' is ignored for mapper '{mapper_choice}'")
+
+    print(f"Skip qubit ordering for mapper '{mapper_choice}'")
+    init_qubit_layout = canonicalize_mapping_to_layout(raw_mapping, m)
 else:
-    qo = QubitOrdering(ip, m, mapping)
-    if reorder_choice == "Naive":
-        init_qubit_layout = qo.reorder_naive()
-    elif reorder_choice == "Fidelity":
-        init_qubit_layout = qo.reorder_fidelity()
-    else:
-        print(f"不支持的 reorder: {reorder_choice}")
-        sys.exit(1)
+    # 对老 mapper，保留历史行为
+    print(f"Apply qubit ordering for mapper '{mapper_choice}' with mode '{reorder_choice}'")
 
-print("init_qubit_layout:")
+    # 这里仍然要求传给 QubitOrdering 的是 qubit->trap 格式
+    # 如果某个老 mapper 已经直接返回了 trap->list（例如 Greedy），则无需再 ordering
+    if is_trap_layout(raw_mapping, m):
+        print("Mapper output is already trap-layout; skip ordering and use it directly")
+        init_qubit_layout = canonicalize_mapping_to_layout(raw_mapping, m)
+    else:
+        qo = QubitOrdering(ip, m, raw_mapping)
+        if reorder_choice == "Naive":
+            init_qubit_layout = qo.reorder_naive()
+        elif reorder_choice == "Fidelity":
+            init_qubit_layout = qo.reorder_fidelity()
+        else:
+            print(f"Error: Unsupported reorder choice '{reorder_choice}'")
+            sys.exit(1)
+
+print("Initial qubit layout:")
 print(init_qubit_layout)
 
 
@@ -263,28 +365,34 @@ print(f"Using {sched_family} Scheduler ({sched_version}) with {mapper_choice} Ma
 
 if sched_family in ["MUSS", "MUSS-TI", "MUSS_TI_MODE"]:
     if sched_version in ["V2", "2", "MUSS_SCHEDULE2", "PAPER"]:
-        print("→ muss_schedule2.py paper-faithful fixed version")
+        print("Using muss_schedule2.py paper-faithful fixed version")
         scheduler = MUSSScheduleV2(
             ip, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     elif sched_version in ["V3", "3", "MUSS_SCHEDULE3", "INNOV"]:
-        print("→ muss_schedule3.py new_vision")
+        if MUSSScheduleV3 is None:
+            print("Error: muss_schedule3 is not available")
+            sys.exit(1)
+        print("Using muss_schedule3.py new_vision")
         scheduler = MUSSScheduleV3(
             ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     elif sched_version in ["V4", "4", "MUSS_SCHEDULE4", "INNOV2"]:
-        print("→ muss_schedule4.py new_vision")
+        if MUSSScheduleV4 is None:
+            print("Error: muss_schedule4 is not available")
+            sys.exit(1)
+        print("Using muss_schedule4.py new_vision")
         scheduler = MUSSScheduleV4(
             ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
             serial_trap_ops, serial_comm, serial_all
         )
     else:
-        print(f"error：不支持的调度器版本 {sched_version}，支持：V2 / V3 / V4")
+        print(f"Error: Unsupported scheduler version '{sched_version}', supported: V2 / V3 / V4")
         sys.exit(1)
 else:
-    print("→ 回退使用 EJF 调度器")
+    print("Fallback to EJF scheduler")
     scheduler = EJFSchedule(
         ip.gate_graph, ip.all_gate_map, m, init_qubit_layout,
         serial_trap_ops, serial_comm, serial_all
@@ -307,12 +415,21 @@ else:
 
 shuttle_mode = ("aggregate" if use_aggregate else "per_event")
 if analyzer_mode in ["PAPER", "TABLE2", "P"]:
-    knobs = AnalyzerKnobs.paper_mode(shuttle_fidelity_mode=shuttle_mode, debug_summary=True)
+    knobs = AnalyzerKnobs.paper_mode(
+        shuttle_fidelity_mode=shuttle_mode,
+        debug_summary=True
+    )
 elif analyzer_mode in ["EXTENDED", "EXP", "E"]:
-    knobs = AnalyzerKnobs.extended_mode(shuttle_fidelity_mode=shuttle_mode, debug_summary=True)
+    knobs = AnalyzerKnobs.extended_mode(
+        shuttle_fidelity_mode=shuttle_mode,
+        debug_summary=True
+    )
 else:
     print(f"Warning: unknown analyzer mode '{analyzer_mode}', fallback to PAPER")
-    knobs = AnalyzerKnobs.paper_mode(shuttle_fidelity_mode=shuttle_mode, debug_summary=True)
+    knobs = AnalyzerKnobs.paper_mode(
+        shuttle_fidelity_mode=shuttle_mode,
+        debug_summary=True
+    )
 
 analyzer = Analyzer(scheduler, m, init_qubit_layout, knobs)
 result = analyzer.analyze_and_return()
