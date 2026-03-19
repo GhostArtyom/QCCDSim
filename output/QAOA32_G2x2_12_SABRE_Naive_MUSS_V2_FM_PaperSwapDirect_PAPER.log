@@ -1,0 +1,78 @@
+Simulation
+Program:           programs\QAOA32.qasm
+Machine:           G2x2
+Model:             MUSS_Params
+Ions/Region:       12
+Mapper:            SABRE
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  MUSS
+Scheduler Version: V2
+Analyzer Mode:     PAPER
+Arch Scale:        SMALL
+========== Gate Set Summary ==========
+cx: 128
+h: 32
+rx: 64
+rz: 64
+======================================
+Parse object map:
+{32: [0, 1], 34: [0, 1], 35: [2, 3], 37: [2, 3], 38: [4, 5], 40: [4, 5], 41: [6, 7], 43: [6, 7], 44: [8, 9], 46: [8, 9], 47: [10, 11], 49: [10, 11], 50: [12, 13], 52: [12, 13], 53: [14, 15], 55: [14, 15], 56: [16, 17], 58: [16, 17], 59: [18, 19], 61: [18, 19], 62: [20, 21], 64: [20, 21], 65: [22, 23], 67: [22, 23], 68: [24, 25], 70: [24, 25], 71: [26, 27], 73: [26, 27], 74: [28, 29], 76: [28, 29], 77: [30, 31], 79: [30, 31], 80: [1, 2], 82: [1, 2], 83: [3, 4], 85: [3, 4], 86: [5, 6], 88: [5, 6], 89: [7, 8], 91: [7, 8], 92: [9, 10], 94: [9, 10], 95: [11, 12], 97: [11, 12], 98: [13, 14], 100: [13, 14], 101: [15, 16], 103: [15, 16], 104: [17, 18], 106: [17, 18], 107: [19, 20], 109: [19, 20], 110: [21, 22], 112: [21, 22], 113: [23, 24], 115: [23, 24], 116: [25, 26], 118: [25, 26], 119: [27, 28], 121: [27, 28], 122: [29, 30], 124: [29, 30], 125: [31, 0], 127: [31, 0], 160: [0, 1], 162: [0, 1], 163: [2, 3], 165: [2, 3], 166: [4, 5], 168: [4, 5], 169: [6, 7], 171: [6, 7], 172: [8, 9], 174: [8, 9], 175: [10, 11], 177: [10, 11], 178: [12, 13], 180: [12, 13], 181: [14, 15], 183: [14, 15], 184: [16, 17], 186: [16, 17], 187: [18, 19], 189: [18, 19], 190: [20, 21], 192: [20, 21], 193: [22, 23], 195: [22, 23], 196: [24, 25], 198: [24, 25], 199: [26, 27], 201: [26, 27], 202: [28, 29], 204: [28, 29], 205: [30, 31], 207: [30, 31], 208: [1, 2], 210: [1, 2], 211: [3, 4], 213: [3, 4], 214: [5, 6], 216: [5, 6], 217: [7, 8], 219: [7, 8], 220: [9, 10], 222: [9, 10], 223: [11, 12], 225: [11, 12], 226: [13, 14], 228: [13, 14], 229: [15, 16], 231: [15, 16], 232: [17, 18], 234: [17, 18], 235: [19, 20], 237: [19, 20], 238: [21, 22], 240: [21, 22], 241: [23, 24], 243: [23, 24], 244: [25, 26], 246: [25, 26], 247: [27, 28], 249: [27, 28], 250: [29, 30], 252: [29, 30], 253: [31, 0], 255: [31, 0]}
+Parse object graph:
+DiGraph with 288 nodes and 384 edges
+Using QubitMapSABRE2 mapper (matches muss_schedule2 paper version)
+Raw mapping:
+{0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 1, 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1, 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 2, 25: 2, 26: 2, 27: 2, 28: 2, 29: 2, 30: 2, 31: 2}
+Initial layout policy: mapping_only + canonicalize_to_trap_layout
+Note: reorder_choice='Naive' is ignored for mapper 'SABRE'
+Skip qubit ordering for mapper 'SABRE'
+Initial qubit layout:
+{0: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 1: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], 2: [24, 25, 26, 27, 28, 29, 30, 31], 3: []}
+Using MUSS Scheduler (V2) with SABRE Mapping
+Using muss_schedule2.py paper-faithful fixed version
+Analyzer shuttle mode: aggregate (detected shuttle_id annotations)
+Analyzer parameter wiring: alpha_bg=0.0001, T1=600000000.0, k_heating=0.001, epsilon_2q=3.90625e-05, strict_paper_mainline=False
+Analyzer mode: paper
+Program Finish Time: 1135 us
+OPCOUNTS Gate: 288 Split: 3 Move: 5 Merge: 3
+
+Two-qubit gate chain statistics
+Mean: 10.96875 Max: 12.0
+Fidelity: 0.5194242693803559
+
+Shuttle count summary
+  logical_shuttle_count      = 3   # High-level shuttle count aggregated by shuttle_id
+  physical_shuttle_leg_count = 3   # Paper-facing count: each complete trap-to-trap split+move+merge leg
+  split_count                = 3
+  merge_count                = 3
+  move_count                 = 5
+[DBG SUMMARY] gates=288  gate_mult=0.526554  avg_gate_nbar=0.3447
+[DBG SUMMARY] logical_shuttles=3  shuttle_mult=0.98646  min_shuttle=0.9949
+[DBG SUMMARY] worst_B: Trap 0 -> 0.999770 (heat_state=2.300000, alpha_bg=0.0001, move_bg_fraction=0.0, model=exp, strict_paper_mainline=False)
+
+========== ANALYSIS RESULT ==========
+{'fidelity': 0.5194242693803559, 'total_shuttle': 3, 'logical_shuttle_count': 3, 'physical_shuttle_leg_count': 3, 'split_count': 3, 'merge_count': 3, 'move_count': 5, 'time': 1135}
+
+========== SHUTTLE TRACE ==========
+[SHUTTLE 0] ion=0  T0 -> T2  route=T0->J0->J1->T2
+    - SPLIT  (320 -> 440)  ion 0: T0 -> Seg0 (swap_cnt=1, swap_hops=11, ion_hops=0, i1=0, i2=11)
+    - MOVE   (440 -> 454)  ion 0: Seg0 -> Seg4 via J0
+    - MOVE   (454 -> 468)  ion 0: Seg4 -> Seg3 via J1
+    - MERGE  (468 -> 548)  ion 0: Seg3 -> T2
+[SHUTTLE 1] ion=23  T1 -> T2  route=T1->J1->T2
+    - SPLIT  (548 -> 628)  ion 23: T1 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (628 -> 642)  ion 23: Seg2 -> Seg3 via J1
+    - MERGE  (642 -> 722)  ion 23: Seg3 -> T2
+[SHUTTLE 2] ion=12  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (722 -> 842)  ion 12: T1 -> Seg2 (swap_cnt=1, swap_hops=10, ion_hops=0, i1=12, i2=22)
+    - MOVE   (842 -> 856)  ion 12: Seg2 -> Seg4 via J1
+    - MOVE   (856 -> 870)  ion 12: Seg4 -> Seg0 via J0
+    - MERGE  (870 -> 950)  ion 12: Seg0 -> T0
+SplitSWAP: 2
+SchedulerFiredShuttle: 3
+ReportedTotalShuttle: 3
+----------------

@@ -183,7 +183,7 @@ mpar.inter_ion_spacing_um = 1.0
 
 # 论文复现默认值：
 # 保留 B_i 接口，因此不给 0；若你后续要完全关闭 B_i，可显式改回 0.0
-mpar.alpha_bg = 0.0
+mpar.alpha_bg = 0.0001
 
 mpar.architecture_scale = "small"
 mpar.enable_partition = False

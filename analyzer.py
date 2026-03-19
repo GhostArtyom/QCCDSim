@@ -8,46 +8,41 @@ class AnalyzerKnobs:
     """
     Analyzer 配置。
 
-    这里把两类口径分开：
-    1) paper_mode：尽量贴近论文 Table 2 / Table 1 的保真度口径。
-       - 门保真度使用论文给出的固有 fidelity
-       - shuttle fidelity 使用论文式(1): exp(-t/T1) - k*nbar
-       - 使用 aggregate shuttle fidelity（一次高层 shuttle 统一结算）
-       - 开启 gate_use_bg，保留“穿梭影响后续 gate”的实现接口
-         （具体强度由 alpha_bg 控制；若 machine.mparams.alpha_bg 为 0，则 B_i 退化为 1）
-
-       注意：
-       本文件现在会同时统计三种“穿梭次数”：
-       (a) logical_shuttle_count：
-           高层逻辑 shuttle 次数，按 shuttle_id 聚合，和旧版 total_shuttle 语义一致。
-       (b) physical_shuttle_leg_count：
-           最贴近论文表述的穿梭次数。每一个完整 trap->trap 的 split+move+merge 段记 1 次。
-       (c) split_count：
-           纯底层 split 微操作次数。
-
-    2) extended_mode：保留原来的扩展研究口径。
+    论文主线口径：
+    1) shuttle fidelity:
+           F = exp(-t / T1) - k * nbar
+    2) gate fidelity:
+           1Q gate    -> 0.9999
+           2Q gate    -> 1 - epsilon * N^2
+           Fiber gate -> 0.99
+       若启用背景项，则再乘 B_i。
+    3) 当前 paper_mode 的更收紧版本：
+       - 当 alpha_bg == 0.0 时，严格令 B_i 恒为 1
+       - split/move/merge 的 heating 只参与 shuttle fidelity 聚合
+         不再写回长期 ion / trap 热状态
     """
 
     def __init__(
         self,
         bg_model: str = "exp",
-        alpha_bg: float = 0.005,
+        alpha_bg=None,
         inject_norm: str = "none",
         swap_norm: str = "none",
         move_heat_use_distance: bool = True,
         move_heat_const: float = 0.1,
-        move_bg_fraction: float = 0.25,
+        move_bg_fraction: float = 0.0,
         gate_env_time_mode: str = "duration",
         gate_use_env: bool = False,
         gate_use_bg: bool = True,
         shuttle_fidelity_mode: str = "aggregate",
-        merge_equalize: bool = True,
+        merge_equalize: bool = False,
         debug_events: bool = False,
         debug_summary: bool = True,
         mode_name: str = "custom",
     ):
         self.bg_model = bg_model
-        self.alpha_bg = float(alpha_bg)
+        self.alpha_bg = (None if alpha_bg is None else float(alpha_bg))
+
         self.inject_norm = inject_norm
         self.swap_norm = swap_norm
         self.move_heat_use_distance = move_heat_use_distance
@@ -63,20 +58,24 @@ class AnalyzerKnobs:
         self.mode_name = mode_name
 
     @classmethod
-    def paper_mode(cls, shuttle_fidelity_mode: str = "aggregate", debug_summary: bool = True):
+    def paper_mode(
+        cls,
+        shuttle_fidelity_mode: str = "aggregate",
+        debug_summary: bool = True,
+        alpha_bg=None,
+    ):
         """
-        贴近论文 Table 2 的建议口径：
-        - shuttle fidelity 采用论文式(1): exp(-t/T1) - k*nbar
-        - 使用 aggregate shuttle fidelity
-        - gate fidelity 以论文表中的固有 fidelity 为主
-        - gate_use_bg=True：保留“穿梭降低后续门保真度”的实现接口
-          注：B_i 的具体更新公式论文没有给出完整离散实现，这里沿用当前代码中的 trap_bg 代理；
-              若 machine.mparams.alpha_bg=0，则 B_i 恒为 1，不额外惩罚。
-        - 不做 merge 后链内加热均衡（避免引入额外实现假设）
+        更收紧到论文主线的模式：
+        - shuttle fidelity 使用论文式(1)
+        - gate fidelity 仅使用论文表中的固有 fidelity，再乘 B_i
+        - 若 alpha_bg == 0，则 B_i 恒为 1
+        - 不额外乘 gate env fidelity
+        - 不做 merge 后 heating 均衡
+        - 不将 move heating 注入 zone background
         """
         return cls(
             bg_model="exp",
-            alpha_bg=0.001,
+            alpha_bg=alpha_bg,
             inject_norm="none",
             swap_norm="none",
             move_heat_use_distance=True,
@@ -93,10 +92,19 @@ class AnalyzerKnobs:
         )
 
     @classmethod
-    def extended_mode(cls, shuttle_fidelity_mode: str = "aggregate", debug_summary: bool = True):
+    def extended_mode(
+        cls,
+        shuttle_fidelity_mode: str = "aggregate",
+        debug_summary: bool = True,
+        alpha_bg=None,
+    ):
+        """
+        扩展模式：
+        保留原有可扩展实现，用于后续研究。
+        """
         return cls(
             bg_model="exp",
-            alpha_bg=0.001,
+            alpha_bg=alpha_bg,
             inject_norm="none",
             swap_norm="none",
             move_heat_use_distance=True,
@@ -115,7 +123,8 @@ class AnalyzerKnobs:
 
 class Analyzer:
     # ----------------------------------------------------------
-    # 论文/模型参数
+    # 论文/模型默认参数
+    # 运行时优先从 machine.mparams 接线。
     # ----------------------------------------------------------
     T1_US = 600 * 1e6
     K_HEATING = 0.001
@@ -136,10 +145,34 @@ class Analyzer:
         self.init_map = getattr(scheduler_obj, "init_map", init_mapping)
         self.knobs = knobs if knobs is not None else AnalyzerKnobs.paper_mode()
 
-        # 若 knobs 里没有显式给 alpha_bg，则尝试从 machine 取
-        if self.knobs.alpha_bg == 0.0:
-            if hasattr(self.machine, "mparams") and hasattr(self.machine.mparams, "alpha_bg"):
-                self.knobs.alpha_bg = float(self.machine.mparams.alpha_bg)
+        mparams = getattr(self.machine, "mparams", None)
+
+        if self.knobs.alpha_bg is None:
+            if mparams is not None and hasattr(mparams, "alpha_bg"):
+                self.knobs.alpha_bg = float(mparams.alpha_bg)
+            else:
+                self.knobs.alpha_bg = 0.0
+
+        self.T1_US = float(getattr(mparams, "T1", self.T1_US))
+        self.K_HEATING = float(getattr(mparams, "k_heating", self.K_HEATING))
+        self.EPSILON_2Q = float(getattr(mparams, "epsilon", self.EPSILON_2Q))
+
+        # 该标志用于严格论文主线：
+        # - paper_mode
+        # - alpha_bg == 0
+        # 在此模式下，不保留长期热状态对后续 gate 的附加影响。
+        self.strict_paper_mainline = (
+            self.knobs.mode_name == "paper" and float(self.knobs.alpha_bg) == 0.0
+        )
+
+        print(
+            "Analyzer parameter wiring: "
+            f"alpha_bg={self.knobs.alpha_bg}, "
+            f"T1={self.T1_US}, "
+            f"k_heating={self.K_HEATING}, "
+            f"epsilon_2q={self.EPSILON_2Q}, "
+            f"strict_paper_mainline={self.strict_paper_mainline}"
+        )
 
         # ------------------------------------------------------
         # trap 背景 / 热状态
@@ -147,7 +180,6 @@ class Analyzer:
         self.trap_heat_state = {t.id: 0.0 for t in self.machine.traps}
         self.trap_bg = {t.id: 1.0 for t in self.machine.traps}
 
-        # 估计可容纳的 ion id 范围
         capacity = self.machine.traps[0].capacity if self.machine.traps else 20
         num_traps = len(self.machine.traps)
         max_ions = num_traps * capacity * 4
@@ -172,41 +204,25 @@ class Analyzer:
         self._dyn_min = 1.0
 
         # ------------------------------------------------------
-        # aggregate shuttle 统计（高层逻辑 shuttle）
-        # 这是旧版 total_shuttle 的核心来源
+        # aggregate shuttle 统计
         # ------------------------------------------------------
         self._shuttle_acc_time = {}
         self._shuttle_acc_heat = {}
         self._shuttle_acc_move_heat = {}
         self._shuttle_mult = 1.0
-        self._shuttle_cnt = 0                   # logical_shuttle_count
+        self._shuttle_cnt = 0
         self._shuttle_min = 1.0
         self._shuttle_info = {}
         self._completed_shuttles = set()
 
         # ------------------------------------------------------
-        # 新增：physical shuttle leg 统计
-        #
-        # 目标：
-        #   统计“每一个完整 trap->trap 的 split+move+merge 段”
-        # 这是最贴近论文 shuttle count 的口径。
-        #
-        # 方法：
-        #   在 replay 时，对每个 ion 维护一个“正在进行中的 physical leg”状态：
-        #     split 时记录源 trap
-        #     move 时标记经过通道
-        #     merge 时若源 trap != 目标 trap，则记为一次 physical shuttle leg
-        #
-        # 注意：
-        #   这里不依赖 shuttle_id，因为一个高层 shuttle_id 可能包含多个 physical legs。
+        # physical shuttle leg 统计
         # ------------------------------------------------------
         self._ion_active_leg = {}
         self._physical_shuttle_leg_count = 0
-
-        # 记录 physical legs，便于调试 / 附录 / 后续导出
         self._physical_shuttle_legs = []
 
-        # 额外导出的统计量
+        # 导出计数
         self.split_count = 0
         self.merge_count = 0
         self.move_count = 0
@@ -241,17 +257,28 @@ class Analyzer:
         return sum(self.ion_heating.get(i, 0.0) for i in ions) / float(len(ions))
 
     # ==========================================================
-    # trap 背景模型
+    # 背景项 B_i
     # ==========================================================
     def _refresh_bg(self, trap_id: int):
+        """
+        更新 trap 的背景项 B_i。
+
+        在严格论文主线下，B_i 恒为 1。
+        """
         if trap_id is None:
             return
-        if self.knobs.bg_model == "none":
+
+        if self.strict_paper_mainline:
+            self.trap_bg[trap_id] = 1.0
+            return
+
+        a = float(self.knobs.alpha_bg)
+
+        if self.knobs.bg_model == "none" or a == 0.0:
             self.trap_bg[trap_id] = 1.0
             return
 
         H = max(self.trap_heat_state.get(trap_id, 0.0), 0.0)
-        a = self.knobs.alpha_bg
 
         if self.knobs.bg_model == "exp":
             self.trap_bg[trap_id] = math.exp(-a * H)
@@ -263,9 +290,20 @@ class Analyzer:
         self.trap_bg[trap_id] = min(max(self.trap_bg[trap_id], 0.0), 1.0)
 
     def _apply_bg(self, trap_id: int, delta_avg_nbar: float):
+        """
+        将 shuttle 相关 heating 注入背景状态。
+
+        在严格论文主线下，直接忽略，不保留长期背景热记忆。
+        """
         if trap_id is None:
             return
-        if self.knobs.bg_model == "none":
+
+        if self.strict_paper_mainline:
+            self.trap_bg[trap_id] = 1.0
+            return
+
+        a = float(self.knobs.alpha_bg)
+        if self.knobs.bg_model == "none" or a == 0.0:
             self.trap_bg[trap_id] = 1.0
             return
 
@@ -279,8 +317,6 @@ class Analyzer:
         """
         论文式(1):
             F = exp(-t/T1) - k * nbar
-
-        这里不改公式，只做极小数值保护，避免后续乘法崩溃。
         """
         f = math.exp(-float(t_us) / self.T1_US) - self.K_HEATING * float(avg_nbar)
         if f > 1.0:
@@ -291,15 +327,16 @@ class Analyzer:
                        gate_start_us: float, gate_end_us: float, trap_id: int):
         """
         计算单个 gate 的 fidelity。
+
+        更收紧到论文主线：
+            F_gate = B_i * F_g
+        且在 strict_paper_mainline 下，B_i 恒为 1。
         """
         N = len(chain_ions)
         if N <= 0:
-            avg_n = 0.0
-            f_env = 1.0
             self._refresh_bg(trap_id)
             B = self.trap_bg.get(trap_id, 1.0)
-            f_g = 1e-15
-            return 1e-15, avg_n, f_env, f_g, B
+            return max(B * 1e-15, 1e-15), 0.0, 1.0, 1e-15, B
 
         if is_fiber:
             f_g = self.FID_FIBER
@@ -309,20 +346,20 @@ class Analyzer:
             f_g = self.FID_1Q
         f_g = max(f_g, 1e-15)
 
-        avg_n = self._avg_nbar(chain_ions)
+        # 在严格论文主线下，gate 不再承受长期 heating 记忆带来的额外惩罚
+        avg_n = 0.0 if self.strict_paper_mainline else self._avg_nbar(chain_ions)
+
+        # 仅保留 debug 用，不乘进 gate fidelity
         if self.knobs.gate_env_time_mode == "duration":
             t_env = float(gate_end_us - gate_start_us)
         else:
             t_env = float(gate_end_us)
-
         f_env = self._env_fidelity(t_env, avg_n)
 
         self._refresh_bg(trap_id)
         B = self.trap_bg.get(trap_id, 1.0)
 
         fid = f_g
-        if self.knobs.gate_use_env:
-            fid *= f_env
         if self.knobs.gate_use_bg:
             fid *= B
 
@@ -330,7 +367,8 @@ class Analyzer:
 
     def _dyn_event_mult(self, dt_us: float, delta_avg_nbar: float):
         """
-        per-event fidelity 口径下，单个动态事件的 fidelity 累乘。
+        per-event fidelity 口径下的单事件乘子。
+        当前论文主线默认不用该模式，接口保留。
         """
         f_dyn = self._env_fidelity(dt_us, delta_avg_nbar)
         self._dyn_mult *= f_dyn
@@ -339,14 +377,10 @@ class Analyzer:
         return f_dyn
 
     # ==========================================================
-    # aggregate shuttle 统计（高层逻辑 shuttle）
+    # shuttle 聚合
     # ==========================================================
     def _accumulate_shuttle(self, shuttle_id, dt_us: float, delta_heat: float,
                             etype: str = None, swap_cnt: int = 0):
-        """
-        将 split / move / merge 事件按 shuttle_id 聚合。
-        这是旧版 analyzer 的“逻辑 shuttle”口径。
-        """
         if shuttle_id is None:
             return
 
@@ -372,7 +406,6 @@ class Analyzer:
     def _finalize_shuttle(self, shuttle_id):
         """
         完成一次 aggregate shuttle 的 fidelity 结算。
-        这里对应“逻辑 shuttle 次数”。
         """
         if shuttle_id is None:
             return 1.0
@@ -389,15 +422,9 @@ class Analyzer:
         return f_sh
 
     # ==========================================================
-    # 新增：physical shuttle leg 统计
+    # physical shuttle leg 统计
     # ==========================================================
     def _start_physical_leg(self, ion_id, src_trap, split_event_info, split_start, split_end):
-        """
-        在 replay 遇到 Split 时，认为该 ion 开始了一段可能的 physical shuttle leg。
-
-        这里不立刻记数，必须等到对应 Merge 发生，
-        且确认 src_trap != dst_trap，才算一次真正的 trap-to-trap physical shuttle leg。
-        """
         self._ion_active_leg[ion_id] = {
             "src_trap": src_trap,
             "split_info": split_event_info,
@@ -408,26 +435,12 @@ class Analyzer:
         }
 
     def _update_physical_leg_move(self, ion_id):
-        """
-        在 replay 遇到 Move 时，更新该 ion 当前正在进行的 physical leg 状态。
-        """
         if ion_id not in self._ion_active_leg:
             return
         self._ion_active_leg[ion_id]["saw_move"] = True
         self._ion_active_leg[ion_id]["move_count"] += 1
 
     def _finish_physical_leg(self, ion_id, dst_trap, merge_event_info, merge_start, merge_end):
-        """
-        在 replay 遇到 Merge 时，若该 ion 之前有活动中的 split，
-        则检查是否构成一次真正的 trap->trap physical shuttle leg。
-
-        最贴近论文表述的口径：
-          physical shuttle leg = 一次完整的 trap-to-trap split + move + merge 段
-
-        这里要求：
-          src_trap != dst_trap
-        即源 trap 与目标 trap 不同才算一次 shuttle。
-        """
         rec = self._ion_active_leg.pop(ion_id, None)
         if rec is None:
             return
@@ -436,7 +449,6 @@ class Analyzer:
         if src_trap is None or dst_trap is None:
             return
 
-        # 只有真正从一个 trap 到另一个 trap，才算论文意义上的一次 shuttle leg
         if src_trap != dst_trap:
             self._physical_shuttle_leg_count += 1
             self._physical_shuttle_legs.append({
@@ -454,6 +466,70 @@ class Analyzer:
             })
 
     # ==========================================================
+    # heating 状态更新
+    # ==========================================================
+    def _record_split_heat(self, trap, chain, d_split, d_swap):
+        """
+        split 阶段的 heating 记账。
+
+        在严格论文主线下：
+        - 只用于 shuttle fidelity 聚合
+        - 不写回长期 ion / trap 状态
+        """
+        if self.strict_paper_mainline:
+            return
+
+        L = len(chain)
+        if L > 0 and d_split > 0:
+            for ion in chain:
+                self.ion_heating[ion] += d_split
+            self._apply_bg(trap, d_split)
+
+        if L > 0 and d_swap > 0:
+            for ion in chain:
+                self.ion_heating[ion] += d_swap
+            self._apply_bg(trap, d_swap)
+
+    def _record_move_heat(self, ions, heat):
+        """
+        move 阶段的 heating 记账。
+
+        在严格论文主线下：
+        - 只用于 shuttle fidelity 聚合
+        - 不写回长期 ion 状态
+        """
+        if self.strict_paper_mainline:
+            return
+
+        for ion in ions:
+            self.ion_heating[ion] += heat
+
+    def _record_merge_heat(self, trap, new_chain, d_merge, move_bg):
+        """
+        merge 阶段的 heating / background 记账。
+
+        在严格论文主线下：
+        - 只用于 shuttle fidelity 聚合
+        - 不写回长期 ion / trap 状态
+        """
+        if self.strict_paper_mainline:
+            return
+
+        L = len(new_chain)
+        if L > 0 and d_merge > 0:
+            for ion in new_chain:
+                self.ion_heating[ion] += d_merge
+            self._apply_bg(trap, d_merge)
+
+        if move_bg > 0:
+            self._apply_bg(trap, move_bg)
+
+        if self.knobs.merge_equalize and new_chain:
+            avg_h = self._avg_nbar(new_chain)
+            for ion in new_chain:
+                self.ion_heating[ion] = avg_h
+
+    # ==========================================================
     # 主 replay 逻辑
     # ==========================================================
     def move_check(self):
@@ -462,8 +538,12 @@ class Analyzer:
         - 最终 fidelity
         - 程序总时间
         - 各类事件计数
-        - logical shuttle count（旧版 total_shuttle 语义）
-        - physical shuttle leg count（最贴近论文表述）
+        - logical shuttle count
+        - physical shuttle leg count
+
+        注意：
+        - 不改执行时间统计
+        - 不改 shuttle 计数统计
         """
         self.op_count = {
             Schedule.Gate: 0,
@@ -472,13 +552,11 @@ class Analyzer:
             Schedule.Merge: 0
         }
 
-        # replay_traps: 逻辑回放下每个 trap 当前的 ion 链
         replay_traps = {t.id: [] for t in self.machine.traps}
         for t_id, ions in self.init_map.items():
             if t_id in replay_traps:
                 replay_traps[t_id] = ions[:]
 
-        # 总执行时间 = 最后一个事件的结束时刻
         self.prog_fin_time = 0.0
         for ev in self.schedule.events:
             self.prog_fin_time = max(self.prog_fin_time, ev[3])
@@ -495,7 +573,7 @@ class Analyzer:
                 self.op_count[etype] += 1
 
             # --------------------------------------------------
-            # Gate 事件
+            # Gate
             # --------------------------------------------------
             if etype == Schedule.Gate:
                 trap = info.get("trap", None)
@@ -531,7 +609,7 @@ class Analyzer:
                     )
 
             # --------------------------------------------------
-            # Split 事件
+            # Split
             # --------------------------------------------------
             elif etype == Schedule.Split:
                 trap = info["trap"]
@@ -543,21 +621,15 @@ class Analyzer:
                 L = len(chain)
 
                 d_split = self.HEAT_SPLIT / float(L) if self.knobs.inject_norm == "chain" and L > 0 else self.HEAT_SPLIT
-                if L > 0:
-                    for ion in chain:
-                        self.ion_heating[ion] += d_split
-                    self._apply_bg(trap, d_split)
-
+                d_swap = 0.0
                 if swap_cnt > 0:
                     d_swap = (self.HEAT_SWAP * swap_cnt) / float(L) if self.knobs.swap_norm == "chain" and L > 0 else (self.HEAT_SWAP * swap_cnt)
-                    if L > 0:
-                        for ion in chain:
-                            self.ion_heating[ion] += d_swap
-                        self._apply_bg(trap, d_swap)
-                else:
-                    d_swap = 0.0
 
-                # aggregate shuttle fidelity
+                # 更收紧到论文主线：
+                # 这些 heating 在 strict_paper_mainline 下只进入 shuttle fidelity 聚合，
+                # 不再写回长期 ion / trap 状态。
+                self._record_split_heat(trap, chain, d_split, d_swap)
+
                 if self.knobs.shuttle_fidelity_mode == "aggregate":
                     self._accumulate_shuttle(
                         shuttle_id,
@@ -571,12 +643,10 @@ class Analyzer:
                     f_dyn = self._dyn_event_mult(dt, d_split + d_swap)
                     acc *= f_dyn
 
-                # replay: moving ions 从源 trap 链中移出
                 for ion in moving_ions:
                     if ion in chain:
                         chain.remove(ion)
 
-                # 新增：开启 physical shuttle leg 追踪
                 for ion in moving_ions:
                     self._start_physical_leg(
                         ion_id=ion,
@@ -598,7 +668,7 @@ class Analyzer:
                     )
 
             # --------------------------------------------------
-            # Move 事件
+            # Move
             # --------------------------------------------------
             elif etype == Schedule.Move:
                 ions = info.get("ions", [])
@@ -611,8 +681,7 @@ class Analyzer:
                 else:
                     heat = self.knobs.move_heat_const
 
-                for ion in ions:
-                    self.ion_heating[ion] += heat
+                self._record_move_heat(ions, heat)
 
                 if self.knobs.shuttle_fidelity_mode == "aggregate":
                     self._accumulate_shuttle(shuttle_id, dt, heat, etype="move")
@@ -621,7 +690,6 @@ class Analyzer:
                     f_dyn = self._dyn_event_mult(dt, heat)
                     acc *= f_dyn
 
-                # 新增：标记这些 ion 当前的 physical leg 经过了 move
                 for ion in ions:
                     self._update_physical_leg_move(ion)
 
@@ -636,7 +704,7 @@ class Analyzer:
                     )
 
             # --------------------------------------------------
-            # Merge 事件
+            # Merge
             # --------------------------------------------------
             elif etype == Schedule.Merge:
                 trap = info["trap"]
@@ -648,14 +716,9 @@ class Analyzer:
                 L = len(new_chain)
 
                 d_merge = self.HEAT_MERGE / float(L) if self.knobs.inject_norm == "chain" and L > 0 else self.HEAT_MERGE
-                if L > 0:
-                    for ion in new_chain:
-                        self.ion_heating[ion] += d_merge
-                    self._apply_bg(trap, d_merge)
-
                 move_bg = self.knobs.move_bg_fraction * self._shuttle_acc_move_heat.get(shuttle_id, 0.0)
-                if move_bg > 0:
-                    self._apply_bg(trap, move_bg)
+
+                self._record_merge_heat(trap, new_chain, d_merge, move_bg)
 
                 if self.knobs.shuttle_fidelity_mode == "aggregate":
                     self._accumulate_shuttle(shuttle_id, dt, d_merge, etype="merge")
@@ -665,13 +728,6 @@ class Analyzer:
                     f_dyn = self._dyn_event_mult(dt, d_merge)
                     acc *= f_dyn
 
-                # 若启用 merge equalize，则把新链中所有 ion 的 heating 拉平
-                if self.knobs.merge_equalize and new_chain:
-                    avg_h = self._avg_nbar(new_chain)
-                    for ion in new_chain:
-                        self.ion_heating[ion] = avg_h
-
-                # 新增：完成 physical shuttle leg 统计
                 for ion in incoming:
                     self._finish_physical_leg(
                         ion_id=ion,
@@ -691,7 +747,6 @@ class Analyzer:
                         "f_dyn", round(f_dyn, 6)
                     )
 
-        # aggregate 模式下，若还有未 finalize 的 shuttle_id，补结算
         if self.knobs.shuttle_fidelity_mode == "aggregate":
             pending_ids = list(self._shuttle_acc_time.keys())
             for sid in pending_ids:
@@ -702,7 +757,6 @@ class Analyzer:
 
         self.final_fidelity = acc
 
-        # 最终导出三类 shuttle count
         self.split_count = int(self.op_count.get(Schedule.Split, 0))
         self.merge_count = int(self.op_count.get(Schedule.Merge, 0))
         self.move_count = int(self.op_count.get(Schedule.Move, 0))
@@ -733,17 +787,12 @@ class Analyzer:
 
         print(f"Fidelity: {self.final_fidelity}")
 
-        # ------------------------------------------------------
-        # 新增：明确打印三种 shuttle 计数口径
-        # ------------------------------------------------------
-
         print("\nShuttle count summary")
-        print(f"  logical_shuttle_count      = {self.logical_shuttle_count}   # High-level shuttle count aggregated by shuttle_id (same as old total_shuttle semantics)")
-        print(f"  physical_shuttle_leg_count = {self.physical_shuttle_leg_count}   # Most faithful to the paper: each complete trap-to-trap split+move+merge segment counts as 1 shuttle")
-        print(f"  split_count                = {self.split_count}   # Number of low-level split operations")
-        print(f"  merge_count                = {self.merge_count}   # Number of low-level merge operations")
-        print(f"  move_count                 = {self.move_count}   # Number of low-level move operations")
-
+        print(f"  logical_shuttle_count      = {self.logical_shuttle_count}   # High-level shuttle count aggregated by shuttle_id")
+        print(f"  physical_shuttle_leg_count = {self.physical_shuttle_leg_count}   # Paper-facing count: each complete trap-to-trap split+move+merge leg")
+        print(f"  split_count                = {self.split_count}")
+        print(f"  merge_count                = {self.merge_count}")
+        print(f"  move_count                 = {self.move_count}")
 
         if self.knobs.debug_summary:
             if self._gate_cnt > 0:
@@ -762,34 +811,23 @@ class Analyzer:
                 print(
                     f"[DBG SUMMARY] worst_B: Trap {worst[0]} -> {worst[1]:.6f} "
                     f"(heat_state={worst_h:.6f}, alpha_bg={self.knobs.alpha_bg}, "
-                    f"move_bg_fraction={self.knobs.move_bg_fraction}, model={self.knobs.bg_model})"
+                    f"move_bg_fraction={self.knobs.move_bg_fraction}, model={self.knobs.bg_model}, "
+                    f"strict_paper_mainline={self.strict_paper_mainline})"
                 )
 
     # ==========================================================
-    # 对外返回接口
+    # 对外接口
     # ==========================================================
     def analyze_and_return(self):
-        """
-        对外返回的结果中：
-        - total_shuttle 仍保留旧字段名，兼容你现有代码
-        - 但其值现在改为最贴近论文表述的 physical_shuttle_leg_count
-        - 同时额外返回 logical_shuttle_count / split_count / merge_count / move_count
-        """
         self.move_check()
 
-        # ------------------------------------------------------
-        # 最贴近论文表述的 shuttle count：
-        #   每一个完整 trap->trap 的 split+move+merge 段记 1 次
-        #
-        # 保留 total_shuttle 字段名，是为了兼容你现有脚本。
-        # ------------------------------------------------------
         paper_shuttle_count = int(self.physical_shuttle_leg_count)
 
         return {
             "fidelity": self.final_fidelity,
-            "total_shuttle": paper_shuttle_count,              # 兼容旧字段名；现在语义改为论文口径
+            "total_shuttle": paper_shuttle_count,
             "logical_shuttle_count": int(self.logical_shuttle_count),
-            "physical_shuttle_leg_count": int(self.physical_shuttle_leg_count),  # 最贴近论文表述
+            "physical_shuttle_leg_count": int(self.physical_shuttle_leg_count),
             "split_count": int(self.split_count),
             "merge_count": int(self.merge_count),
             "move_count": int(self.move_count),

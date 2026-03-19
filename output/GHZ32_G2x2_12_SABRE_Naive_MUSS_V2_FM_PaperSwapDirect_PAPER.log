@@ -1,0 +1,72 @@
+Simulation
+Program:           programs\GHZ32.qasm
+Machine:           G2x2
+Model:             MUSS_Params
+Ions/Region:       12
+Mapper:            SABRE
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  MUSS
+Scheduler Version: V2
+Analyzer Mode:     PAPER
+Arch Scale:        SMALL
+========== Gate Set Summary ==========
+cx: 31
+h: 1
+======================================
+Parse object map:
+{1: [0, 1], 2: [1, 2], 3: [2, 3], 4: [3, 4], 5: [4, 5], 6: [5, 6], 7: [6, 7], 8: [7, 8], 9: [8, 9], 10: [9, 10], 11: [10, 11], 12: [11, 12], 13: [12, 13], 14: [13, 14], 15: [14, 15], 16: [15, 16], 17: [16, 17], 18: [17, 18], 19: [18, 19], 20: [19, 20], 21: [20, 21], 22: [21, 22], 23: [22, 23], 24: [23, 24], 25: [24, 25], 26: [25, 26], 27: [26, 27], 28: [27, 28], 29: [28, 29], 30: [29, 30], 31: [30, 31]}
+Parse object graph:
+DiGraph with 32 nodes and 31 edges
+Using QubitMapSABRE2 mapper (matches muss_schedule2 paper version)
+Raw mapping:
+{0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 2, 24: 2, 25: 2, 26: 2, 27: 2, 28: 2, 29: 2, 30: 2, 31: 2}
+Initial layout policy: mapping_only + canonicalize_to_trap_layout
+Note: reorder_choice='Naive' is ignored for mapper 'SABRE'
+Skip qubit ordering for mapper 'SABRE'
+Initial qubit layout:
+{0: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22], 1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 2: [23, 24, 25, 26, 27, 28, 29, 30, 31], 3: []}
+Using MUSS Scheduler (V2) with SABRE Mapping
+Using muss_schedule2.py paper-faithful fixed version
+Analyzer shuttle mode: aggregate (detected shuttle_id annotations)
+Analyzer parameter wiring: alpha_bg=0.0001, T1=600000000.0, k_heating=0.001, epsilon_2q=3.90625e-05, strict_paper_mainline=False
+Analyzer mode: paper
+Program Finish Time: 1656 us
+OPCOUNTS Gate: 32 Split: 2 Move: 4 Merge: 2
+
+Two-qubit gate chain statistics
+Mean: 11.419354838709678 Max: 12.0
+Fidelity: 0.8425268400398372
+
+Shuttle count summary
+  logical_shuttle_count      = 2   # High-level shuttle count aggregated by shuttle_id
+  physical_shuttle_leg_count = 2   # Paper-facing count: each complete trap-to-trap split+move+merge leg
+  split_count                = 2
+  merge_count                = 2
+  move_count                 = 4
+[DBG SUMMARY] gates=32  gate_mult=0.850931  avg_gate_nbar=0.8773
+[DBG SUMMARY] logical_shuttles=2  shuttle_mult=0.990124  min_shuttle=0.9949
+[DBG SUMMARY] worst_B: Trap 0 -> 0.999770 (heat_state=2.300000, alpha_bg=0.0001, move_bg_fraction=0.0, model=exp, strict_paper_mainline=False)
+
+========== ANALYSIS RESULT ==========
+{'fidelity': 0.8425268400398372, 'total_shuttle': 2, 'logical_shuttle_count': 2, 'physical_shuttle_leg_count': 2, 'split_count': 2, 'merge_count': 2, 'move_count': 4, 'time': 1656}
+
+========== SHUTTLE TRACE ==========
+[SHUTTLE 0] ion=11  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (440 -> 520)  ion 11: T1 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (520 -> 534)  ion 11: Seg2 -> Seg4 via J1
+    - MOVE   (534 -> 548)  ion 11: Seg4 -> Seg0 via J0
+    - MERGE  (548 -> 628)  ion 11: Seg0 -> T0
+[SHUTTLE 1] ion=22  T0 -> T2  route=T0->J0->J1->T2
+    - SPLIT  (1068 -> 1188)  ion 22: T0 -> Seg0 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=22, i2=11)
+    - MOVE   (1188 -> 1202)  ion 22: Seg0 -> Seg4 via J0
+    - MOVE   (1202 -> 1216)  ion 22: Seg4 -> Seg3 via J1
+    - MERGE  (1216 -> 1296)  ion 22: Seg3 -> T2
+SplitSWAP: 1
+SchedulerFiredShuttle: 2
+ReportedTotalShuttle: 2
+----------------
