@@ -1,4 +1,5 @@
 import os
+import csv
 import subprocess as sp
 from pathlib import Path
 
@@ -131,10 +132,92 @@ def build_args(prog: str, machine: str, ions: str, family: str, version: str) ->
     return args
 
 
+
+def parse_summary_line_from_log(log_path: Path) -> dict | None:
+    """
+    从单个日志文件中提取 run.py 末尾打印的 SUMMARY 行。
+
+    期望格式：
+      SUMMARY|program=BV32|machine=G2x2|version=V6|mapper=SABRE2|total_shuttle=3|execution_time_us=1831|fidelity=0.827...
+
+    返回：
+      {
+        "程序": ...,
+        "架构": ...,
+        "版本": ...,
+        "映射": ...,
+        "穿梭次数": ...,
+        "执行时间 (μs)": ...,
+        "保真度": ...,
+      }
+
+    若日志中不存在 SUMMARY 行，则返回 None。
+    """
+    if not log_path.exists():
+        return None
+
+    summary_line = None
+    with open(log_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("SUMMARY|"):
+                summary_line = line
+
+    if summary_line is None:
+        return None
+
+    parts = summary_line.split("|")[1:]
+    kv = {}
+    for item in parts:
+        if "=" not in item:
+            continue
+        k, v = item.split("=", 1)
+        kv[k] = v
+
+    return {
+        "程序": kv.get("program", ""),
+        "架构": kv.get("machine", ""),
+        "版本": kv.get("version", ""),
+        "映射": kv.get("mapper", ""),
+        "穿梭次数": kv.get("total_shuttle", ""),
+        "执行时间 (μs)": kv.get("execution_time_us", ""),
+        "保真度": kv.get("fidelity", ""),
+    }
+
+
+def write_summary_markdown(rows: list[dict], out_path: Path) -> None:
+    """
+    将汇总结果写成 Markdown 表格，便于直接查看或粘贴到文档中。
+    """
+    headers = ["程序", "架构", "版本", "映射", "穿梭次数", "执行时间 (μs)", "保真度"]
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write("| " + " | ".join(headers) + " |\n")
+        f.write("|" + "|".join(["---"] * len(headers)) + "|\n")
+        for row in rows:
+            f.write("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |\n")
+
+
+def write_summary_csv(rows: list[dict], out_path: Path) -> None:
+    """
+    将汇总结果写成 CSV，方便后续用 Excel / pandas 继续处理。
+    """
+    headers = ["程序", "架构", "版本", "映射", "穿梭次数", "执行时间 (μs)", "保真度"]
+
+    with open(out_path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=headers)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
+
 # ============================================================
 # 运行
 # ============================================================
 def main() -> None:
+    summary_rows = []
+
     print("=" * 72)
     print("Batch run configuration")
     print(f"Programs       : {PROG}")
@@ -167,6 +250,20 @@ def main() -> None:
                 else:
                     print(f"[OK]   Finished: {log_path}")
 
+                    row = parse_summary_line_from_log(log_path)
+                    if row is None:
+                        print(f"[WARN] No SUMMARY line found in: {log_path}")
+                    else:
+                        summary_rows.append(row)
+
+    summary_md_path = OUTPUT_DIR / "summary.md"
+    summary_csv_path = OUTPUT_DIR / "summary.csv"
+
+    write_summary_markdown(summary_rows, summary_md_path)
+    write_summary_csv(summary_rows, summary_csv_path)
+
+    print(f"Summary markdown: {summary_md_path}")
+    print(f"Summary csv     : {summary_csv_path}")
     print("All jobs finished.")
 
 

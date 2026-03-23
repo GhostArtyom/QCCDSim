@@ -133,10 +133,42 @@ def canonicalize_mapping_to_layout(mapping, machine_obj):
     return output_layout
 
 
-def describe_layout_policy(mapper_choice: str, reorder_choice: str) -> str:
+def is_mapping_bundle(mapping, machine_obj) -> bool:
+    """
+    判断 mapper 输出是否为新的结构化 bundle：
+      {
+          "layout": q->trap,
+          "trap_to_qubits": trap->ordered_qubit_list
+      }
+    """
+    if not isinstance(mapping, dict):
+        return False
+    if "layout" not in mapping or "trap_to_qubits" not in mapping:
+        return False
+    if not isinstance(mapping["layout"], dict):
+        return False
+    if not is_trap_layout(mapping["trap_to_qubits"], machine_obj):
+        return False
+    return True
+
+
+def extract_layout_bundle(mapping, machine_obj):
+    """
+    将 mapper 输出统一拆解成两部分：
+      - layout_mapping: q->trap 或旧式原始输出
+      - mapper_trap_layout: 若 mapper 已提供有序 trap 布局，则直接返回；否则为 None
+    """
+    if is_mapping_bundle(mapping, machine_obj):
+        return mapping["layout"], canonicalize_mapping_to_layout(mapping["trap_to_qubits"], machine_obj)
+    return mapping, None
+
+
+def describe_layout_policy(mapper_choice: str, reorder_choice: str, raw_mapping=None, machine_obj=None) -> str:
     """
     用于日志打印，描述本次 initial layout 的生成策略。
     """
+    if machine_obj is not None and is_mapping_bundle(raw_mapping, machine_obj):
+        return "mapping_bundle(layout + trap_to_qubits_from_mapper)"
     if should_run_qubit_ordering(mapper_choice):
         return f"mapping + qubit_ordering({reorder_choice})"
     return "mapping_only + canonicalize_to_trap_layout"
@@ -317,7 +349,7 @@ elif mapper_choice == "SABRE":
             print("Using SABRE2 mapper (matches muss_schedule5 improved version)")
             qm = QubitMapSABRE2(ip, m)
         elif sched_version in ["V6", "6", "MUSS_SCHEDULE6", "INNOV4"]:
-            print("Using SABRE2 mapper (matches muss_schedule6 improved version)")
+            print("Using QubitMapSABRE2 mapper (matches muss_schedule6 improved version)")
             qm = QubitMapSABRE2(ip, m)
         else:
             print(f"Warning: Unknown scheduler version '{sched_version}', fallback to SABRE2")
@@ -334,35 +366,46 @@ raw_mapping = qm.compute_mapping()
 print("Raw mapping:")
 print(raw_mapping)
 
+layout_mapping, mapper_trap_layout = extract_layout_bundle(raw_mapping, m)
 
 # ============================================================
 # 初始布局生成：
 #   - 老 mapper：mapping -> QubitOrdering -> trap_id -> [ion_ids]
-#   - Trivial/SABRE：跳过 ordering，但仍要 canonicalize 成 trap_id -> [ion_ids]
+#   - Trivial：跳过 ordering，但仍要 canonicalize 成 trap_id -> [ion_ids]
+#   - 新 SABRE2：若 mapper 已直接返回有序 trap 布局，则直接使用该布局
 # ============================================================
-print(f"Initial layout policy: {describe_layout_policy(mapper_choice, reorder_choice)}")
+print(f"Initial layout policy: {describe_layout_policy(mapper_choice, reorder_choice, raw_mapping, m)}")
 
 run_ordering = should_run_qubit_ordering(mapper_choice)
 
-if not run_ordering:
-    # 对论文复现路径，不做额外 ordering
-    # 但必须把 qubit->trap 形式转成 scheduler 所需的 trap->list 形式
+if mapper_trap_layout is not None:
+    # 对新的结构化 mapper 输出，直接使用 mapper 内部形成的有序 trap 布局
+    # 这里不再做额外 qubit ordering，也不再做 canonicalize 重建，以避免抹掉 SABRE 的 pass 结果。
+    if reorder_choice not in [None, "", "None", "NONE", "Disabled", "DISABLED"]:
+        print(f"Note: reorder_choice='{reorder_choice}' is ignored because mapper already provides ordered trap layout")
+
+    print(f"Use mapper-provided ordered trap layout for mapper '{mapper_choice}'")
+    init_qubit_layout = mapper_trap_layout
+
+elif not run_ordering:
+    # 对论文复现路径中的旧式输出，不做额外 ordering
+    # 但仍需把 q->trap 形式转成 scheduler 所需的 trap->list 形式
     if reorder_choice not in [None, "", "None", "NONE", "Disabled", "DISABLED"]:
         print(f"Note: reorder_choice='{reorder_choice}' is ignored for mapper '{mapper_choice}'")
 
     print(f"Skip qubit ordering for mapper '{mapper_choice}'")
-    init_qubit_layout = canonicalize_mapping_to_layout(raw_mapping, m)
+    init_qubit_layout = canonicalize_mapping_to_layout(layout_mapping, m)
 else:
     # 对老 mapper，保留历史行为
     print(f"Apply qubit ordering for mapper '{mapper_choice}' with mode '{reorder_choice}'")
 
-    # 这里仍然要求传给 QubitOrdering 的是 qubit->trap 格式
+    # 这里仍然要求传给 QubitOrdering 的是 q->trap 格式
     # 如果某个老 mapper 已经直接返回了 trap->list（例如 Greedy），则无需再 ordering
-    if is_trap_layout(raw_mapping, m):
+    if is_trap_layout(layout_mapping, m):
         print("Mapper output is already trap-layout; skip ordering and use it directly")
-        init_qubit_layout = canonicalize_mapping_to_layout(raw_mapping, m)
+        init_qubit_layout = canonicalize_mapping_to_layout(layout_mapping, m)
     else:
-        qo = QubitOrdering(ip, m, raw_mapping)
+        qo = QubitOrdering(ip, m, layout_mapping)
         if reorder_choice == "Naive":
             init_qubit_layout = qo.reorder_naive()
         elif reorder_choice == "Fidelity":
@@ -490,3 +533,17 @@ if hasattr(scheduler, "shuttle_counter"):
 
 print("ReportedTotalShuttle:", result.get("total_shuttle"))
 print("----------------")
+program_name = openqasm_file_name.split("/")[-1].replace(".qasm", "")
+mapper_label = "SABRE2" if mapper_choice == "SABRE" else mapper_choice
+
+summary_line = (
+    "SUMMARY|"
+    f"program={program_name}|"
+    f"machine={machine_type}|"
+    f"version={sched_version}|"
+    f"mapper={mapper_label}|"
+    f"total_shuttle={result.get('total_shuttle')}|"
+    f"execution_time_us={result.get('time')}|"
+    f"fidelity={result.get('fidelity')}"
+)
+print(summary_line)

@@ -625,26 +625,49 @@ class QubitMapSABRE1:
         # 返回产生最小代价的那个“初始布局”
         return best_mapping
 
-
-
-# 论文标准版。
-# mappers.py
 class QubitMapSABRE2:
     """
-    Paper-faithful SABRE2 mapper for MUSS-TI small/large flows.
+    最终推荐版 SABRE2（面向论文小规模 Table 2 复现）。
 
-    Principles:
-      1) Mapping pass runs on the 2Q-only dependency DAG.
-      2) Seed layout uses the existing trivial mapper.
-      3) Forward pass on G, backward pass on the true reversed DAG G^R.
-      4) Each pass follows SABRE principles:
-           - execute all currently local front-layer gates
-           - otherwise choose one relocation candidate using
-                 H = avg(front distances) + W * avg(extended-set distances)
-      5) Strict trap-capacity enforcement with LRU victim replacement.
+    设计原则：
+      1) 严格运行在 2Q-only dependency DAG 上；
+      2) seed layout 使用论文中的 Trivial mapping；
+      3) 使用两次搜索：
+           - 正向 G
+           - 反向 G^R
+      4) 每个 pass 中遵循 SABRE 原则：
+           - 若 front layer 中已有可本地执行门，则优先执行这些门；
+           - 否则仅考虑论文允许的 relocation 候选：
+                 q1 -> trap(q2)
+                 q2 -> trap(q1)
+           - 使用论文主代价函数：
+                 H = avg(front distances) + W * avg(extended distances)
+      5) 严格 trap 容量限制，trap 满时仅使用 LRU victim replacement；
+      6) 保留 SABRE pass 内部形成的 trap 内 qubit 顺序，不再丢弃；
+      7) 输出结构化 bundle：
+           - layout: q -> trap
+           - trap_to_qubits: trap -> ordered qubit list
+
+    为什么这是“最终推荐版”：
+      - 相比最早版本：修复了“只返回 q->trap，导致 trap 内链顺序丢失”的问题；
+      - 相比过强增强版：去掉了热点 qubit 惩罚、working-set gain 等额外偏好，
+        避免在 BV / ADDER / QFT 这类 benchmark 上形成过强的局部团块化；
+      - 保留的 tie-break 只有：
+           1) 论文主代价 H
+           2) front 中可立即本地执行门数（越多越好）
+           3) front 总距离和（越小越好）
+           4) moving_q / target_t / gate_id 稳定 tie-break
+        这几项都属于“同分时更稳地落地论文 SABRE”，而不是论文外的大新启发式。
     """
 
-    def __init__(self, parse_obj, machine_obj, excess_capacity=0, extended_set_size=20, extended_weight=0.5):
+    def __init__(
+        self,
+        parse_obj,
+        machine_obj,
+        excess_capacity=0,
+        extended_set_size=20,
+        extended_weight=0.5,
+    ):
         self.parse_obj = parse_obj
         self.machine_obj = machine_obj
         self.excess_capacity = excess_capacity
@@ -654,7 +677,14 @@ class QubitMapSABRE2:
         if not hasattr(self.machine_obj, "dist_cache") or not self.machine_obj.dist_cache:
             self.machine_obj.precompute_distances()
 
+    # ============================================================
+    # 基础工具函数
+    # ============================================================
     def _effective_capacity(self, trap_id):
+        """
+        返回 trap 的有效容量。
+        excess_capacity > 0 时，可用于给后续调度预留少量空位。
+        """
         return self.machine_obj.traps[trap_id].capacity - self.excess_capacity
 
     def _all_trap_ids(self):
@@ -669,6 +699,15 @@ class QubitMapSABRE2:
         return tuple(self.parse_obj.cx_gate_map[gate_id])
 
     def _load_layout(self, mapping):
+        """
+        将 q -> trap 装载成两份运行时状态：
+          - loads: trap 当前负载
+          - trap_to_qubits: trap 当前有序 qubit 列表
+
+        注意：
+        这里保留 dict 的遍历顺序，因此若初始 mapping 本身有稳定顺序，
+        该顺序会自然成为 SABRE pass 的起始链顺序。
+        """
         loads = {t: 0 for t in self._all_trap_ids()}
         trap_to_qubits = {t: [] for t in self._all_trap_ids()}
         for q, t in mapping.items():
@@ -676,24 +715,55 @@ class QubitMapSABRE2:
             trap_to_qubits[t].append(q)
         return loads, trap_to_qubits
 
+    def _normalize_trap_layout(self, trap_to_qubits):
+        """
+        规范化 trap -> ordered qubit list：
+          - 补齐空 trap
+          - 保证每个条目都是普通 Python list
+        """
+        out = {}
+        for t in self._all_trap_ids():
+            out[t] = list(trap_to_qubits.get(t, []))
+        return out
+
+    # ============================================================
+    # DAG 构造
+    # ============================================================
     def _build_two_qubit_dag(self):
+        """
+        优先使用 parse_obj.twoq_gate_graph；
+        若不存在，则从 gate_graph 中截取 2Q 子图。
+        """
         dag = getattr(self.parse_obj, "twoq_gate_graph", None)
         if dag is None or dag.number_of_nodes() == 0:
-            dag = self.parse_obj.gate_graph.subgraph(list(self.parse_obj.cx_gate_map.keys())).copy()
+            dag = self.parse_obj.gate_graph.subgraph(
+                list(self.parse_obj.cx_gate_map.keys())
+            ).copy()
         if not nx.is_directed_acyclic_graph(dag):
             raise ValueError("SABRE2 requires a 2Q-only DAG.")
         return dag
 
     def _build_reversed_two_qubit_dag(self, dag_2q):
+        """
+        构造真反向 DAG G^R。
+        """
         rev = dag_2q.reverse(copy=True)
         if not nx.is_directed_acyclic_graph(rev):
             raise ValueError("Reversed 2Q DAG is not a DAG.")
         return rev
 
     def _trivial_seed_mapping(self):
-        trivial_mapper = QubitMapTrivial(self.parse_obj, self.machine_obj, self.excess_capacity)
+        """
+        论文要求：SABRE 的初始种子布局来自 Trivial mapping。
+        """
+        trivial_mapper = QubitMapTrivial(
+            self.parse_obj, self.machine_obj, self.excess_capacity
+        )
         return trivial_mapper.compute_mapping()
 
+    # ============================================================
+    # SABRE 主评分与辅助统计
+    # ============================================================
     def _gate_distance_under_layout(self, gate_id, layout):
         q1, q2 = self._gate_qubits(gate_id)
         t1 = layout[q1]
@@ -704,9 +774,14 @@ class QubitMapSABRE2:
         return [g for g in dag.nodes if g not in done_set and indegree_map[g] == 0]
 
     def _extended_set(self, dag, front, done_set):
+        """
+        论文式 extended set：
+        从 front layer 往后做宽搜，取有限大小的后继集合。
+        """
         ext = []
         seen = set(front)
         queue = list(front)
+
         while queue and len(ext) < self.extended_set_size:
             cur = queue.pop(0)
             for succ in dag.successors(cur):
@@ -720,22 +795,82 @@ class QubitMapSABRE2:
         return ext
 
     def _heuristic_cost(self, layout, front, ext):
+        """
+        论文 SABRE 主代价函数：
+            H = avg(front distances) + W * avg(extended distances)
+        """
         if not front:
             return 0.0
-        front_cost = sum(self._gate_distance_under_layout(g, layout) for g in front) / float(len(front))
+
+        front_cost = sum(
+            self._gate_distance_under_layout(g, layout) for g in front
+        ) / float(len(front))
+
         if not ext:
             return front_cost
-        ext_cost = sum(self._gate_distance_under_layout(g, layout) for g in ext) / float(len(ext))
+
+        ext_cost = sum(
+            self._gate_distance_under_layout(g, layout) for g in ext
+        ) / float(len(ext))
+
         return front_cost + self.extended_weight * ext_cost
 
+    def _count_executable_front_gates(self, front, layout):
+        """
+        统计在给定 layout 下，front layer 中有多少门已经能本地执行。
+        这是 tie-break 用的辅助量，不替代论文主代价函数 H。
+        """
+        cnt = 0
+        for g in front:
+            q1, q2 = self._gate_qubits(g)
+            if layout[q1] == layout[q2]:
+                cnt += 1
+        return cnt
+
+    def _total_front_distance(self, front, layout):
+        """
+        front layer 总 trap 距离和。
+        仅用于 H 相同时的 tie-break。
+        """
+        return sum(self._gate_distance_under_layout(g, layout) for g in front)
+
+    # ============================================================
+    # 容量与 LRU replacement
+    # ============================================================
     def _select_lru_victim(self, target_trap, trap_to_qubits, last_used, forbidden=None):
+        """
+        从目标 trap 中选择 LRU victim。
+        forbidden 中的 qubit 不允许被驱逐（通常是当前 gate 的 partner）。
+        """
         forbidden = forbidden or set()
         candidates = [q for q in trap_to_qubits[target_trap] if q not in forbidden]
         if not candidates:
             return None
         return min(candidates, key=lambda q: last_used.get(q, -1))
 
-    def _apply_relocation(self, layout, loads, trap_to_qubits, last_used, moving_qubit, target_trap, partner_qubit=None):
+    def _apply_relocation(
+        self,
+        layout,
+        loads,
+        trap_to_qubits,
+        last_used,
+        moving_qubit,
+        target_trap,
+        partner_qubit=None,
+    ):
+        """
+        执行一个 relocation 候选动作：
+          - 将 moving_qubit 迁到 target_trap；
+          - 若 target_trap 已满，则使用 LRU victim replacement；
+          - 同时维护：
+                layout: q -> trap
+                loads: trap 当前负载
+                trap_to_qubits: trap 内部有序 qubit 列表
+
+        注意：
+        这里维护的 trap_to_qubits 顺序不是“额外 heuristic”，
+        只是把 SABRE pass 自然产生的顺序保留下来。
+        """
         new_layout = dict(layout)
         new_loads = dict(loads)
         new_trap_to_qubits = {t: list(qs) for t, qs in trap_to_qubits.items()}
@@ -744,6 +879,7 @@ class QubitMapSABRE2:
         if src_trap == target_trap:
             return new_layout, new_loads, new_trap_to_qubits
 
+        # 目标 trap 还有空位：直接迁移
         if new_loads[target_trap] < self._effective_capacity(target_trap):
             new_trap_to_qubits[src_trap].remove(moving_qubit)
             new_trap_to_qubits[target_trap].append(moving_qubit)
@@ -752,6 +888,7 @@ class QubitMapSABRE2:
             new_layout[moving_qubit] = target_trap
             return new_layout, new_loads, new_trap_to_qubits
 
+        # 目标 trap 已满：按论文小规模解释，使用 LRU replacement
         victim = self._select_lru_victim(
             target_trap,
             new_trap_to_qubits,
@@ -761,41 +898,127 @@ class QubitMapSABRE2:
         if victim is None:
             return None, None, None
 
+        # 先把 victim 送回 src_trap
         new_trap_to_qubits[target_trap].remove(victim)
         new_trap_to_qubits[src_trap].append(victim)
         new_layout[victim] = src_trap
 
+        # 再把 moving_qubit 放入 target_trap
         new_trap_to_qubits[src_trap].remove(moving_qubit)
         new_trap_to_qubits[target_trap].append(moving_qubit)
         new_layout[moving_qubit] = target_trap
 
+        # 负载不变，因此 new_loads 不需要修改
         return new_layout, new_loads, new_trap_to_qubits
 
+    # ============================================================
+    # 候选动作生成与选择
+    # ============================================================
     def _generate_candidate_actions(self, front, layout, loads, trap_to_qubits, last_used):
+        """
+        仅针对 front layer 中当前仍不本地的门，生成两类论文内候选：
+          - q1 -> trap(q2)
+          - q2 -> trap(q1)
+
+        不引入 front 之外的任意迁移，不做论文外的大范围动作集扩展。
+        """
         candidates = []
+
         for g in front:
             q1, q2 = self._gate_qubits(g)
             t1 = layout[q1]
             t2 = layout[q2]
+
+            # 已经本地可执行的门，不需要生成 relocation
             if t1 == t2:
                 continue
 
+            # 候选1：把 q1 迁到 q2 所在 trap
             cand_layout, cand_loads, cand_trap_to_qubits = self._apply_relocation(
-                layout, loads, trap_to_qubits, last_used,
-                moving_qubit=q1, target_trap=t2, partner_qubit=q2
+                layout,
+                loads,
+                trap_to_qubits,
+                last_used,
+                moving_qubit=q1,
+                target_trap=t2,
+                partner_qubit=q2,
             )
             if cand_layout is not None:
-                candidates.append((g, q1, t2, cand_layout, cand_loads, cand_trap_to_qubits))
+                candidates.append(
+                    (g, q1, t2, cand_layout, cand_loads, cand_trap_to_qubits)
+                )
 
+            # 候选2：把 q2 迁到 q1 所在 trap
             cand_layout, cand_loads, cand_trap_to_qubits = self._apply_relocation(
-                layout, loads, trap_to_qubits, last_used,
-                moving_qubit=q2, target_trap=t1, partner_qubit=q1
+                layout,
+                loads,
+                trap_to_qubits,
+                last_used,
+                moving_qubit=q2,
+                target_trap=t1,
+                partner_qubit=q1,
             )
             if cand_layout is not None:
-                candidates.append((g, q2, t1, cand_layout, cand_loads, cand_trap_to_qubits))
+                candidates.append(
+                    (g, q2, t1, cand_layout, cand_loads, cand_trap_to_qubits)
+                )
+
         return candidates
 
+    def _choose_best_candidate(self, front, ext, candidates):
+        """
+        选择最佳 relocation 候选。
+
+        主排序仍严格遵循论文 SABRE 的 H 代价函数；
+        仅在 H 完全相同或非常接近时，使用更稳定的 tie-break：
+          1) H 越小越好
+          2) 动作后 front 中可立即执行门数越多越好
+          3) front 总距离和越小越好
+          4) moving_q / target_t / gate_id 越小越好（稳定性）
+        """
+        best_payload = None
+
+        for gate_id, moving_q, target_t, cand_layout, cand_loads, cand_trap_to_qubits in candidates:
+            score = self._heuristic_cost(cand_layout, front, ext)
+            local_exec = self._count_executable_front_gates(front, cand_layout)
+            front_dist_sum = self._total_front_distance(front, cand_layout)
+
+            key = (
+                score,
+                -local_exec,
+                front_dist_sum,
+                moving_q,
+                target_t,
+                gate_id,
+            )
+
+            if best_payload is None or key < best_payload[-1]:
+                best_payload = (
+                    gate_id,
+                    moving_q,
+                    target_t,
+                    cand_layout,
+                    cand_loads,
+                    cand_trap_to_qubits,
+                    key,
+                )
+
+        return best_payload
+
+    # ============================================================
+    # 单次 SABRE pass
+    # ============================================================
     def _simulate_pass(self, dag, initial_mapping):
+        """
+        执行一次 SABRE pass。
+
+        返回：
+          - layout: q -> trap
+          - trap_to_qubits: trap -> ordered qubit list
+
+        与旧版相比，这里不再只返回 layout，而是同时返回 trap_to_qubits，
+        以保留 SABRE 搜索过程中形成的 trap 顺序。
+        """
         layout = dict(initial_mapping)
         loads, trap_to_qubits = self._load_layout(layout)
         indegree_map = {g: dag.in_degree(g) for g in dag.nodes}
@@ -825,31 +1048,56 @@ class QubitMapSABRE2:
                 continue
 
             ext = self._extended_set(dag, front, done_set)
-            candidates = self._generate_candidate_actions(front, layout, loads, trap_to_qubits, last_used)
-            if not candidates:
-                raise RuntimeError("SABRE2: no executable gate and no valid relocation candidate.")
+            candidates = self._generate_candidate_actions(
+                front, layout, loads, trap_to_qubits, last_used
+            )
 
-            best_payload = None
-            for gate_id, moving_q, target_t, cand_layout, cand_loads, cand_trap_to_qubits in candidates:
-                score = self._heuristic_cost(cand_layout, front, ext)
-                key = (score, moving_q, target_t, gate_id)
-                if best_payload is None or key < best_payload[-1]:
-                    best_payload = (gate_id, moving_q, target_t, cand_layout, cand_loads, cand_trap_to_qubits, key)
+            if not candidates:
+                raise RuntimeError(
+                    "SABRE2: no executable gate and no valid relocation candidate."
+                )
+
+            best_payload = self._choose_best_candidate(front, ext, candidates)
 
             _, moved_q, _, layout, loads, trap_to_qubits, _ = best_payload
             timestamp += 1
             last_used[moved_q] = timestamp
 
-        return layout
+        return dict(layout), self._normalize_trap_layout(trap_to_qubits)
 
+    # ============================================================
+    # 对外接口
+    # ============================================================
     def compute_mapping(self):
+        """
+        返回结构化 bundle：
+
+        {
+            "layout": {q: trap_id, ...},
+            "trap_to_qubits": {trap_id: [q1, q2, ...], ...},
+        }
+
+        这样 run.py 可以：
+          - 若只想看传统 mapping，可读 bundle["layout"]
+          - 若想保留 SABRE pass 内部形成的 trap 链顺序，可直接使用 bundle["trap_to_qubits"]
+        """
         dag_2q = self._build_two_qubit_dag()
         dag_2q_rev = self._build_reversed_two_qubit_dag(dag_2q)
 
         seed_mapping = self._trivial_seed_mapping()
-        mapping_after_forward = self._simulate_pass(dag_2q, seed_mapping)
-        mapping_after_backward = self._simulate_pass(dag_2q_rev, mapping_after_forward)
-        return mapping_after_backward
+
+        # 正向 pass：G
+        mapping_after_forward, _ = self._simulate_pass(dag_2q, seed_mapping)
+
+        # 反向 pass：G^R
+        mapping_after_backward, trap_layout_after_backward = self._simulate_pass(
+            dag_2q_rev, mapping_after_forward
+        )
+
+        return {
+            "layout": dict(mapping_after_backward),
+            "trap_to_qubits": self._normalize_trap_layout(trap_layout_after_backward),
+        }
 
 
 # 严格离子阱容量限制版，加进行多次sabre
