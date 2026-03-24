@@ -44,7 +44,6 @@ from machine import Trap, Segment, Junction
 # 这是本文件最关键的“干净消融”改动之一。
 # from rebalance import *
 
-
 class MUSSSchedule:
     """
     输入:
@@ -149,30 +148,6 @@ class MUSSSchedule:
         for t_ions in trap_ions.values():
             all_ions.update(t_ions)
         self.ion_last_used = {ion: -1 for ion in all_ions}
-
-        # =====================================================
-        # 方案二：short-term sticky meeting trap（仅用于小规模 3.2 严格版的轻量 tie-break）
-        #
-        # 设计目标：
-        #   - 不改变论文 3.2 的主流程：frontier / FCFS / target selection / local LRU conflict handling；
-        #   - 只在“available + level”同级候选内部，增加一个非常轻量的“最近工作区复用”偏好，
-        #     以缓解 G2x3 上中心 qubit / 当前工作集在多个 meeting trap 之间来回震荡的问题；
-        #   - 不引入 3.3 look-ahead，不引入全局优化器，不引入 rebalance。
-        #
-        # 语义：
-        #   - 当某个 ion 刚在某个 remote meeting trap 上完成一次 2Q gate，
-        #     且后续很短的一段时间内它仍然活跃时，
-        #     在多个同优先级候选 target trap 中，优先继续复用这个最近工作 trap。
-        #
-        # 注意：
-        #   - 这里只是 tie-break，不替代论文的 available / closest-in-level / distance；
-        #   - 为避免“黏住”过久，只保留一个很短的时间窗口。
-        # =====================================================
-        self.recent_remote_trap_by_ion = {}
-        self.recent_remote_time_by_ion = {}
-        self.sticky_trap_horizon_us = int(
-            getattr(self.machine.mparams, "sticky_trap_horizon_us", 600)
-        )
 
         # 保护“当前 gate 涉及的离子”不被驱逐
         # 注意：在本无-rebalance版本中，这个集合仍保留，
@@ -807,67 +782,24 @@ class MUSSSchedule:
             return bool(getattr(trap, "supports_twoq"))
         return True
 
-    def _preferred_sticky_traps(self, ion1, ion2, fire_time):
-        """
-        返回当前 gate 可优先复用的“最近工作 trap”集合。
-
-        规则：
-          1) 只看最近一次 remote 2Q gate 留下的 meeting trap；
-          2) 只保留时间上仍在短窗口内的记录；
-          3) 若两个参与离子都带有最近工作 trap，则都纳入候选集合。
-
-        这不是论文外的新目标函数，只是小规模 3.2 严格版中的轻量 tie-break 信息。
-        """
-        preferred = set()
-        horizon = int(getattr(self, "sticky_trap_horizon_us", 0))
-
-        for ion in [ion1, ion2]:
-            if ion not in self.recent_remote_trap_by_ion:
-                continue
-            last_t = self.recent_remote_time_by_ion.get(ion, None)
-            if last_t is None:
-                continue
-            if horizon > 0 and (int(fire_time) - int(last_t)) > horizon:
-                continue
-            preferred.add(self.recent_remote_trap_by_ion[ion])
-
-        return preferred
-
-    def _record_recent_remote_meeting(self, ion1, ion2, trap_id, finish_time):
-        """
-        记录一次 remote 2Q gate 刚刚使用过的 meeting trap。
-
-        这里只在“原先两颗离子不在同一 trap，需要 remote 会合”的路径中调用；
-        对完全本地的 2Q gate 不更新该状态，避免把普通 local trap 误当成工作区锚点。
-        """
-        self.recent_remote_trap_by_ion[ion1] = trap_id
-        self.recent_remote_trap_by_ion[ion2] = trap_id
-        self.recent_remote_time_by_ion[ion1] = int(finish_time)
-        self.recent_remote_time_by_ion[ion2] = int(finish_time)
-
-    def _candidate_meeting_traps(self, ion1_trap, ion2_trap, ion1, ion2, fire_time):
+    def _candidate_meeting_traps(self, ion1_trap, ion2_trap):
         """
         返回论文 3.2 语义下的“目标执行 trap 候选列表”。
 
         这里严格只做“目标选择”本身，不掺入 route legality。
-        也就是说，本函数仍按论文文字里明确出现的偏好排序：
+        也就是说，本函数只按照论文文字里明确出现的偏好排序：
 
           1) available：当前目标 trap 是否能直接容纳本门所需离子数
           2) closest in level：目标 trap 的 level 是否更接近当前两颗离子所在层级
-          3) （轻量 sticky tie-break）若本 gate 的参与离子最近刚在某个 meeting trap 上完成 remote gate，
-             则在同级候选中优先继续复用这个最近工作 trap
-          4) distance：当前两颗离子搬运到目标 trap 的总图距离是否更小
-          5) trap id：仅作稳定 tie-break，避免非确定性
+          3) distance：当前两颗离子搬运到目标 trap 的总图距离是否更小
+          4) trap id：仅作稳定 tie-break，避免非确定性
 
         注意：
         - 这里显式去掉 endpoint_bias。论文没有“同分优先 endpoint”的表述，
           因此严格版不再保留这条工程偏好。
-        - sticky 偏好只是一层轻量 tie-break，不替代论文主排序项；
-          它的作用是缓解 G2x3 上中心工作区在多个 meeting trap 间震荡。
         - route 是否可达不在这里判断；论文流程更接近“先选目标，再做 routing”。
         """
         src_level_ref = max(self._trap_level(ion1_trap), self._trap_level(ion2_trap))
-        preferred_sticky_traps = self._preferred_sticky_traps(ion1, ion2, fire_time)
         candidates = []
 
         for trap in self.machine.traps:
@@ -892,13 +824,7 @@ class MUSSSchedule:
                 self.machine.dist_cache.get((ion1_trap, tid), 10 ** 6)
                 + self.machine.dist_cache.get((ion2_trap, tid), 10 ** 6)
             )
-            sticky_penalty = 0 if tid in preferred_sticky_traps else 1
-
-            # 关键点：
-            #   - available / level 仍然是论文主导项；
-            #   - sticky 只在同级候选中发挥“最近工作区复用”的 tie-break 作用；
-            #   - 再之后才比较当前 distance。
-            candidates.append((available_penalty, level_gap, sticky_penalty, dist_sum, tid))
+            candidates.append((available_penalty, level_gap, dist_sum, tid))
 
         candidates.sort()
         return [x[-1] for x in candidates]
@@ -972,13 +898,13 @@ class MUSSSchedule:
                 return False
         return True
 
-    def _choose_partition_target(self, ion1_trap, ion2_trap, ion1, ion2, fire_time, current_gate_idx):
+    def _choose_partition_target(self, ion1_trap, ion2_trap, ion1, ion2, current_gate_idx):
         """
         严格版目标选择：只做“论文 3.2 里的目标执行 trap 选择”。
 
         本函数不检查 route legality，只返回按论文偏好排序后的候选目标及其搬运计划。
         这样可以把流程明确拆成两步：
-          第一步：按 available + closest-in-level + sticky working-area tie-break + current distance 选择 target
+          第一步：按 available + closest-in-level + current distance 选择 target
           第二步：对选中的 target 再单独检查 routing 是否可行
 
         返回：
@@ -995,9 +921,7 @@ class MUSSSchedule:
         ordered_choices = []
         src_level_ref = max(self._trap_level(ion1_trap), self._trap_level(ion2_trap))
 
-        for target in self._candidate_meeting_traps(
-            ion1_trap, ion2_trap, ion1, ion2, current_gate_idx
-        ):
+        for target in self._candidate_meeting_traps(ion1_trap, ion2_trap):
             plan_info = self._build_move_plan_for_target(
                 ion1_trap, ion2_trap, ion1, ion2, target
             )
@@ -1194,7 +1118,7 @@ class MUSSSchedule:
         cur_time = fire_time
 
         ordered_choices = self._choose_partition_target(
-            ion1_trap, ion2_trap, ion1, ion2, fire_time, gate_idx
+            ion1_trap, ion2_trap, ion1, ion2, gate_idx
         )
         if not ordered_choices:
             return False, None, cur_time
@@ -1309,10 +1233,6 @@ class MUSSSchedule:
             )
             self.gate_finish_times[gate] = clk + gate_duration
             finish_time = clk + gate_duration
-
-            # 方案二：记录最近一次 remote meeting trap。
-            # 这只影响后续同优先级 target 的轻量 tie-break，不改变论文 3.2 的主流程。
-            self._record_recent_remote_meeting(ion1, ion2, dest_trap, finish_time)
 
         self.ion_last_used[ion1] = finish_time
         self.ion_last_used[ion2] = finish_time
