@@ -1981,7 +1981,6 @@ class QubitMapSABRE6:
 # 暴力聚类（Mapper产生的超载）” + “全局最优疏散，动态版本，传给调度器超载版本的映射。对应的muss调度要进行修改，采用第四版本的调度。
 # mappers.py
 
-
 class QubitMapSABRE7:
     def __init__(self, parse_obj, machine_obj, excess_capacity=0):
         self.parse_obj = parse_obj
@@ -2080,33 +2079,149 @@ class QubitMapSABRE7:
         # 直接返回超载的 Map
         return best_mapping
     
-#论文sabre相比下的弱化版，之前是因为穿梭次数过低导致的弱化，后来发现是因为容量限制失效，现在添加上容量限制后，穿梭次数均明确增加，之前结果错误，该映射失去价值，只能作为消融版本。
-class QubitMapTrivialPaper:
+    
+class QubitMapSABRELarge:
     """
-    Paper-faithful trivial mapper.
+    面向 large / EML-QCCD 的 SABRE 初始映射器。
 
-    Rule from MUSS-TI paper:
-      - prioritize zones ordered by their levels from highest to lowest
-      - place qubits sequentially in that order
+    目标：
+      1) 支持每个 QCCD 的最大载荷约束（默认 32 qubits）；
+      2) 支持 module-aware 初始映射：
+           - 先把逻辑 qubit 映射到 qccd/module
+           - 再在 module 内做 zone-aware trap 落位
+      3) 支持 zone-aware seed：
+           - optical > operation > storage
+           - 或按 zone_level 从高到低（数值越小优先级越高）
+      4) 保持与 QubitMapSABRE2 相同的返回风格：
+           {
+               "layout": {q: trap_id, ...},
+               "trap_to_qubits": {trap_id: [q1, q2, ...], ...},
+           }
 
-    Interpretation:
-      - if zone_level exists: smaller zone_level = higher priority
-      - else if zone_type exists: optical > operation > storage
-      - else: trap id order
+    说明：
+      - 这个类只负责“大规模初始映射”，不负责 look-ahead SWAP insertion；
+      - 它的 SABRE 搜索运行在“QCCD module 粒度”上，而不是 trap 粒度；
+      - module 内部的最终 trap 落位是 zone-aware 的贪心分配。
     """
 
-    def __init__(self, parse_obj, machine_obj, excess_capacity=0):
+    def __init__(
+        self,
+        parse_obj,
+        machine_obj,
+        excess_capacity=0,
+        max_qubits_per_qccd=None,
+        extended_set_size=20,
+        extended_weight=0.5,
+    ):
         self.parse_obj = parse_obj
         self.machine_obj = machine_obj
-        self.excess_capacity = excess_capacity
+        self.excess_capacity = int(excess_capacity)
+        if max_qubits_per_qccd is None:
+            max_qubits_per_qccd = getattr(getattr(self.machine_obj, "mparams", None), "max_qubits_per_qccd", 32)
+        self.max_qubits_per_qccd = int(max_qubits_per_qccd)
+        self.extended_set_size = int(extended_set_size)
+        self.extended_weight = float(extended_weight)
 
-    def _effective_capacity(self, trap_id):
-        return self.machine_obj.traps[trap_id].capacity - self.excess_capacity
+        if not hasattr(self.machine_obj, "dist_cache") or not self.machine_obj.dist_cache:
+            self.machine_obj.precompute_distances()
+
+        # 预处理机器上的 QCCD / trap / 容量信息
+        self._build_module_metadata()
+
+    # ============================================================
+    # 一、基础元数据与工具函数
+    # ============================================================
+    def _logical_qubits(self):
+        """
+        获取需要映射的逻辑 qubit 列表。
+        优先使用 parse_obj.nqubits；若没有，则从 all_gate_map/cx_graph 推断。
+        """
+        if hasattr(self.parse_obj, "nqubits"):
+            return list(range(self.parse_obj.nqubits))
+
+        qubit_set = set()
+
+        if hasattr(self.parse_obj, "all_gate_map"):
+            for _, data in self.parse_obj.all_gate_map.items():
+                if isinstance(data, dict):
+                    qlist = data.get("qubits", [])
+                else:
+                    qlist = list(data)
+                for q in qlist:
+                    qubit_set.add(q)
+
+        if hasattr(self.parse_obj, "cx_graph"):
+            for q in self.parse_obj.cx_graph.nodes:
+                qubit_set.add(q)
+
+        return sorted(qubit_set)
+
+    def _build_module_metadata(self):
+        """
+        从 machine 中提取 QCCD / trap 元数据。
+
+        期望 Stage 1 的 machine / test_machines 已经为 trap 补充：
+          - qccd_id
+          - zone_type
+          - zone_level
+
+        若缺失 qccd_id，则退化为“所有 trap 属于一个 module”，
+        这样不会误伤小规模路径。
+        """
+        self.module_to_traps = {}
+        self.trap_to_module = {}
+        self.trap_effective_capacity = {}
+        self.module_capacity = {}
+        self.module_order = []
+
+        traps = getattr(self.machine_obj, "traps", [])
+        if not traps:
+            raise RuntimeError("QubitMapSABRELarge: machine_obj.traps is empty.")
+
+        for trap in traps:
+            trap_id = trap.id
+            module_id = getattr(trap, "qccd_id", 0)
+
+            self.trap_to_module[trap_id] = module_id
+            self.module_to_traps.setdefault(module_id, []).append(trap_id)
+
+            eff_cap = int(getattr(trap, "capacity", 0)) - self.excess_capacity
+            if eff_cap < 0:
+                eff_cap = 0
+            self.trap_effective_capacity[trap_id] = eff_cap
+
+        self.module_order = sorted(self.module_to_traps.keys())
+
+        # 每个模块的有效容量：
+        #   - 多 module / EML：min(模块 trap 总容量, max_qubits_per_qccd)
+        #   - 单 module fallback：使用真实总容量，不做 32 截断
+        single_module_fallback = (len(self.module_order) == 1)
+        for module_id in self.module_order:
+            total_cap = sum(self.trap_effective_capacity[t] for t in self.module_to_traps[module_id])
+            if single_module_fallback:
+                self.module_capacity[module_id] = total_cap
+            else:
+                self.module_capacity[module_id] = min(total_cap, self.max_qubits_per_qccd)
+
+        total_capacity = sum(self.module_capacity[m] for m in self.module_order)
+        nqubits = len(self._logical_qubits())
+        if total_capacity < nqubits:
+            raise RuntimeError(
+                f"QubitMapSABRELarge failed: machine total module capacity {total_capacity} "
+                f"is smaller than required logical qubits {nqubits}."
+            )
 
     def _trap_priority_key(self, trap_obj):
+        """
+        module 内部 zone-aware 的 trap 排序键：
+          1) zone_level 越小优先级越高
+          2) 若没有 zone_level，则按 zone_type:
+               optical > operation > storage
+          3) 最后按 trap id 稳定排序
+        """
         zone_level = getattr(trap_obj, "zone_level", None)
         if zone_level is not None:
-            return (zone_level, trap_obj.id)
+            return (int(zone_level), trap_obj.id)
 
         zone_type = getattr(trap_obj, "zone_type", None)
         if zone_type is not None:
@@ -2115,288 +2230,366 @@ class QubitMapTrivialPaper:
 
         return (0, trap_obj.id)
 
-    def _logical_qubits(self):
-        if hasattr(self.parse_obj, "nqubits"):
-            return list(range(self.parse_obj.nqubits))
+    def _sorted_traps_in_module(self, module_id):
+        """
+        返回某个 module 内按 zone 优先级排序后的 trap 列表。
+        """
+        trap_objs = [self.machine_obj.traps[t] for t in self.module_to_traps[module_id]]
+        trap_objs.sort(key=self._trap_priority_key)
+        return [t.id for t in trap_objs]
 
-        qubit_set = set()
-        for gate_id, data in self.parse_obj.all_gate_map.items():
-            if isinstance(data, dict):
-                qlist = data.get("qubits", [])
-            else:
-                qlist = list(data)
-            for q in qlist:
-                qubit_set.add(q)
+    def _trap_distance(self, t1, t2):
+        if t1 == t2:
+            return 0
+        return self.machine_obj.dist_cache.get((t1, t2), float("inf"))
 
-        return sorted(qubit_set)
+    def _module_distance(self, m1, m2):
+        """
+        module 间距离。
 
-    def compute_mapping(self):
-        trap_order = sorted(self.machine_obj.traps, key=self._trap_priority_key)
-        logical_qubits = self._logical_qubits()
+        优先级：
+          1) 若 machine 有 qccd_graph，则走 qccd_graph 最短路
+          2) 否则用两个 module 中 trap 间最小 trap distance 近似
+        """
+        if m1 == m2:
+            return 0
 
-        mapping = {}
-        q_idx = 0
+        qccd_graph = getattr(self.machine_obj, "qccd_graph", None)
+        if qccd_graph is not None:
+            try:
+                import networkx as nx
+                return nx.shortest_path_length(qccd_graph, source=m1, target=m2)
+            except Exception:
+                pass
 
-        for trap in trap_order:
-            cap = self._effective_capacity(trap.id)
-            for _ in range(cap):
-                if q_idx >= len(logical_qubits):
-                    break
-                mapping[logical_qubits[q_idx]] = trap.id
-                q_idx += 1
-            if q_idx >= len(logical_qubits):
-                break
-
-        if q_idx != len(logical_qubits):
-            raise RuntimeError(
-                f"QubitMapTrivialPaper failed: only mapped {q_idx}/{len(logical_qubits)} qubits."
-            )
-
-        return mapping
-
-
-class QubitMapSABREPaperFinal:
-    """
-    Final paper-oriented SABRE mapper for MUSS-TI.
-
-    Design:
-      1) 2Q-only DAG
-      2) trivial seed π
-      3) forward pass on G -> π'
-      4) backward pass on reversed G -> π''
-      5) return π''
-
-    Kept:
-      - front layer
-      - executable local gates first
-      - deterministic bidirectional relocation
-      - LRU replacement only for full target traps
-
-    Removed:
-      - extended set
-      - weighted heuristic
-      - extra lookahead hyperparameters
-    """
-
-    def __init__(self, parse_obj, machine_obj, excess_capacity=0):
-        self.parse_obj = parse_obj
-        self.machine_obj = machine_obj
-        self.excess_capacity = excess_capacity
-
-        if not hasattr(self.machine_obj, "dist_cache") or not self.machine_obj.dist_cache:
-            self.machine_obj.precompute_distances()
-
-    # ==========================================================
-    # Basic helpers
-    # ==========================================================
-    def _effective_capacity(self, trap_id):
-        return self.machine_obj.traps[trap_id].capacity - self.excess_capacity
-
-    def _all_trap_ids(self):
-        return list(range(len(self.machine_obj.traps)))
+        best = float("inf")
+        for t1 in self.module_to_traps[m1]:
+            for t2 in self.module_to_traps[m2]:
+                d = self._trap_distance(t1, t2)
+                if d < best:
+                    best = d
+        return best
 
     def _gate_qubits(self, gate_id):
         return tuple(self.parse_obj.cx_gate_map[gate_id])
 
-    def _load_layout(self, mapping):
-        loads = {t: 0 for t in self._all_trap_ids()}
-        trap_to_qubits = {t: [] for t in self._all_trap_ids()}
-        for q, t in mapping.items():
-            loads[t] += 1
-            trap_to_qubits[t].append(q)
-        return loads, trap_to_qubits
-
     def _build_two_qubit_dag(self):
+        """
+        与 SABRE2 保持一致：优先使用 2Q-only DAG。
+        """
         dag = getattr(self.parse_obj, "twoq_gate_graph", None)
         if dag is None or dag.number_of_nodes() == 0:
             dag = self.parse_obj.gate_graph.subgraph(
                 list(self.parse_obj.cx_gate_map.keys())
             ).copy()
 
+        import networkx as nx
         if not nx.is_directed_acyclic_graph(dag):
-            raise ValueError("QubitMapSABREPaperFinal requires a 2Q-only DAG.")
+            raise ValueError("QubitMapSABRELarge requires a 2Q-only DAG.")
         return dag
 
     def _build_reversed_two_qubit_dag(self, dag_2q):
+        import networkx as nx
         rev = dag_2q.reverse(copy=True)
         if not nx.is_directed_acyclic_graph(rev):
             raise ValueError("Reversed 2Q DAG is not a DAG.")
         return rev
 
-    def _trivial_seed_mapping(self):
-        trivial_mapper = QubitMapTrivialPaper(
-            self.parse_obj, self.machine_obj, self.excess_capacity
-        )
-        return trivial_mapper.compute_mapping()
+    def _build_program_graph_weights(self):
+        """
+        构建逻辑 qubit 交互图的边权。
+        用于 module-aware seed。
+        """
+        edge_weights = {}
+        for g in self.parse_obj.gate_graph:
+            if g not in self.parse_obj.cx_gate_map:
+                continue
+            q1, q2 = self.parse_obj.cx_gate_map[g]
+            a, b = min(q1, q2), max(q1, q2)
+            edge_weights[(a, b)] = edge_weights.get((a, b), 0) + 1
+        return edge_weights
 
-    # ==========================================================
-    # Front layer
-    # ==========================================================
+    def _qubit_weight(self):
+        """
+        每个逻辑 qubit 的总交互权重。
+        """
+        weights = {q: 0 for q in self._logical_qubits()}
+        for (q1, q2), w in self._build_program_graph_weights().items():
+            weights[q1] += w
+            weights[q2] += w
+        return weights
+
+    # ============================================================
+    # 二、module-aware trivial seed
+    # ============================================================
+    def _ordered_module_priority(self):
+        """
+        给 module 排序，便于 trivial seed 使用。
+        当前规则：
+          - module 内最高优先级 trap 越“高级”，module 越靠前
+          - 然后按 module id 稳定排序
+        """
+        ranked = []
+        for m in self.module_order:
+            traps = [self.machine_obj.traps[t] for t in self.module_to_traps[m]]
+            best_key = min(self._trap_priority_key(t) for t in traps)
+            ranked.append((best_key, m))
+        ranked.sort()
+        return [m for _, m in ranked]
+
+    def _trivial_module_seed(self):
+        """
+        大规模 trivial seed：
+          - 先按 qubit 编号顺序分配到 module
+          - module 顺序按 zone-aware 优先级
+          - 严格遵守每 module <= 32 限制
+        """
+        logical_qubits = self._logical_qubits()
+        modules = self._ordered_module_priority()
+
+        module_layout = {}
+        module_loads = {m: 0 for m in modules}
+
+        q_idx = 0
+        for m in modules:
+            cap = self.module_capacity[m]
+            for _ in range(cap):
+                if q_idx >= len(logical_qubits):
+                    break
+                module_layout[logical_qubits[q_idx]] = m
+                module_loads[m] += 1
+                q_idx += 1
+            if q_idx >= len(logical_qubits):
+                break
+
+        if q_idx != len(logical_qubits):
+            raise RuntimeError(
+                f"QubitMapSABRELarge seed failed: only mapped {q_idx}/{len(logical_qubits)} qubits into modules."
+            )
+
+        return module_layout, module_loads
+
+    # ============================================================
+    # 三、SABRE at module level
+    # ============================================================
     def _front_layer(self, dag, indegree_map, done_set):
         return [g for g in dag.nodes if g not in done_set and indegree_map[g] == 0]
 
-    # ==========================================================
-    # LRU victim selection
-    # ==========================================================
-    def _select_lru_victim(self, target_trap, trap_to_qubits, last_used, forbidden=None):
+    def _extended_set(self, dag, front, done_set):
+        ext = []
+        seen = set(front)
+        queue = list(front)
+
+        while queue and len(ext) < self.extended_set_size:
+            cur = queue.pop(0)
+            for succ in dag.successors(cur):
+                if succ in seen or succ in done_set:
+                    continue
+                seen.add(succ)
+                ext.append(succ)
+                queue.append(succ)
+                if len(ext) >= self.extended_set_size:
+                    break
+        return ext
+
+    def _gate_module_distance_under_layout(self, gate_id, module_layout):
+        q1, q2 = self._gate_qubits(gate_id)
+        m1 = module_layout[q1]
+        m2 = module_layout[q2]
+        return self._module_distance(m1, m2)
+
+    def _heuristic_cost(self, module_layout, front, ext):
+        """
+        SABRE 的 module-level 代价函数：
+            H = avg(front module distances) + W * avg(extended module distances)
+        """
+        if not front:
+            return 0.0
+
+        front_cost = sum(
+            self._gate_module_distance_under_layout(g, module_layout) for g in front
+        ) / float(len(front))
+
+        if not ext:
+            return front_cost
+
+        ext_cost = sum(
+            self._gate_module_distance_under_layout(g, module_layout) for g in ext
+        ) / float(len(ext))
+
+        return front_cost + self.extended_weight * ext_cost
+
+    def _count_executable_front_gates(self, front, module_layout):
+        """
+        统计当前 front 中有多少 gate 已处于同 module。
+        注意：这里是“同 module 可本地化”的判断，不要求同 trap。
+        """
+        cnt = 0
+        for g in front:
+            q1, q2 = self._gate_qubits(g)
+            if module_layout[q1] == module_layout[q2]:
+                cnt += 1
+        return cnt
+
+    def _total_front_distance(self, front, module_layout):
+        return sum(self._gate_module_distance_under_layout(g, module_layout) for g in front)
+
+    def _load_module_layout(self, module_layout):
+        loads = {m: 0 for m in self.module_order}
+        module_to_qubits = {m: [] for m in self.module_order}
+        for q, m in module_layout.items():
+            loads[m] += 1
+            module_to_qubits[m].append(q)
+        return loads, module_to_qubits
+
+    def _select_lru_victim(self, target_module, module_to_qubits, last_used, forbidden=None):
         forbidden = forbidden or set()
-        candidates = [q for q in trap_to_qubits[target_trap] if q not in forbidden]
+        candidates = [q for q in module_to_qubits[target_module] if q not in forbidden]
         if not candidates:
             return None
         return min(candidates, key=lambda q: last_used.get(q, -1))
 
-    # ==========================================================
-    # Mapping updates
-    # ==========================================================
-    def _apply_direct_move(self, layout, loads, trap_to_qubits, moving_qubit, target_trap):
-        new_layout = dict(layout)
-        new_loads = dict(loads)
-        new_trap_to_qubits = {t: list(qs) for t, qs in trap_to_qubits.items()}
-
-        src_trap = new_layout[moving_qubit]
-        if src_trap == target_trap:
-            return new_layout, new_loads, new_trap_to_qubits
-
-        if new_loads[target_trap] >= self._effective_capacity(target_trap):
-            return None, None, None
-
-        new_trap_to_qubits[src_trap].remove(moving_qubit)
-        new_trap_to_qubits[target_trap].append(moving_qubit)
-        new_loads[src_trap] -= 1
-        new_loads[target_trap] += 1
-        new_layout[moving_qubit] = target_trap
-
-        return new_layout, new_loads, new_trap_to_qubits
-
-    def _apply_lru_replacement(
+    def _apply_module_relocation(
         self,
-        layout,
-        loads,
-        trap_to_qubits,
+        module_layout,
+        module_loads,
+        module_to_qubits,
         last_used,
         moving_qubit,
-        target_trap,
+        target_module,
         partner_qubit=None,
     ):
-        new_layout = dict(layout)
-        new_loads = dict(loads)
-        new_trap_to_qubits = {t: list(qs) for t, qs in trap_to_qubits.items()}
+        """
+        module 级 relocation：
+          - 若 target module 还有空位，则直接迁入
+          - 若 target module 已满，则使用 LRU replacement
+        """
+        new_layout = dict(module_layout)
+        new_loads = dict(module_loads)
+        new_module_to_qubits = {m: list(qs) for m, qs in module_to_qubits.items()}
 
-        src_trap = new_layout[moving_qubit]
-        if src_trap == target_trap:
-            return new_layout, new_loads, new_trap_to_qubits
+        src_module = new_layout[moving_qubit]
+        if src_module == target_module:
+            return new_layout, new_loads, new_module_to_qubits
 
-        if new_loads[target_trap] < self._effective_capacity(target_trap):
-            return self._apply_direct_move(layout, loads, trap_to_qubits, moving_qubit, target_trap)
+        # 目标 module 还有空位：直接移动
+        if new_loads[target_module] < self.module_capacity[target_module]:
+            new_module_to_qubits[src_module].remove(moving_qubit)
+            new_module_to_qubits[target_module].append(moving_qubit)
+            new_loads[src_module] -= 1
+            new_loads[target_module] += 1
+            new_layout[moving_qubit] = target_module
+            return new_layout, new_loads, new_module_to_qubits
 
+        # 目标 module 满了：使用 LRU victim replacement
         victim = self._select_lru_victim(
-            target_trap,
-            new_trap_to_qubits,
+            target_module,
+            new_module_to_qubits,
             last_used,
             forbidden={partner_qubit} if partner_qubit is not None else set(),
         )
         if victim is None:
             return None, None, None
 
-        # victim: target_trap -> src_trap
-        new_trap_to_qubits[target_trap].remove(victim)
-        new_trap_to_qubits[src_trap].append(victim)
-        new_layout[victim] = src_trap
+        # victim: target_module -> src_module
+        new_module_to_qubits[target_module].remove(victim)
+        new_module_to_qubits[src_module].append(victim)
+        new_layout[victim] = src_module
 
-        # moving_qubit: src_trap -> target_trap
-        new_trap_to_qubits[src_trap].remove(moving_qubit)
-        new_trap_to_qubits[target_trap].append(moving_qubit)
-        new_layout[moving_qubit] = target_trap
+        # moving_qubit: src_module -> target_module
+        new_module_to_qubits[src_module].remove(moving_qubit)
+        new_module_to_qubits[target_module].append(moving_qubit)
+        new_layout[moving_qubit] = target_module
 
-        return new_layout, new_loads, new_trap_to_qubits
+        # 负载不变
+        return new_layout, new_loads, new_module_to_qubits
 
-    # ==========================================================
-    # Deterministic bidirectional relocation
-    # ==========================================================
-    def _choose_direction_and_apply(
-        self,
-        q1,
-        q2,
-        layout,
-        loads,
-        trap_to_qubits,
-        last_used,
-    ):
+    def _generate_candidate_actions(self, front, module_layout, module_loads, module_to_qubits, last_used):
         """
-        Try only two directions:
-          1) q1 -> trap(q2)
-          2) q2 -> trap(q1)
-
-        Selection rule:
-          A. Prefer direct move if available
-          B. Otherwise use LRU replacement
-          C. Tie-break:
-               - smaller target trap id
-               - then smaller moving qubit id
+        仅生成论文风格的双向候选：
+          - q1 -> module(q2)
+          - q2 -> module(q1)
         """
-        t1 = layout[q1]
-        t2 = layout[q2]
-
-        if t1 == t2:
-            return layout, loads, trap_to_qubits, None
-
         candidates = []
 
-        # direct moves
-        cand_layout, cand_loads, cand_trap_to_qubits = self._apply_direct_move(
-            layout, loads, trap_to_qubits, q1, t2
-        )
-        if cand_layout is not None:
-            candidates.append(("direct", t2, q1, cand_layout, cand_loads, cand_trap_to_qubits))
+        for g in front:
+            q1, q2 = self._gate_qubits(g)
+            m1 = module_layout[q1]
+            m2 = module_layout[q2]
 
-        cand_layout, cand_loads, cand_trap_to_qubits = self._apply_direct_move(
-            layout, loads, trap_to_qubits, q2, t1
-        )
-        if cand_layout is not None:
-            candidates.append(("direct", t1, q2, cand_layout, cand_loads, cand_trap_to_qubits))
+            if m1 == m2:
+                continue
 
-        if candidates:
-            candidates.sort(key=lambda x: (0, x[1], x[2]))
-            _, _, moved_q, best_layout, best_loads, best_trap_to_qubits = candidates[0]
-            return best_layout, best_loads, best_trap_to_qubits, moved_q
+            cand_layout, cand_loads, cand_module_to_qubits = self._apply_module_relocation(
+                module_layout,
+                module_loads,
+                module_to_qubits,
+                last_used,
+                moving_qubit=q1,
+                target_module=m2,
+                partner_qubit=q2,
+            )
+            if cand_layout is not None:
+                candidates.append((g, q1, m2, cand_layout, cand_loads, cand_module_to_qubits))
 
-        # LRU replacements
-        candidates = []
+            cand_layout, cand_loads, cand_module_to_qubits = self._apply_module_relocation(
+                module_layout,
+                module_loads,
+                module_to_qubits,
+                last_used,
+                moving_qubit=q2,
+                target_module=m1,
+                partner_qubit=q1,
+            )
+            if cand_layout is not None:
+                candidates.append((g, q2, m1, cand_layout, cand_loads, cand_module_to_qubits))
 
-        cand_layout, cand_loads, cand_trap_to_qubits = self._apply_lru_replacement(
-            layout, loads, trap_to_qubits, last_used, q1, t2, partner_qubit=q2
-        )
-        if cand_layout is not None:
-            candidates.append(("lru", t2, q1, cand_layout, cand_loads, cand_trap_to_qubits))
+        return candidates
 
-        cand_layout, cand_loads, cand_trap_to_qubits = self._apply_lru_replacement(
-            layout, loads, trap_to_qubits, last_used, q2, t1, partner_qubit=q1
-        )
-        if cand_layout is not None:
-            candidates.append(("lru", t1, q2, cand_layout, cand_loads, cand_trap_to_qubits))
+    def _choose_best_candidate(self, front, ext, candidates):
+        """
+        module 级 SABRE 候选选择。
+        """
+        best_payload = None
 
-        if candidates:
-            candidates.sort(key=lambda x: (1, x[1], x[2]))
-            _, _, moved_q, best_layout, best_loads, best_trap_to_qubits = candidates[0]
-            return best_layout, best_loads, best_trap_to_qubits, moved_q
+        for gate_id, moving_q, target_m, cand_layout, cand_loads, cand_module_to_qubits in candidates:
+            score = self._heuristic_cost(cand_layout, front, ext)
+            local_exec = self._count_executable_front_gates(front, cand_layout)
+            front_dist_sum = self._total_front_distance(front, cand_layout)
 
-        raise RuntimeError(
-            f"QubitMapSABREPaperFinal failed on gate ({q1}, {q2}): "
-            f"no direct move and no valid LRU replacement."
-        )
+            key = (
+                score,
+                -local_exec,
+                front_dist_sum,
+                moving_q,
+                target_m,
+                gate_id,
+            )
 
-    # ==========================================================
-    # One pass simulation
-    # ==========================================================
-    def _simulate_pass(self, dag, initial_mapping):
-        layout = dict(initial_mapping)
-        loads, trap_to_qubits = self._load_layout(layout)
+            if best_payload is None or key < best_payload[-1]:
+                best_payload = (
+                    gate_id,
+                    moving_q,
+                    target_m,
+                    cand_layout,
+                    cand_loads,
+                    cand_module_to_qubits,
+                    key,
+                )
+
+        return best_payload
+
+    def _simulate_module_pass(self, dag, initial_module_layout):
+        """
+        在 module 粒度执行一次 SABRE pass。
+        """
+        module_layout = dict(initial_module_layout)
+        module_loads, module_to_qubits = self._load_module_layout(module_layout)
 
         indegree_map = {g: dag.in_degree(g) for g in dag.nodes}
         done_set = set()
 
-        # internal LRU time for this pass
-        last_used = {q: -1 for q in layout.keys()}
+        last_used = {q: -1 for q in module_layout.keys()}
         timestamp = 0
 
         while len(done_set) < dag.number_of_nodes():
@@ -2405,48 +2598,144 @@ class QubitMapSABREPaperFinal:
             executable = []
             for g in front:
                 q1, q2 = self._gate_qubits(g)
-                if layout[q1] == layout[q2]:
+                if module_layout[q1] == module_layout[q2]:
                     executable.append(g)
 
             if executable:
-                # execute all currently local front-layer gates
                 for g in executable:
                     q1, q2 = self._gate_qubits(g)
                     timestamp += 1
                     last_used[q1] = timestamp
                     last_used[q2] = timestamp
-
                     done_set.add(g)
                     for succ in dag.successors(g):
                         indegree_map[succ] -= 1
                 continue
 
-            # no local executable gate: choose one front gate deterministically
-            chosen_gate = min(front)
-            q1, q2 = self._gate_qubits(chosen_gate)
-
-            layout, loads, trap_to_qubits, moved_q = self._choose_direction_and_apply(
-                q1, q2, layout, loads, trap_to_qubits, last_used
+            ext = self._extended_set(dag, front, done_set)
+            candidates = self._generate_candidate_actions(
+                front, module_layout, module_loads, module_to_qubits, last_used
             )
 
+            if not candidates:
+                raise RuntimeError(
+                    "QubitMapSABRELarge: no executable gate and no valid module relocation candidate."
+                )
+
+            best_payload = self._choose_best_candidate(front, ext, candidates)
+            _, moved_q, _, module_layout, module_loads, module_to_qubits, _ = best_payload
+
             timestamp += 1
-            if moved_q is not None:
-                last_used[moved_q] = timestamp
+            last_used[moved_q] = timestamp
 
-            # after relocation, the chosen gate should now be local, so loop continues
-            # and it will be consumed in the next executable phase
+        return dict(module_layout), {m: list(qs) for m, qs in module_to_qubits.items()}
 
-        return layout
+    # ============================================================
+    # 四、module -> trap 的 zone-aware 落位
+    # ============================================================
+    def _build_zone_seed_order_in_module(self, module_id, qubits_in_module):
+        """
+        给 module 内 qubit 生成一个优先落位顺序。
 
-    # ==========================================================
-    # Public API
-    # ==========================================================
+        当前策略：
+          - 按 qubit 的总交互权重降序
+          - 权重大的先尝试占据 optical / operation
+          - 同权时按 qubit id 稳定排序
+        """
+        q_weight = self._qubit_weight()
+        ordered = list(qubits_in_module)
+        ordered.sort(key=lambda q: (-q_weight.get(q, 0), q))
+        return ordered
+
+    def _assign_module_qubits_to_traps(self, module_id, qubits_in_module):
+        """
+        在固定 module 内进行 zone-aware trap 分配。
+        规则：
+          - trap 按 zone_level / zone_type 优先级排序
+          - qubit 按交互权重排序
+          - 顺序填充，不超过各 trap 有效容量
+        """
+        trap_order = self._sorted_traps_in_module(module_id)
+        ordered_qubits = self._build_zone_seed_order_in_module(module_id, qubits_in_module)
+
+        trap_to_qubits = {t: [] for t in self.module_to_traps[module_id]}
+        layout = {}
+
+        idx = 0
+        for trap_id in trap_order:
+            cap = self.trap_effective_capacity[trap_id]
+            for _ in range(cap):
+                if idx >= len(ordered_qubits):
+                    break
+                q = ordered_qubits[idx]
+                trap_to_qubits[trap_id].append(q)
+                layout[q] = trap_id
+                idx += 1
+            if idx >= len(ordered_qubits):
+                break
+
+        if idx != len(ordered_qubits):
+            raise RuntimeError(
+                f"QubitMapSABRELarge failed inside module {module_id}: "
+                f"only placed {idx}/{len(ordered_qubits)} qubits."
+            )
+
+        return layout, trap_to_qubits
+
+    def _materialize_trap_layout(self, module_layout, module_to_qubits):
+        """
+        将 module 级布局具体化为 trap 级布局。
+        """
+        final_layout = {}
+        final_trap_to_qubits = {t.id: [] for t in self.machine_obj.traps}
+
+        for module_id in self.module_order:
+            qubits = module_to_qubits.get(module_id, [])
+            local_layout, local_trap_to_qubits = self._assign_module_qubits_to_traps(
+                module_id, qubits
+            )
+
+            for q, t in local_layout.items():
+                final_layout[q] = t
+            for t, qlist in local_trap_to_qubits.items():
+                final_trap_to_qubits[t] = list(qlist)
+
+        return final_layout, final_trap_to_qubits
+
+    # ============================================================
+    # 五、对外接口
+    # ============================================================
     def compute_mapping(self):
+        """
+        主入口：
+          1) 构造 2Q DAG
+          2) 用 module-aware trivial seed 初始化
+          3) 正向 SABRE（module 粒度）
+          4) 反向 SABRE（module 粒度）
+          5) 在每个 module 内做 zone-aware trap 落位
+          6) 返回结构化 bundle
+        """
         dag_2q = self._build_two_qubit_dag()
         dag_2q_rev = self._build_reversed_two_qubit_dag(dag_2q)
 
-        seed_mapping = self._trivial_seed_mapping()
-        mapping_after_forward = self._simulate_pass(dag_2q, seed_mapping)
-        mapping_after_backward = self._simulate_pass(dag_2q_rev, mapping_after_forward)
+        # 第一步：module-aware seed
+        seed_module_layout, _ = self._trivial_module_seed()
 
-        return mapping_after_backward
+        # 第二步：正向 pass
+        module_layout_after_forward, _ = self._simulate_module_pass(dag_2q, seed_module_layout)
+
+        # 第三步：反向 pass
+        module_layout_after_backward, module_to_qubits_after_backward = self._simulate_module_pass(
+            dag_2q_rev, module_layout_after_forward
+        )
+
+        # 第四步：module 内 zone-aware trap 落位
+        final_layout, final_trap_to_qubits = self._materialize_trap_layout(
+            module_layout_after_backward,
+            module_to_qubits_after_backward,
+        )
+
+        return {
+            "layout": dict(final_layout),
+            "trap_to_qubits": {t: list(qs) for t, qs in final_trap_to_qubits.items()},
+        }
