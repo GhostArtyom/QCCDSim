@@ -93,6 +93,13 @@ except Exception:
 
 np.random.seed(12345)
 
+# 让批量日志在 stdout 被重定向到文件时仍尽可能按行刷新，避免把“运行很慢”误判成“完全没输出”。
+try:
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
+except Exception:
+    pass
+
 
 # ============================================================
 # Helper: 命令行与环境变量读取
@@ -264,6 +271,20 @@ def build_analyzer(
 
     print("Using legacy analyzer.py")
     return Analyzer(scheduler, machine_obj, init_qubit_layout, knobs)
+
+
+def add_optional_summary_fields(summary_fields, result_dict, keys):
+    """
+    将 analyzer 返回中的可选字段写入 SUMMARY 行。
+
+    这样做的好处是：
+    - run_batch_large.py 无需理解 V7 每个字段的含义；
+    - paper_report_v7.py 可直接从 manifest / log 中读取论文字段；
+    - 旧 analyzer 缺少这些字段时会自动跳过，不影响旧路径。
+    """
+    for key in keys:
+        if key in result_dict:
+            summary_fields[key] = result_dict.get(key)
 
 
 # ============================================================
@@ -978,6 +999,45 @@ summary_fields = {
     "remote_gate_count": remote_gate_count,
     "compile_time_s": f"{compile_time_s:.6f}",
 }
+
+add_optional_summary_fields(
+    summary_fields,
+    result,
+    [
+        "logical_shuttle_count",
+        "physical_shuttle_leg_count",
+        "split_count",
+        "merge_count",
+        "move_count",
+        "local_1q_count",
+        "local_2q_count",
+        "operation_local_2q_count",
+        "optical_local_2q_count",
+        "storage_local_2q_count",
+        "remote_2q_count",
+        "fiber_gate_count",
+        "regular_fiber_gate_count",
+        "swap_insert_gate_count",
+        "swap_insert_logical_count",
+        "local_1q_time",
+        "local_2q_time",
+        "operation_local_2q_time",
+        "optical_local_2q_time",
+        "storage_local_2q_time",
+        "fiber_gate_time",
+        "swap_insert_time",
+        "split_time_total",
+        "move_time_total",
+        "merge_time_total",
+        "shuttle_time_total",
+        "gate_mult",
+        "regular_gate_mult",
+        "swap_insert_gate_mult",
+        "operation_local_2q_mult",
+        "optical_local_2q_mult",
+        "shuttle_mult",
+    ],
+)
 
 summary_line = "SUMMARY|" + "|".join(f"{k}={v}" for k, v in summary_fields.items())
 print(summary_line)

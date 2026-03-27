@@ -39,6 +39,8 @@ from muss_schedule6 import MUSSSchedule as MUSSScheduleV6
 from machine import Trap
 from route import FreeTrapRoute
 from schedule import Schedule
+from schedule_v7 import ScheduleV7
+from machine_state import MachineState
 
 
 class GateScheduleResult(Enum):
@@ -65,6 +67,35 @@ class BlockedGateInfo:
     gate_id: object
     reason: str
     round_idx: int
+
+
+class DeltaJournal:
+    """
+    V7 large-mode 的局部增量回滚日志。
+
+    设计目标：
+    - 只记录本次候选尝试真正改到的局部状态；
+    - 候选失败时按逆序撤销这些局部修改；
+    - 不再复制整份 schedule / sys_state / log。
+    """
+
+    def __init__(self):
+        self.undo: List = []
+
+    def mark(self) -> int:
+        return len(self.undo)
+
+    def record(self, undo_fn) -> None:
+        self.undo.append(undo_fn)
+
+    def rollback_to(self, mark: int = 0) -> None:
+        mark = int(mark)
+        while len(self.undo) > mark:
+            undo_fn = self.undo.pop()
+            undo_fn()
+
+    def commit(self) -> None:
+        self.undo.clear()
 
 
 class MUSSSchedule(MUSSScheduleV6):
@@ -126,6 +157,31 @@ class MUSSSchedule(MUSSScheduleV6):
         self.v7_event_log: List[Dict] = []
         self.round_idx = 0
 
+        # 这些计数器主要给 run.py 摘要行与 paper_report_v7.py 使用。
+        self.remote_gate_count = 0
+        self.swap_insert_gate_count = 0
+        self.swap_insert_logical_count = 0
+
+        # large-mode 采用独立的 ScheduleV7，实现 O(1) 的事件时间缓存，
+        # 避免把论文 3.2 的调度代价退化为对整个历史 schedule 的重复扫描。
+        if self.is_large_mode:
+            self.schedule = ScheduleV7(self.machine)
+
+        # 运行期缓存：逻辑 qubit 当前所在 trap 与最近一次操作完成时间。
+        # 这两个缓存由 V7 在 commit 阶段增量维护，避免 large-mode 下反复扫描
+        # 整个 schedule.events 去反推当前位置。
+        self.ion_current_trap: Dict[int, int] = {}
+        self.ion_ready_time: Dict[int, int] = {}
+        for trap_id, ions in self.init_map.items():
+            for ion in ions:
+                self.ion_current_trap[int(ion)] = int(trap_id)
+                self.ion_ready_time[int(ion)] = 0
+
+        # 仅供论文 3.3 的 look-ahead 使用的增量 frontier 结构。
+        self._runtime_in_degree = None
+        self._runtime_ready_queue = None
+        self._runtime_remaining_twoq: Set[object] = set()
+
     # ==========================================================
     # V7 large-mode：状态快照 / 日志 / 阻塞诊断
     # ==========================================================
@@ -156,6 +212,9 @@ class MUSSSchedule(MUSSScheduleV6):
             "current_shuttle_src": self._current_shuttle_src,
             "current_shuttle_dst": self._current_shuttle_dst,
             "inserted_swap_counter": int(self._inserted_swap_counter),
+            "remote_gate_count": int(self.remote_gate_count),
+            "swap_insert_gate_count": int(self.swap_insert_gate_count),
+            "swap_insert_logical_count": int(self.swap_insert_logical_count),
             "protected_ions": set(self.protected_ions),
         }
 
@@ -178,6 +237,9 @@ class MUSSSchedule(MUSSScheduleV6):
         self._current_shuttle_src = snapshot["current_shuttle_src"]
         self._current_shuttle_dst = snapshot["current_shuttle_dst"]
         self._inserted_swap_counter = int(snapshot["inserted_swap_counter"])
+        self.remote_gate_count = int(snapshot["remote_gate_count"])
+        self.swap_insert_gate_count = int(snapshot["swap_insert_gate_count"])
+        self.swap_insert_logical_count = int(snapshot["swap_insert_logical_count"])
         self.protected_ions = set(snapshot["protected_ions"])
 
     def _emit_event(self, event_name: str, **kwargs):
@@ -186,41 +248,142 @@ class MUSSSchedule(MUSSScheduleV6):
         payload.update(kwargs)
         self.v7_event_log.append(payload)
 
-    def _remove_from_deferred(self, gate):
-        if not self.deferred_queue:
+    def _journal_mark(self, journal: Optional[DeltaJournal]) -> Tuple[int, int]:
+        """返回 (journal_mark, schedule_mark)，供候选尝试失败时做局部回滚。"""
+        if journal is None:
+            raise RuntimeError("journal is required in V7 large-mode delta rollback path")
+        schedule_mark = self.schedule.mark() if hasattr(self.schedule, "mark") else 0
+        return journal.mark(), int(schedule_mark)
+
+    def _rollback_to_mark(self, journal: Optional[DeltaJournal], mark: Tuple[int, int]) -> None:
+        if journal is None:
             return
-        self.deferred_queue = collections.deque([g for g in self.deferred_queue if g != gate])
+        jmark, smark = int(mark[0]), int(mark[1])
+        journal.rollback_to(jmark)
+        if hasattr(self.schedule, "rollback"):
+            self.schedule.rollback(smark)
+
+    def _journal_save_attr(self, journal: DeltaJournal, obj, attr_name: str):
+        old_value = getattr(obj, attr_name)
+        journal.record(lambda obj=obj, attr_name=attr_name, old_value=old_value: setattr(obj, attr_name, old_value))
+
+    def _journal_save_dict_value(self, journal: DeltaJournal, d: Dict, key, default_missing=False):
+        existed = key in d
+        old_value = d.get(key)
+        def undo():
+            if existed:
+                d[key] = old_value
+            else:
+                d.pop(key, None)
+        journal.record(undo)
+
+    def _journal_save_list_len(self, journal: DeltaJournal, lst: list):
+        old_len = len(lst)
+        journal.record(lambda lst=lst, old_len=old_len: lst.__delitem__(slice(old_len, None)))
+
+    def _journal_save_trap_contents(self, journal: DeltaJournal, trap_ids: Sequence[int]):
+        saved = {}
+        for tid in trap_ids:
+            tid = int(tid)
+            if tid in saved:
+                continue
+            saved[tid] = list(self.sys_state.trap_ions[tid])
+        def undo(saved=saved):
+            for tid, ions in saved.items():
+                self.sys_state.trap_ions[tid] = list(ions)
+        journal.record(undo)
+
+    def _fire_shuttle_with_journal(self, src_trap, dest_trap, ion, gate_fire_time, route=None, journal: Optional[DeltaJournal] = None):
+        """
+        V7 large-mode 的 journal-aware shuttle 封装。
+
+        实现要点：
+        - 仍然复用 V6 的论文式 Split/Move/Merge 执行语义；
+        - 但候选失败时只回滚 route 涉及的 trap、事件尾部、相关缓存与计数器；
+        - 不再对整份状态做 deep copy。
+        """
+        if journal is None:
+            return self.fire_shuttle(src_trap, dest_trap, ion, gate_fire_time, route=route or [])
+
+        if route is None or len(route) == 0:
+            route = self._find_route_or_none(src_trap, dest_trap)
+            if route is None:
+                raise RuntimeError(f"No legal route found for shuttle: T{src_trap} -> T{dest_trap}")
+
+        trap_ids = []
+        for node in route:
+            if isinstance(node, Trap):
+                trap_ids.append(int(node.id))
+        self._journal_save_trap_contents(journal, trap_ids)
+        self._journal_save_attr(journal, self, 'split_swap_counter')
+        self._journal_save_attr(journal, self, 'shuttle_counter')
+        self._journal_save_attr(journal, self, '_current_shuttle_id')
+        self._journal_save_attr(journal, self, '_current_shuttle_route')
+        self._journal_save_attr(journal, self, '_current_shuttle_ion')
+        self._journal_save_attr(journal, self, '_current_shuttle_src')
+        self._journal_save_attr(journal, self, '_current_shuttle_dst')
+        self._journal_save_list_len(journal, self.shuttle_log)
+        self._journal_save_list_len(journal, self.chain_reorder_log)
+        self._journal_save_dict_value(journal, self.ion_current_trap, int(ion))
+        self._journal_save_dict_value(journal, self.ion_ready_time, int(ion))
+
+        finish_time = MUSSScheduleV6.fire_shuttle(self, src_trap, dest_trap, ion, gate_fire_time, route=route)
+        dst_id = dest_trap.id if isinstance(dest_trap, Trap) else int(dest_trap)
+        self.ion_current_trap[int(ion)] = int(dst_id)
+        self.ion_ready_time[int(ion)] = int(finish_time)
+        return finish_time
+
+    def fire_shuttle(self, src_trap, dest_trap, ion, gate_fire_time, route=[]):
+        finish_time = MUSSScheduleV6.fire_shuttle(self, src_trap, dest_trap, ion, gate_fire_time, route=route)
+        dst_id = dest_trap.id if isinstance(dest_trap, Trap) else int(dest_trap)
+        self.ion_current_trap[int(ion)] = int(dst_id)
+        self.ion_ready_time[int(ion)] = int(finish_time)
+        return finish_time
+
+    def _set_logical_override_journaled(self, ion: int, trap_id: int, ts: int, journal: Optional[DeltaJournal]):
+        if journal is not None:
+            self._journal_save_dict_value(journal, self.logical_position_overrides, int(ion))
+        self.logical_position_overrides[int(ion)] = (int(ts), int(trap_id))
+
+    def _swap_ions_in_sys_state_journaled(self, ion_a: int, ion_b: int, journal: Optional[DeltaJournal]):
+        trap_a = self.sys_state.find_trap_id_by_ion(ion_a)
+        trap_b = self.sys_state.find_trap_id_by_ion(ion_b)
+        if trap_a == -1 or trap_b == -1:
+            raise RuntimeError(f"Logical swap failed: cannot find ions ({ion_a}, {ion_b}) in current system state.")
+        if journal is not None:
+            self._journal_save_trap_contents(journal, [trap_a, trap_b])
+        idx_a = self.sys_state.trap_ions[trap_a].index(ion_a)
+        idx_b = self.sys_state.trap_ions[trap_b].index(ion_b)
+        self.sys_state.trap_ions[trap_a][idx_a] = ion_b
+        self.sys_state.trap_ions[trap_b][idx_b] = ion_a
+
+    def _remove_from_deferred(self, gate):
+        """兼容旧接口；严格论文轮次下不再维护跨轮 deferred 队列。"""
+        _ = gate
 
     def _record_blocked_gate(self, gate, reason: str):
+        """
+        记录当前轮次内某个 frontier gate 的阻塞原因。
+
+        与上一版不同：
+        - 不再把 gate 推入跨轮 deferred 队列；
+        - 仅保留“本轮为什么没法执行”的诊断信息。
+        """
         reason = str(reason or "BLOCKED")
         self.last_blocked_reasons[gate] = BlockedGateInfo(gate_id=gate, reason=reason, round_idx=int(self.round_idx))
         self.blocked_reason_count[reason] += 1
-        if gate not in self.deferred_queue:
-            self.deferred_queue.append(gate)
-        self._emit_event("DEFERRED_GATE", gate_id=gate, reason=reason)
+        self._emit_event("BLOCKED_GATE", gate_id=gate, reason=reason)
 
     def _build_executable_set_fcfs(self, ready_queue: List) -> List:
         """
-        V7 的 frontier gate 构造规则：
-        1) 只看当前 DAG frontier（ready_queue）；
-        2) deferred 中仍然合法的 gate 保持 FIFO，优先排在前面；
-        3) 若存在“已经满足硬件执行条件”的 gate，则仍优先执行这些 gate；
-        4) 否则保持 FCFS。
+        论文式 frontier 选择：
+        1) 只看当前 ready_queue；
+        2) 若存在已经满足硬件执行条件的 gate，则优先这些 gate；
+        3) 否则保持 FCFS。
+
+        这里不再引入跨轮 deferred 优先级，以减少工程增强对论文主流程的干扰。
         """
-        ready_set = set(ready_queue)
-
-        ordered = []
-        seen = set()
-        for g in list(self.deferred_queue):
-            if g in ready_set and g not in seen:
-                ordered.append(g)
-                seen.add(g)
-
-        for g in ready_queue:
-            if g not in seen:
-                ordered.append(g)
-                seen.add(g)
-
+        ordered = list(ready_queue)
         local_ready = [g for g in ordered if self.is_executable_local(g)]
         if local_ready:
             return local_ready
@@ -340,87 +503,95 @@ class MUSSSchedule(MUSSScheduleV6):
         """
         返回 (该 ion 最近一次操作完成时间, 当前所在 trap_id)。
 
-        与 V6 的区别：
-        1) 若最后一次事件是 fiber gate，则 ions[0] 仍位于主 trap，ions[1] 位于 remote_trap；
-        2) 若此前发生过“逻辑 SWAP 插入”，则优先使用 override 中记录的新逻辑位置；
-        3) 仍保留与 sys_state 的强一致性检查。
+        V7 large-mode 使用增量缓存维护 ion 的当前位置与最近完成时间，
+        从而与论文 3.2 的 O(g(n+z+c)) 复杂度保持一致；
+        不再通过扫描整个 schedule.events 反推出当前位置。
         """
-        s = self.schedule
-        this_ion_ops = s.filter_by_ion(s.events, ion_id)
-        this_ion_last_op_time = 0
-        inferred_trap = None
+        if self.is_small_mode:
+            return super().ion_ready_info(ion_id)
 
-        if len(this_ion_ops):
-            last_ev = this_ion_ops[-1]
-            etype = last_ev[1]
-            info = last_ev[4]
-            assert (etype == Schedule.Gate) or (etype == Schedule.Merge)
+        ion_id = int(ion_id)
+        trap_id = self.ion_current_trap.get(ion_id, self.sys_state.find_trap_id_by_ion(ion_id))
+        ready_ts = int(self.ion_ready_time.get(ion_id, 0))
 
-            this_ion_last_op_time = int(last_ev[3])
-
-            if etype == Schedule.Gate and info.get("is_fiber", False):
-                ions = list(info.get("ions", []))
-                if len(ions) >= 2 and ions[1] == ion_id and info.get("remote_trap", None) is not None:
-                    inferred_trap = info.get("remote_trap")
-                else:
-                    inferred_trap = info.get("trap")
-            else:
-                inferred_trap = info.get("trap")
-        else:
-            for trap_id in self.init_map.keys():
-                if ion_id in self.init_map[trap_id]:
-                    inferred_trap = trap_id
-                    break
-            if inferred_trap is None:
-                raise AssertionError(f"Did not find ion {ion_id} in init_map")
-
-        ov = self.logical_position_overrides.get(ion_id, None)
-        if ov is not None:
-            ov_ts, ov_trap = ov
-            if int(ov_ts) >= int(this_ion_last_op_time):
-                this_ion_last_op_time = int(ov_ts)
-                inferred_trap = int(ov_trap)
+        if trap_id == -1:
+            raise AssertionError(f"Did not find ion {ion_id} in runtime cache/sys_state")
 
         actual_trap = self.sys_state.find_trap_id_by_ion(ion_id)
-        if inferred_trap != actual_trap:
-            print("ion location mismatch", ion_id, inferred_trap, actual_trap)
+        if int(trap_id) != int(actual_trap):
+            print("ion location mismatch", ion_id, trap_id, actual_trap)
             self.sys_state.print_state()
-            raise AssertionError("ion location mismatch between schedule-inferred and sys_state")
+            raise AssertionError("ion location mismatch between runtime cache and sys_state")
 
-        return this_ion_last_op_time, inferred_trap
+        return ready_ts, int(trap_id)
 
     # ==========================================================
     # 论文 3.3：look-ahead / 权重表 / SWAP insertion
     # ==========================================================
     def _remaining_twoq_generations(self, exclude_gate=None) -> List[List]:
         """
-        以“当前 gate 已执行完毕”为前提，返回剩余 2Q DAG 的拓扑分层。
-        只取尚未被正式调度完成的原始 2Q gate；插入的 SWAP gate 不在该 DAG 中。
+        增量式前 k 层生成视图。
+
+        与旧版不同：
+        - 不再为每次 SWAP 判定重新构造 remaining subgraph 并重新做 topological_generations；
+        - 直接基于 run() 当前维护的 frontier indegree / ready queue 做局部层展开。
+
+        这与论文 3.3 对 look-ahead 的 O(kn) 判定复杂度保持一致。
         """
-        remaining = []
-        for g in self.ir.nodes:
-            if g == exclude_gate:
-                continue
-            if g in self.gate_finish_times:
-                continue
-            _, qubits, _ = self._gate_payload(g)
-            if len(qubits) == 2:
-                remaining.append(g)
+        if self._runtime_in_degree is None or self._runtime_ready_queue is None:
+            remaining = [g for g in self.ir.nodes if g != exclude_gate and g not in self.gate_finish_times]
+            if not remaining:
+                return []
+            subg = self.ir.subgraph(remaining).copy()
+            gens = []
+            for layer in nx.topological_generations(subg):
+                ordered = sorted(list(layer), key=lambda x: self.static_topo_order.get(x, float("inf")))
+                gens.append(ordered)
+            return gens
 
-        if not remaining:
-            return []
+        remaining = set(self._runtime_remaining_twoq)
+        if exclude_gate in remaining:
+            remaining.remove(exclude_gate)
 
-        subg = self.ir.subgraph(remaining).copy()
-        gens = []
-        for layer in nx.topological_generations(subg):
-            ordered = sorted(list(layer), key=lambda x: self.static_topo_order.get(x, float("inf")))
-            gens.append(ordered)
-        return gens
+        ready_set = {g for g in self._runtime_ready_queue if g in remaining}
+        indegree_override = {}
+        queued = set(ready_set)
+
+        if exclude_gate is not None and exclude_gate in self.ir:
+            for succ in self.ir.successors(exclude_gate):
+                if succ not in remaining:
+                    continue
+                new_deg = int(self._runtime_in_degree.get(succ, self.ir.in_degree(succ))) - 1
+                indegree_override[succ] = new_deg
+                if new_deg == 0 and succ not in queued:
+                    ready_set.add(succ)
+                    queued.add(succ)
+
+        frontier = sorted(ready_set, key=lambda x: self.static_topo_order.get(x, float("inf")))
+        layers: List[List] = []
+        local_remaining = set(remaining)
+
+        while frontier:
+            layer = list(frontier)
+            layers.append(layer)
+            next_ready = set()
+            for node in layer:
+                if node in local_remaining:
+                    local_remaining.remove(node)
+                for succ in self.ir.successors(node):
+                    if succ not in local_remaining:
+                        continue
+                    base_deg = indegree_override.get(succ, int(self._runtime_in_degree.get(succ, self.ir.in_degree(succ))))
+                    new_deg = base_deg - 1
+                    indegree_override[succ] = new_deg
+                    if new_deg == 0 and succ not in queued:
+                        next_ready.add(succ)
+                        queued.add(succ)
+            frontier = sorted(next_ready, key=lambda x: self.static_topo_order.get(x, float("inf")))
+
+        return layers
 
     def _lookahead_gates_after(self, current_gate, k: Optional[int] = None) -> List:
-        """
-        论文 3.3：只看“前 k 层”的 DAG。
-        """
         if k is None:
             k = self.swap_lookahead_k
         gens = self._remaining_twoq_generations(exclude_gate=current_gate)
@@ -589,90 +760,112 @@ class MUSSSchedule(MUSSScheduleV6):
 
     def _execute_cross_qccd_swap(self, ion_a: int, ion_c: int, clk: int) -> Tuple[bool, int]:
         """
-        在不同 QCCD 上对 (ion_a, ion_c) 执行一次“论文 3.3 的逻辑 SWAP”。
+        在不同 QCCD 上对 (ion_a, ion_c) 执行一次论文 3.3 的逻辑 SWAP。
 
-        实现方式：
-        1) 将双方各自路由到本 QCCD 的 optical trap；
-        2) 连续执行 3 个 fiber MS gate（SWAP = 3 个 2Q gate）；
-        3) 在 sys_state / logical override 中交换逻辑位置。
-
-        返回：
-          (是否成功插入, 新时间戳)
+        本版严格使用 delta rollback：
+        - 对每个 optical pair 只记录本次尝试真实改动的 delta；
+        - pair 失败时只撤销本 pair 的 shuttles / fiber gate / 逻辑标签交换；
+        - 不再复制 planning state。
         """
         time_a, trap_a = self.ion_ready_info(ion_a)
         time_c, trap_c = self.ion_ready_info(ion_c)
-        clk = max(int(clk), int(time_a), int(time_c))
+        base_clk = max(int(clk), int(time_a), int(time_c))
 
         qccd_a = self._qccd_id_of_trap(trap_a)
         qccd_c = self._qccd_id_of_trap(trap_c)
         if qccd_a == qccd_c:
-            return False, clk
+            return False, base_clk
 
         target_pairs = self._candidate_swap_target_pairs(ion_a, ion_c, trap_a, trap_c)
         if not target_pairs:
-            return False, clk
+            return False, base_clk
 
+        journal = DeltaJournal()
+        last_clk = base_clk
         for target_a, target_c in target_pairs:
-            snapshot = self._snapshot_runtime_state()
-            cur_clk = clk
-
-            ok_a, cur_clk = self._ensure_space_on_trap_large(
-                target_a, cur_clk,
-                required_incoming=(0 if trap_a == target_a else 1),
-                forbidden_ions={ion_a},
-            )
-            ok_c, cur_clk = self._ensure_space_on_trap_large(
-                target_c, cur_clk,
-                required_incoming=(0 if trap_c == target_c else 1),
-                forbidden_ions={ion_c},
-            )
-            if not ok_a or not ok_c:
-                self._restore_runtime_state(snapshot)
-                continue
-
-            if trap_a != target_a:
-                route_a = self._find_route_or_none(trap_a, target_a)
-                if route_a is None:
-                    self._restore_runtime_state(snapshot)
-                    continue
-                cur_clk = self.fire_shuttle(trap_a, target_a, ion_a, cur_clk, route=route_a)
-
-            if trap_c != target_c:
-                route_c = self._find_route_or_none(trap_c, target_c)
-                if route_c is None:
-                    self._restore_runtime_state(snapshot)
-                    continue
-                cur_clk = self.fire_shuttle(trap_c, target_c, ion_c, cur_clk, route=route_c)
-
-            if ion_a not in self.sys_state.trap_ions[target_a] or ion_c not in self.sys_state.trap_ions[target_c]:
-                self._restore_runtime_state(snapshot)
-                continue
-
-            swap_tag = ("inserted_swap", self._inserted_swap_counter, ion_a, ion_c)
-            self._inserted_swap_counter += 1
-
-            for phase in range(3):
-                cur_clk = self._add_gate_op_with_metadata(
-                    cur_clk,
+            mark = self._journal_mark(journal)
+            cur_clk = base_clk
+            try:
+                ok_a, cur_clk = self._ensure_space_on_trap_large(
                     target_a,
-                    [ion_a, ion_c],
-                    gate=(swap_tag, phase),
-                    gate_type="swap_fiber",
-                    is_fiber=True,
-                    remote_trap=target_c,
-                    qccd_pair=(qccd_a, qccd_c),
+                    cur_clk,
+                    required_incoming=(0 if trap_a == target_a else 1),
+                    forbidden_ions={ion_a},
+                    journal=journal,
                 )
+                if not ok_a:
+                    raise RuntimeError("SWAP_LEFT_TARGET_FULL")
 
-            # 3 个 fiber gate 完成后，执行逻辑标签交换
-            self._swap_ions_in_sys_state(ion_a, ion_c)
-            self._set_logical_override(ion_a, target_c, cur_clk)
-            self._set_logical_override(ion_c, target_a, cur_clk)
-            self.ion_last_used[ion_a] = cur_clk
-            self.ion_last_used[ion_c] = cur_clk
-            return True, cur_clk
+                ok_c, cur_clk = self._ensure_space_on_trap_large(
+                    target_c,
+                    cur_clk,
+                    required_incoming=(0 if trap_c == target_c else 1),
+                    forbidden_ions={ion_c},
+                    journal=journal,
+                )
+                if not ok_c:
+                    raise RuntimeError("SWAP_RIGHT_TARGET_FULL")
 
-        return False, clk
+                if trap_a != target_a:
+                    route_a = self._find_route_or_none(trap_a, target_a)
+                    if route_a is None:
+                        raise RuntimeError("SWAP_LEFT_ROUTE_MISSING")
+                    cur_clk = self._fire_shuttle_with_journal(trap_a, target_a, ion_a, cur_clk, route=route_a, journal=journal)
 
+                if trap_c != target_c:
+                    route_c = self._find_route_or_none(trap_c, target_c)
+                    if route_c is None:
+                        raise RuntimeError("SWAP_RIGHT_ROUTE_MISSING")
+                    cur_clk = self._fire_shuttle_with_journal(trap_c, target_c, ion_c, cur_clk, route=route_c, journal=journal)
+
+                if ion_a not in self.sys_state.trap_ions[target_a] or ion_c not in self.sys_state.trap_ions[target_c]:
+                    raise RuntimeError("SWAP_ENDPOINT_NOT_REACHED")
+
+                self._journal_save_attr(journal, self, '_inserted_swap_counter')
+                self._journal_save_attr(journal, self, 'swap_insert_logical_count')
+                self._journal_save_dict_value(journal, self.ion_last_used, int(ion_a))
+                self._journal_save_dict_value(journal, self.ion_last_used, int(ion_c))
+
+                swap_tag = ("inserted_swap", self._inserted_swap_counter, ion_a, ion_c)
+                self._inserted_swap_counter += 1
+                swap_insert_id = self._inserted_swap_counter - 1
+
+                for phase in range(3):
+                    cur_clk = self._add_gate_op_with_metadata(
+                        cur_clk,
+                        target_a,
+                        [ion_a, ion_c],
+                        gate=(swap_tag, phase),
+                        gate_type="swap_fiber",
+                        is_fiber=True,
+                        remote_trap=target_c,
+                        qccd_pair=(qccd_a, qccd_c),
+                        extra_metadata={
+                            "is_swap_insert": True,
+                            "swap_insert_id": swap_insert_id,
+                            "swap_insert_phase": phase,
+                        },
+                        journal=journal,
+                    )
+
+                self.swap_insert_logical_count += 1
+                self._swap_ions_in_sys_state_journaled(ion_a, ion_c, journal)
+                self._set_logical_override_journaled(ion_a, target_c, cur_clk, journal)
+                self._set_logical_override_journaled(ion_c, target_a, cur_clk, journal)
+                self.ion_current_trap[int(ion_a)] = int(target_c)
+                self.ion_current_trap[int(ion_c)] = int(target_a)
+                self.ion_ready_time[int(ion_a)] = int(cur_clk)
+                self.ion_ready_time[int(ion_c)] = int(cur_clk)
+                self.ion_last_used[ion_a] = cur_clk
+                self.ion_last_used[ion_c] = cur_clk
+                journal.commit()
+                return True, cur_clk
+            except Exception:
+                self._rollback_to_mark(journal, mark)
+                last_clk = cur_clk
+                continue
+
+        return False, last_clk
 
     def _maybe_insert_swap_for_ion(self, current_gate, ion: int, clk: int) -> int:
         """
@@ -819,17 +1012,20 @@ class MUSSSchedule(MUSSScheduleV6):
         fire_time: int,
         required_incoming: int = 1,
         forbidden_ions: Optional[Set[int]] = None,
+        journal: Optional[DeltaJournal] = None,
     ) -> Tuple[bool, int]:
         """
-        large 模式局部冲突处理：
-        - 只围绕目标 trap 做 LRU 驱逐；
-        - 优先在同一 qccd 内腾挪；
-        - 不做跨模块全局 rebalance。
+        large 模式局部冲突处理（论文 3.2 的 LRU conflict handling）。
+
+        关键修复：
+        - 不再复制 planning state；
+        - 直接在当前真实状态上尝试局部驱逐；
+        - 每次 victim 尝试仅对新增的 delta 做 rollback。
         """
         if forbidden_ions is None:
             forbidden_ions = set()
 
-        cur_time = fire_time
+        cur_time = int(fire_time)
         guard = 0
         while not self._trap_has_free_slot(trap_id, incoming=required_incoming):
             guard += 1
@@ -842,18 +1038,28 @@ class MUSSSchedule(MUSSScheduleV6):
 
             moved = False
             victim_ready, victim_trap = self.ion_ready_info(victim)
-            cur_time = max(cur_time, victim_ready)
+            cur_time = max(cur_time, int(victim_ready))
 
             for dst_trap in self._candidate_traps_for_eviction_large(victim_trap):
-                # 仅允许片上可路由的目标；跨 qccd 不做 shuttle。
                 if self._qccd_id_of_trap(dst_trap) != self._qccd_id_of_trap(victim_trap):
                     continue
                 route = self._find_route_or_none(victim_trap, dst_trap)
                 if route is None:
                     continue
-                cur_time = self.fire_shuttle(victim_trap, dst_trap, victim, cur_time, route=route)
-                moved = True
-                break
+
+                if journal is None:
+                    cur_time = self.fire_shuttle(victim_trap, dst_trap, victim, cur_time, route=route)
+                    moved = True
+                    break
+
+                mark = self._journal_mark(journal)
+                try:
+                    cur_time = self._fire_shuttle_with_journal(victim_trap, dst_trap, victim, cur_time, route=route, journal=journal)
+                    moved = True
+                    break
+                except Exception:
+                    self._rollback_to_mark(journal, mark)
+                    continue
 
             if not moved:
                 return False, cur_time
@@ -961,6 +1167,8 @@ class MUSSSchedule(MUSSScheduleV6):
         remote_trap: Optional[int] = None,
         qccd_pair: Optional[Tuple[int, int]] = None,
         remote_latency_us: Optional[int] = None,
+        extra_metadata: Optional[Dict] = None,
+        journal: Optional[DeltaJournal] = None,
     ) -> int:
         """
         写入 Gate 事件。
@@ -980,11 +1188,18 @@ class MUSSSchedule(MUSSScheduleV6):
         if self.GlobalSerialLock == 1:
             fire_time = max(fire_time, self.schedule.get_last_event_ts())
 
+        if journal is not None:
+            for ion in ions:
+                self._journal_save_dict_value(journal, self.ion_current_trap, int(ion))
+                self._journal_save_dict_value(journal, self.ion_ready_time, int(ion))
+            if is_fiber:
+                self._journal_save_attr(journal, self, "remote_gate_count")
+            if extra_metadata and bool(extra_metadata.get("is_swap_insert", False)):
+                self._journal_save_attr(journal, self, "swap_insert_gate_count")
+
         if is_fiber:
             duration = self._fiber_gate_duration() if remote_latency_us is None else int(remote_latency_us)
             zone_type = "optical"
-            # schedule.add_gate 的原始接口不接受 remote_trap / qccd_pair 等额外字段，
-            # 因此这里先按兼容接口写入，再原地补充 metadata，避免影响其它调度器。
             self.schedule.add_gate(
                 fire_time,
                 fire_time + duration,
@@ -999,6 +1214,7 @@ class MUSSSchedule(MUSSScheduleV6):
             last_event[4]["remote_trap"] = remote_trap
             last_event[4]["qccd_pair"] = qccd_pair
             last_event[4]["fiber_fidelity"] = self._fiber_gate_fidelity()
+            self.remote_gate_count += 1
         else:
             duration = self.machine.gate_time(self.sys_state, trap_id, ions[0], ions[1])
             zone_type = getattr(self.machine.get_trap(trap_id), "zone_type", None) if hasattr(self.machine, "get_trap") else None
@@ -1011,7 +1227,25 @@ class MUSSSchedule(MUSSScheduleV6):
                 gate_id=gate,
                 zone_type=zone_type,
             )
-        return fire_time + duration
+
+        if extra_metadata:
+            self.schedule.events[-1][4].update(dict(extra_metadata))
+            if bool(extra_metadata.get("is_swap_insert", False)):
+                self.swap_insert_gate_count += 1
+
+        finish_time = fire_time + duration
+        if is_fiber:
+            if len(ions) >= 1:
+                self.ion_current_trap[int(ions[0])] = int(trap_id)
+                self.ion_ready_time[int(ions[0])] = int(finish_time)
+            if len(ions) >= 2 and remote_trap is not None:
+                self.ion_current_trap[int(ions[1])] = int(remote_trap)
+                self.ion_ready_time[int(ions[1])] = int(finish_time)
+        else:
+            for ion in ions:
+                self.ion_current_trap[int(ion)] = int(trap_id)
+                self.ion_ready_time[int(ion)] = int(finish_time)
+        return finish_time
 
     def _rank_local_meeting_traps(self, ion1_trap: int, ion2_trap: int, ion1: int, ion2: int) -> List[int]:
         """
@@ -1106,12 +1340,12 @@ class MUSSSchedule(MUSSScheduleV6):
         fire_time: int,
     ) -> GateAttemptResult:
         """
-        安排同一 module 内的本地 2Q gate。
+        安排同一 QCCD 内的本地 2Q gate。
 
-        与旧版不同：
-        - 不再因为某个 local meeting trap 失败而直接抛异常；
-        - 依次尝试多个候选 trap；
-        - 只有当所有候选都失败时，才返回 BLOCKED，让 V7 主循环去 defer。
+        本版严格使用 delta rollback：
+        - 对每个候选 target trap，只在真实状态上做局部尝试；
+        - 失败时仅回滚该 target 尝试产生的 delta；
+        - 不再复制 planning state。
         """
         ion1_time, ion1_trap = self.ion_ready_info(ion1)
         ion2_time, ion2_trap = self.ion_ready_info(ion2)
@@ -1125,15 +1359,55 @@ class MUSSSchedule(MUSSScheduleV6):
         if not ranked_targets:
             return GateAttemptResult(GateScheduleResult.BLOCKED, clk, "NO_LOCAL_MEETING_TRAP_NOW")
 
+        journal = DeltaJournal()
         last_reason = "NO_LOCAL_MEETING_TRAP_NOW"
         for dest_trap in ranked_targets:
-            snapshot = self._snapshot_runtime_state()
-            attempt = self._try_schedule_intra_target(gate, ion1, ion2, gate_type, clk, dest_trap)
-            if attempt.result == GateScheduleResult.EXECUTED:
-                return attempt
-            self._restore_runtime_state(snapshot)
-            if attempt.reason:
-                last_reason = attempt.reason
+            mark = self._journal_mark(journal)
+            try:
+                plan_info = self._build_move_plan_for_target(ion1_trap, ion2_trap, ion1, ion2, dest_trap)
+                move_plan = plan_info["plan"]
+                incoming_needed = plan_info["incoming_needed"]
+
+                ok, clk_local = self._ensure_space_on_trap_large(
+                    dest_trap,
+                    clk,
+                    required_incoming=incoming_needed,
+                    forbidden_ions={ion1, ion2},
+                    journal=journal,
+                )
+                if not ok:
+                    last_reason = "LOCAL_TARGET_FULL"
+                    raise RuntimeError(last_reason)
+
+                for moving_ion, source_trap, _ in move_plan:
+                    if source_trap == dest_trap:
+                        continue
+                    route = self._find_route_or_none(source_trap, dest_trap)
+                    if route is None:
+                        last_reason = "NO_ROUTE_TO_LOCAL_TARGET"
+                        raise RuntimeError(last_reason)
+                    clk_local = self._fire_shuttle_with_journal(source_trap, dest_trap, moving_ion, clk_local, route=route, journal=journal)
+
+                dest_ions = self.sys_state.trap_ions[dest_trap]
+                if ion1 not in dest_ions or ion2 not in dest_ions:
+                    last_reason = "LOCAL_GATE_IONS_NOT_COLOCATED"
+                    raise RuntimeError(last_reason)
+
+                finish_time = self._add_gate_op_with_metadata(
+                    clk_local,
+                    dest_trap,
+                    [ion1, ion2],
+                    gate,
+                    gate_type,
+                    journal=journal,
+                )
+                journal.commit()
+                return GateAttemptResult(GateScheduleResult.EXECUTED, finish_time, "")
+            except Exception as exc:
+                if str(exc):
+                    last_reason = str(exc)
+                self._rollback_to_mark(journal, mark)
+                continue
 
         return GateAttemptResult(GateScheduleResult.BLOCKED, clk, last_reason)
 
@@ -1213,10 +1487,10 @@ class MUSSSchedule(MUSSScheduleV6):
         """
         安排跨 module 的 optical/fiber 2Q gate。
 
-        与旧版不同：
-        - 会枚举所有合法的 optical target pair；
-        - 若某个 pair 当前不可行，则回滚并尝试下一个 pair；
-        - 全部 pair 都失败时返回 BLOCKED，而不是直接抛异常。
+        本版严格使用 delta rollback：
+        - 对每个 optical pair 直接在真实状态上尝试；
+        - 失败时仅撤销该 pair 产生的局部 delta；
+        - 成功后再保留 fiber gate 及其后置 SWAP insertion 的结果。
         """
         ion1_time, ion1_trap = self.ion_ready_info(ion1)
         ion2_time, ion2_trap = self.ion_ready_info(ion2)
@@ -1231,15 +1505,70 @@ class MUSSSchedule(MUSSScheduleV6):
         if not target_pairs:
             return GateAttemptResult(GateScheduleResult.BLOCKED, clk, "NO_REGISTERED_FIBER_LINK")
 
+        journal = DeltaJournal()
         last_reason = "NO_REGISTERED_FIBER_LINK"
         for target1, target2 in target_pairs:
-            snapshot = self._snapshot_runtime_state()
-            attempt = self._try_schedule_cross_pair(gate, ion1, ion2, gate_type, clk, target1, target2)
-            if attempt.result == GateScheduleResult.EXECUTED:
-                return attempt
-            self._restore_runtime_state(snapshot)
-            if attempt.reason:
-                last_reason = attempt.reason
+            mark = self._journal_mark(journal)
+            try:
+                ok1, clk_local = self._ensure_space_on_trap_large(
+                    target1,
+                    clk,
+                    required_incoming=(0 if ion1_trap == target1 else 1),
+                    forbidden_ions={ion1},
+                    journal=journal,
+                )
+                if not ok1:
+                    last_reason = "OPTICAL_TARGET_FULL_LEFT"
+                    raise RuntimeError(last_reason)
+
+                ok2, clk_local = self._ensure_space_on_trap_large(
+                    target2,
+                    clk_local,
+                    required_incoming=(0 if ion2_trap == target2 else 1),
+                    forbidden_ions={ion2},
+                    journal=journal,
+                )
+                if not ok2:
+                    last_reason = "OPTICAL_TARGET_FULL_RIGHT"
+                    raise RuntimeError(last_reason)
+
+                if ion1_trap != target1:
+                    route1 = self._find_route_or_none(ion1_trap, target1)
+                    if route1 is None:
+                        last_reason = "NO_ROUTE_TO_OPTICAL_TARGET_LEFT"
+                        raise RuntimeError(last_reason)
+                    clk_local = self._fire_shuttle_with_journal(ion1_trap, target1, ion1, clk_local, route=route1, journal=journal)
+
+                if ion2_trap != target2:
+                    route2 = self._find_route_or_none(ion2_trap, target2)
+                    if route2 is None:
+                        last_reason = "NO_ROUTE_TO_OPTICAL_TARGET_RIGHT"
+                        raise RuntimeError(last_reason)
+                    clk_local = self._fire_shuttle_with_journal(ion2_trap, target2, ion2, clk_local, route=route2, journal=journal)
+
+                if ion1 not in self.sys_state.trap_ions[target1] or ion2 not in self.sys_state.trap_ions[target2]:
+                    last_reason = "FIBER_GATE_IONS_NOT_AT_OPTICAL_ENDPOINTS"
+                    raise RuntimeError(last_reason)
+
+                clk_local = self._add_gate_op_with_metadata(
+                    clk_local,
+                    target1,
+                    [ion1, ion2],
+                    gate,
+                    gate_type,
+                    is_fiber=True,
+                    remote_trap=target2,
+                    qccd_pair=(q1, q2),
+                    journal=journal,
+                )
+                clk_local = self._maybe_insert_swap_after_cross_qccd_gate(gate, ion1, ion2, clk_local)
+                journal.commit()
+                return GateAttemptResult(GateScheduleResult.EXECUTED, clk_local, "")
+            except Exception as exc:
+                if str(exc):
+                    last_reason = str(exc)
+                self._rollback_to_mark(journal, mark)
+                continue
 
         return GateAttemptResult(GateScheduleResult.BLOCKED, clk, last_reason)
 
@@ -1340,14 +1669,9 @@ class MUSSSchedule(MUSSScheduleV6):
         """
         V7 主循环。
 
-        设计目标：
-        1) small 模式完全复用 V6；
-        2) large 模式严格保持论文 3.2 的 frontier + prioritize executable + FCFS 主线；
-        3) 当前 frontier 中若某个 gate 受局部容量/路由限制，则返回 BLOCKED 并延期；
-        4) 仅当整个 frontier 都无法推进时，才报告 TRUE_DEADLOCK。
-
-        说明：论文 3.3 的 SWAP insertion 仍保留为“跨 QCCD gate 成功之后”的后置优化，
-        不会在 run() 中额外发明一套全局兜底逻辑。
+        相比旧实现，当前版本去掉了 gate-attempt 级别的 schedule/sys_state 深拷贝回滚；
+        frontier 上每个 gate 只做一次纯规划，成功后再提交，从而与论文 3.2/3.3
+        的复杂度设定保持一致。
         """
         if self.is_small_mode:
             return super().run()
@@ -1366,6 +1690,13 @@ class MUSSSchedule(MUSSScheduleV6):
         self.last_blocked_reasons = {}
         self.v7_event_log = []
         self.round_idx = 0
+        self.remote_gate_count = 0
+        self.swap_insert_gate_count = 0
+        self.swap_insert_logical_count = 0
+
+        self._runtime_in_degree = in_degree
+        self._runtime_ready_queue = ready_queue
+        self._runtime_remaining_twoq = set(self.ir.nodes)
 
         while processed_count < total_gates:
             if not ready_queue:
@@ -1376,14 +1707,13 @@ class MUSSSchedule(MUSSScheduleV6):
 
             for gate in ordered_candidates:
                 gate_idx = self.static_topo_order.get(gate, 0)
-                snapshot = self._snapshot_runtime_state()
                 attempt = self._schedule_gate_internal(gate, gate_idx=gate_idx)
 
                 if attempt.result == GateScheduleResult.EXECUTED:
                     progressed = True
                     if gate in ready_queue:
                         ready_queue.remove(gate)
-                    self._remove_from_deferred(gate)
+                    self._runtime_remaining_twoq.discard(gate)
                     self.last_blocked_reasons.pop(gate, None)
                     processed_count += 1
 
@@ -1397,8 +1727,6 @@ class MUSSSchedule(MUSSScheduleV6):
                     self._emit_event("GATE_EXECUTED", gate_id=gate, finish_time=int(attempt.finish_time))
                     break
 
-                self._restore_runtime_state(snapshot)
-
                 if attempt.result == GateScheduleResult.BLOCKED:
                     self._record_blocked_gate(gate, attempt.reason)
                     continue
@@ -1410,7 +1738,7 @@ class MUSSSchedule(MUSSScheduleV6):
                     "ROUND_NO_PROGRESS",
                     frontier_gate_ids=list(ready_queue),
                     blocked_reasons={g: info.reason for g, info in self.last_blocked_reasons.items() if g in ready_queue},
-                    deferred_size=len(self.deferred_queue),
+                    deferred_size=0,
                 )
                 self._detect_true_deadlock_or_raise(ready_queue)
 

@@ -142,6 +142,7 @@ class JobConfig:
         """构造对子进程 run.py 的调用参数。"""
         return [
             sys.executable,
+            "-u",
             "run.py",
             self.qasm_path,
             self.machine,
@@ -283,6 +284,23 @@ def write_markdown(rows: List[Dict], out_path: Path) -> None:
         fh.write("|" + "|".join(["---"] * len(headers)) + "|\n")
         for row in rows:
             fh.write("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |\n")
+
+
+def maybe_generate_paper_report(manifest_csv: Path) -> None:
+    """
+    若 paper_report_v7.py 存在，则在批量实验结束后自动生成论文式汇总表。
+    这样可避免把汇总逻辑继续堆进 run_batch_large.py。
+    """
+    report_script = ROOT / "paper_report_v7.py"
+    if not report_script.exists():
+        print(f"[INFO] Skip paper report: {report_script} not found")
+        return
+
+    cmd = [sys.executable, str(report_script), str(manifest_csv), str(OUTPUT_DIR)]
+    print("[REPORT] " + " ".join(cmd))
+    ret = sp.call(cmd)
+    if ret != 0:
+        print(f"[WARN] paper_report_v7.py exited with code {ret}")
 
 
 # ============================================================
@@ -472,6 +490,8 @@ def run_one_job(job: JobConfig) -> Dict[str, str]:
             "fidelity": summary.get("fidelity", ""),
         }
     )
+    if summary:
+        row.update(summary)
 
     if ret != 0:
         print(f"[WARN] Job failed with exit code {ret}: {log_path}")
@@ -512,6 +532,7 @@ def main() -> None:
     print("=" * 100)
     print(f"Manifest CSV : {manifest_csv}")
     print(f"Manifest MD  : {manifest_md}")
+    maybe_generate_paper_report(manifest_csv)
     print("All large-scale jobs finished.")
 
 

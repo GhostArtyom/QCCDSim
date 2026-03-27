@@ -1,0 +1,35 @@
+{
+  "total_wall_time_s": 2268.099863999989,
+  "functions": [
+    {
+      "name": "_schedule_cross_qccd_gate",
+      "calls": 2912,
+      "total_s": 66.88926499825902,
+      "avg_s": 0.022970214628523018,
+      "max_s": 0.1133760001976043,
+      "min_s": 0.00019800011068582535,
+      "errors": 0,
+      "share_of_total_wall_time": 0.029491322697005967
+    },
+    {
+      "name": "_maybe_insert_swap_after_cross_qccd_gate",
+      "calls": 2912,
+      "total_s": 66.49154289695434,
+      "avg_s": 0.022833634236591464,
+      "max_s": 0.11326729995198548,
+      "min_s": 0.00013399985618889332,
+      "errors": 0,
+      "share_of_total_wall_time": 0.029315967939652708
+    },
+    {
+      "name": "_ensure_space_on_trap_large",
+      "calls": 6009,
+      "total_s": 0.08626350667327642,
+      "avg_s": 1.4355717535908874e-05,
+      "max_s": 0.0036859000101685524,
+      "min_s": 6.998889148235321e-07,
+      "errors": 0,
+      "share_of_total_wall_time": 3.803338117623416e-05
+    }
+  ]
+}

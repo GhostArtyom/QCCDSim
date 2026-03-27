@@ -30,8 +30,20 @@ class AnalyzerV7Knobs:
     infer_logical_swap_insert_from_triplets: bool = True
 
     @classmethod
-    def paper_mode(cls, debug_summary: bool = True, alpha_bg=None):
+    def paper_mode(cls, debug_summary: bool = True, alpha_bg=None, shuttle_fidelity_mode=None):
+        """论文主模式。
+
+        shuttle_fidelity_mode 参数保留给 run.py 做兼容式传参；
+        对 V7 来说默认始终走论文聚合口径，因此这里不额外分叉。
+        """
+        _ = shuttle_fidelity_mode
         return cls(alpha_bg=alpha_bg, debug_events=False, debug_summary=debug_summary)
+
+    @classmethod
+    def extended_mode(cls, debug_summary: bool = True, alpha_bg=None, shuttle_fidelity_mode=None):
+        """扩展模式：仍保持论文主口径，但打开更多调试输出。"""
+        _ = shuttle_fidelity_mode
+        return cls(alpha_bg=alpha_bg, debug_events=True, debug_summary=debug_summary)
 
 
 class AnalyzerV7:
@@ -113,6 +125,10 @@ class AnalyzerV7:
         self._gate_mult = 1.0
         self._gate_cnt = 0
         self._gate_avg_n = []
+        self._regular_gate_mult = 1.0
+        self._swap_insert_gate_mult = 1.0
+        self._operation_local_2q_mult = 1.0
+        self._optical_local_2q_mult = 1.0
         self._shuttle_mult = 1.0
         self._shuttle_cnt = 0
         self._shuttle_min = 1.0
@@ -151,6 +167,9 @@ class AnalyzerV7:
         self.local_1q_count = 0
         self.local_2q_count = 0
         self.remote_2q_count = 0
+        self.operation_local_2q_count = 0
+        self.optical_local_2q_count = 0
+        self.storage_local_2q_count = 0
         self.fiber_gate_count = 0
         self.swap_insert_gate_count = 0
         self.swap_insert_logical_count = 0
@@ -160,6 +179,9 @@ class AnalyzerV7:
         # 时间分解
         self.local_1q_time = 0.0
         self.local_2q_time = 0.0
+        self.operation_local_2q_time = 0.0
+        self.optical_local_2q_time = 0.0
+        self.storage_local_2q_time = 0.0
         self.fiber_gate_time = 0.0
         self.swap_insert_time = 0.0
         self.split_time_total = 0.0
@@ -440,10 +462,12 @@ class AnalyzerV7:
 
                 # 论文小规模与大规模统一口径：
                 # - 1Q 单独统计
-                # - 本地 2Q 和 fiber 2Q 分开统计
+                # - operation / optical 本地 2Q 分开统计
+                # - fiber 2Q 与 SWAP insertion 单独统计
                 if not is_2q:
                     self.local_1q_count += 1
                     self.local_1q_time += dt
+                    self._regular_gate_mult *= fid
                 elif is_fiber:
                     self.remote_2q_count += 1
                     self.fiber_gate_count += 1
@@ -451,9 +475,24 @@ class AnalyzerV7:
                     if self._is_swap_insert_gate(info):
                         self.swap_insert_gate_count += 1
                         self.swap_insert_time += dt
+                        self._swap_insert_gate_mult *= fid
+                    else:
+                        self._regular_gate_mult *= fid
                 else:
                     self.local_2q_count += 1
                     self.local_2q_time += dt
+                    self._regular_gate_mult *= fid
+                    if zone_type == "operation":
+                        self.operation_local_2q_count += 1
+                        self.operation_local_2q_time += dt
+                        self._operation_local_2q_mult *= fid
+                    elif zone_type == "optical":
+                        self.optical_local_2q_count += 1
+                        self.optical_local_2q_time += dt
+                        self._optical_local_2q_mult *= fid
+                    elif zone_type == "storage":
+                        self.storage_local_2q_count += 1
+                        self.storage_local_2q_time += dt
 
                 if self.knobs.debug_events:
                     print(
@@ -479,9 +518,10 @@ class AnalyzerV7:
                 chain = replay_traps.get(trap, [])
 
                 # 论文 Table 1：
-                # split 固定 80us；若链端前需要 direct internal swap，则再加一次 40us。
+                # split 固定 80us；若目标离子不在链端，则按 PaperSwapDirect
+                # 只补 1 次阱内 direct swap，而不是按 hop 数累计。
                 d_split = 1.0
-                d_swap = 0.3 * max(swap_cnt, 0)
+                d_swap = 1.0 if swap_cnt > 0 else 0.0
                 self._record_split_heat(trap, chain, d_split, d_swap)
                 self._accumulate_shuttle(shuttle_id, dt, d_split + d_swap, etype="split", swap_cnt=swap_cnt)
                 self.split_time_total += dt
@@ -618,6 +658,9 @@ class AnalyzerV7:
         print("\nV7 gate summary")
         print(f"  local_1q_count             = {self.local_1q_count}")
         print(f"  local_2q_count             = {self.local_2q_count}")
+        print(f"  operation_local_2q_count   = {self.operation_local_2q_count}")
+        print(f"  optical_local_2q_count     = {self.optical_local_2q_count}")
+        print(f"  storage_local_2q_count     = {self.storage_local_2q_count}")
         print(f"  remote_2q_count            = {self.remote_2q_count}")
         print(f"  fiber_gate_count           = {self.fiber_gate_count}")
         print(f"  regular_fiber_gate_count   = {self.regular_fiber_gate_count}")
@@ -635,6 +678,9 @@ class AnalyzerV7:
         print("\nTime breakdown (paper-facing)")
         print(f"  local_1q_time        = {self.local_1q_time} us")
         print(f"  local_2q_time        = {self.local_2q_time} us")
+        print(f"  operation_local_2q_time = {self.operation_local_2q_time} us")
+        print(f"  optical_local_2q_time   = {self.optical_local_2q_time} us")
+        print(f"  storage_local_2q_time   = {self.storage_local_2q_time} us")
         print(f"  fiber_gate_time      = {self.fiber_gate_time} us")
         print(f"  swap_insert_time     = {self.swap_insert_time} us")
         print(f"  split_time_total     = {self.split_time_total} us")
@@ -677,6 +723,9 @@ class AnalyzerV7:
             # V7 专用字段
             "local_1q_count": int(self.local_1q_count),
             "local_2q_count": int(self.local_2q_count),
+            "operation_local_2q_count": int(self.operation_local_2q_count),
+            "optical_local_2q_count": int(self.optical_local_2q_count),
+            "storage_local_2q_count": int(self.storage_local_2q_count),
             "remote_2q_count": int(self.remote_2q_count),
             "fiber_gate_count": int(self.fiber_gate_count),
             "regular_fiber_gate_count": int(self.regular_fiber_gate_count),
@@ -687,6 +736,9 @@ class AnalyzerV7:
             "zone_2q_counts": dict(self.zone_2q_counts),
             "local_1q_time": float(self.local_1q_time),
             "local_2q_time": float(self.local_2q_time),
+            "operation_local_2q_time": float(self.operation_local_2q_time),
+            "optical_local_2q_time": float(self.optical_local_2q_time),
+            "storage_local_2q_time": float(self.storage_local_2q_time),
             "fiber_gate_time": float(self.fiber_gate_time),
             "swap_insert_time": float(self.swap_insert_time),
             "split_time_total": float(self.split_time_total),
@@ -694,5 +746,9 @@ class AnalyzerV7:
             "merge_time_total": float(self.merge_time_total),
             "shuttle_time_total": float(self.shuttle_time_total),
             "gate_mult": float(self._gate_mult),
+            "regular_gate_mult": float(self._regular_gate_mult),
+            "swap_insert_gate_mult": float(self._swap_insert_gate_mult),
+            "operation_local_2q_mult": float(self._operation_local_2q_mult),
+            "optical_local_2q_mult": float(self._optical_local_2q_mult),
             "shuttle_mult": float(self._shuttle_mult),
         }
