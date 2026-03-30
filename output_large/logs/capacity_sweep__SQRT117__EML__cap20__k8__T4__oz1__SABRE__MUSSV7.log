@@ -24,6 +24,7 @@ Scheduler Family:  MUSS
 Scheduler Version: V7
 Analyzer Mode:     PAPER
 Arch Scale:        LARGE
+Strict Repro:      True
 Large.Env.K:       8
 Large.Env.T:       4
 Large.Env.MaxQCCD: 32
@@ -46,8 +47,8 @@ Initial qubit layout:
 {0: [], 1: [27, 28, 32, 101, 5, 17, 23, 29, 41, 65, 77, 116], 2: [], 3: [115, 108, 109, 110, 114, 102, 105, 1, 2, 3, 4, 12, 13, 14, 15, 16, 22, 24, 25, 26], 4: [], 5: [84, 85, 86, 87, 88, 99, 100, 35, 47, 59], 6: [], 7: [111, 107, 0, 33, 34, 38, 39, 40, 44, 45, 46, 51, 52, 58, 62, 63, 64, 72, 75, 76], 8: [], 9: [53, 71, 83, 95], 10: [], 11: [103, 6, 18, 30, 42, 66, 67, 68, 69, 70, 78, 79, 80, 81, 82, 90, 91, 92, 93, 94], 12: [], 13: [56, 57, 60, 61, 73, 74, 96, 97, 98, 11, 89], 14: [], 15: [113, 106, 112, 104, 7, 8, 9, 10, 19, 20, 21, 31, 36, 37, 43, 48, 49, 50, 54, 55]}
 Using MUSS Scheduler (V7) with SABRE Mapping
 Using muss_schedule7.py large-scale version
-Scheduler object construction time: 0.010780s
-Scheduler run time: 7.163406s
+Scheduler object construction time: 0.008435s
+Scheduler run time: 6.520904s
 Analyzer shuttle mode: aggregate (detected shuttle_id annotations)
 Using analyzer_v7.py (paper-faithful analyzer for MUSS V7)
 AnalyzerV7 parameter wiring: alpha_bg=0.0, T1=600000000.0, k_heating=0.001, epsilon_2q=3.90625e-05, split_merge=80.0, ion_swap=40.0, fiber_latency=200.0, fiber_fidelity=0.99, strict_paper_mainline=True
@@ -103,7 +104,7 @@ Time breakdown (paper-facing)
 [DBG SUMMARY] gates=3790  gate_mult=3.43693e-09  avg_gate_nbar=0.0000
 [DBG SUMMARY] logical_shuttles=270  shuttle_mult=0.209797  min_shuttle=0.9942
 [DBG SUMMARY] worst_B: Trap 0 -> 1.000000 (heat_state=0.000000, alpha_bg=0.0, strict_paper_mainline=True)
-Analyzer time: 0.015512s
+Analyzer time: 0.013287s
 
 ========== ANALYSIS RESULT ==========
 {'fidelity': 7.210586246513228e-10, 'total_shuttle': 270, 'logical_shuttle_count': 270, 'physical_shuttle_leg_count': 270, 'split_count': 270, 'merge_count': 270, 'move_count': 540, 'time': 270930.0, 'local_1q_count': 2191, 'local_2q_count': 688, 'operation_local_2q_count': 75, 'optical_local_2q_count': 613, 'storage_local_2q_count': 0, 'remote_2q_count': 911, 'fiber_gate_count': 911, 'regular_fiber_gate_count': 911, 'swap_insert_gate_count': 0, 'swap_insert_logical_count': 0, 'swap_insert_gate_remainder': 0, 'zone_gate_counts': {'storage': 0, 'operation': 486, 'optical': 3304, 'unknown': 0}, 'zone_2q_counts': {'storage': 0, 'operation': 75, 'optical': 1524, 'unknown': 0}, 'local_1q_time': 10955.0, 'local_2q_time': 27520.0, 'operation_local_2q_time': 3000.0, 'optical_local_2q_time': 24520.0, 'storage_local_2q_time': 0.0, 'fiber_gate_time': 182200.0, 'swap_insert_time': 0.0, 'split_time_total': 32040.0, 'move_time_total': 7560.0, 'merge_time_total': 21600.0, 'shuttle_time_total': 61200.0, 'gate_mult': 3.436930715694338e-09, 'regular_gate_mult': 3.436930715694338e-09, 'swap_insert_gate_mult': 1.0, 'operation_local_2q_mult': 0.6312980023803545, 'optical_local_2q_mult': 6.418488433604323e-05, 'shuttle_mult': 0.20979725350839729}
@@ -1463,4 +1464,4 @@ SplitSWAP: 261
 SchedulerFiredShuttle: 270
 ReportedTotalShuttle: 270
 ----------------
-SUMMARY|program=programs\SQRT117|machine=EML|version=V7|mapper=SABRELarge|scale=LARGE|total_shuttle=270|execution_time_us=270930.0|fidelity=7.210586246513228e-10|trap_capacity=20|lookahead_k=8|swap_threshold=4|num_optical_zones=1|max_qubits_per_qccd=32|enable_swap_insert=1|num_modules=4|remote_gate_count=911|compile_time_s=7.189699|logical_shuttle_count=270|physical_shuttle_leg_count=270|split_count=270|merge_count=270|move_count=540|local_1q_count=2191|local_2q_count=688|operation_local_2q_count=75|optical_local_2q_count=613|storage_local_2q_count=0|remote_2q_count=911|fiber_gate_count=911|regular_fiber_gate_count=911|swap_insert_gate_count=0|swap_insert_logical_count=0|local_1q_time=10955.0|local_2q_time=27520.0|operation_local_2q_time=3000.0|optical_local_2q_time=24520.0|storage_local_2q_time=0.0|fiber_gate_time=182200.0|swap_insert_time=0.0|split_time_total=32040.0|move_time_total=7560.0|merge_time_total=21600.0|shuttle_time_total=61200.0|gate_mult=3.436930715694338e-09|regular_gate_mult=3.436930715694338e-09|swap_insert_gate_mult=1.0|operation_local_2q_mult=0.6312980023803545|optical_local_2q_mult=6.418488433604323e-05|shuttle_mult=0.20979725350839729
+SUMMARY|program=programs\SQRT117|machine=EML|version=V7|mapper=SABRELarge|scale=LARGE|total_shuttle=270|execution_time_us=270930.0|fidelity=7.210586246513228e-10|trap_capacity=20|lookahead_k=8|swap_threshold=4|num_optical_zones=1|max_qubits_per_qccd=32|enable_swap_insert=1|num_modules=4|remote_gate_count=911|compile_time_s=6.542626|logical_shuttle_count=270|physical_shuttle_leg_count=270|split_count=270|merge_count=270|move_count=540|local_1q_count=2191|local_2q_count=688|operation_local_2q_count=75|optical_local_2q_count=613|storage_local_2q_count=0|remote_2q_count=911|fiber_gate_count=911|regular_fiber_gate_count=911|swap_insert_gate_count=0|swap_insert_logical_count=0|local_1q_time=10955.0|local_2q_time=27520.0|operation_local_2q_time=3000.0|optical_local_2q_time=24520.0|storage_local_2q_time=0.0|fiber_gate_time=182200.0|swap_insert_time=0.0|split_time_total=32040.0|move_time_total=7560.0|merge_time_total=21600.0|shuttle_time_total=61200.0|gate_mult=3.436930715694338e-09|regular_gate_mult=3.436930715694338e-09|swap_insert_gate_mult=1.0|operation_local_2q_mult=0.6312980023803545|optical_local_2q_mult=6.418488433604323e-05|shuttle_mult=0.20979725350839729

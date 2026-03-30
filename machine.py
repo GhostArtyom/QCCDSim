@@ -271,6 +271,21 @@ class Machine:
     def qccd_ids(self) -> List[int]:
         return sorted({getattr(tr, "qccd_id", 0) for tr in self.traps})
 
+    def get_qccd_id_by_trap(self, trap_id: int) -> int:
+        """
+        严格复现辅助接口：根据 trap_id 返回所属 qccd/module。
+
+        之所以显式提供该接口，是为了让 run.py / strict_repro.py 在校验
+        拓扑时不必依赖 Trap 对象的内部字段名，从而避免字段改名导致的
+        隐式失配。
+        """
+        return int(self.get_trap(trap_id).qccd_id)
+
+    def get_trap_zone_type(self, trap_id: int) -> str:
+        """严格复现辅助接口：返回 trap 的 zone_type。"""
+        return str(self.get_trap(trap_id).zone_type)
+
+
     def traps_by_zone(self, zone_type: str) -> List[Trap]:
         return [tr for tr in self.traps if getattr(tr, "zone_type", None) == zone_type]
 

@@ -40,6 +40,17 @@ import sys
 import time
 from typing import Any, Dict, Optional, Tuple
 
+from strict_repro import (
+    StrictReproError,
+    ensure_no_fallback,
+    load_strict_repro_config,
+    validate_analyzer_requirements,
+    validate_large_env_values,
+    validate_machine_topology,
+    validate_runtime_mode,
+    validate_summary_payload,
+)
+
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
@@ -92,6 +103,9 @@ except Exception:
     MUSSScheduleV7 = None
 
 np.random.seed(12345)
+
+# 严格复现模式：仅在用户显式开启时生效，默认不破坏原项目兼容路径。
+STRICT_REPRO = load_strict_repro_config()
 
 # 让批量日志在 stdout 被重定向到文件时仍尽可能按行刷新，避免把“运行很慢”误判成“完全没输出”。
 try:
@@ -179,6 +193,14 @@ def _build_v7_knobs(analyzer_mode: str, shuttle_mode: str):
     if AnalyzerV7Knobs is None:
         raise RuntimeError("AnalyzerV7Knobs is not available")
 
+    if STRICT_REPRO.enabled and STRICT_REPRO.require_paper_mode_default:
+        ensure_no_fallback(
+            STRICT_REPRO,
+            actual=mode if mode in ["PAPER", "TABLE2", "P"] else mode,
+            expected="PAPER/TABLE2/P",
+            context="analyzer_mode",
+        )
+
     # 先优先使用 analyzer_v7 自己定义的模式工厂。
     if mode in ["PAPER", "TABLE2", "P"]:
         if hasattr(AnalyzerV7Knobs, "paper_mode"):
@@ -200,7 +222,13 @@ def _build_v7_knobs(analyzer_mode: str, shuttle_mode: str):
         except TypeError:
             return AnalyzerV7Knobs.extended_mode(debug_summary=True)
 
-    # V7 当前若只提供 paper_mode，则统一回退到论文模式。
+    # 严格复现模式下禁止把未知模式或缺失模式静默回退为 paper_mode。
+    if STRICT_REPRO.enabled:
+        raise StrictReproError(
+            f"严格复现模式下 analyzer_v7 不允许模式回退：请求 analyzer_mode={analyzer_mode!r}，"
+            "但 analyzer_v7 未暴露同名模式工厂。"
+        )
+
     if hasattr(AnalyzerV7Knobs, "paper_mode"):
         if mode not in ["PAPER", "TABLE2", "P", "EXTENDED", "EXP", "E"]:
             print(f"Warning: unknown analyzer mode '{analyzer_mode}', fallback to PAPER for analyzer_v7")
@@ -249,7 +277,10 @@ def build_analyzer(
     if use_v7_analyzer:
         knobs = _build_v7_knobs(analyzer_mode, shuttle_mode)
         print("Using analyzer_v7.py (paper-faithful analyzer for MUSS V7)")
+        validate_analyzer_requirements(STRICT_REPRO, use_aggregate=use_aggregate, using_v7_analyzer=True)
         return AnalyzerV7(scheduler, machine_obj, init_qubit_layout, knobs)
+
+    validate_analyzer_requirements(STRICT_REPRO, use_aggregate=use_aggregate, using_v7_analyzer=False)
 
     # 旧路径保持原样。
     if analyzer_mode in ["PAPER", "TABLE2", "P"]:
@@ -263,6 +294,8 @@ def build_analyzer(
             debug_summary=True,
         )
     else:
+        if STRICT_REPRO.enabled:
+            raise StrictReproError(f"严格复现模式下 legacy analyzer 不允许 analyzer_mode 回退：{analyzer_mode}")
         print(f"Warning: unknown analyzer mode '{analyzer_mode}', fallback to PAPER")
         knobs = AnalyzerKnobs.paper_mode(
             shuttle_fidelity_mode=shuttle_mode,
@@ -427,6 +460,8 @@ def apply_large_env_overrides(mpar: MachineParams, architecture_scale: str) -> D
     if trap_capacity > 0:
         effective["trap_capacity"] = trap_capacity
     else:
+        if STRICT_REPRO.enabled:
+            raise StrictReproError("严格复现模式要求显式提供 MUSS_TRAP_CAPACITY，不能依赖 ions_per_region 历史默认值")
         effective["trap_capacity"] = None
 
     mpar.swap_lookahead_k = int(lookahead_k)
@@ -440,6 +475,7 @@ def apply_large_env_overrides(mpar: MachineParams, architecture_scale: str) -> D
     effective["max_qubits_per_qccd"] = int(max_qubits_per_qccd)
     effective["num_optical_zones"] = int(num_optical_zones)
     effective["enable_swap_insert"] = bool(enable_swap_insert)
+    validate_large_env_values(effective, STRICT_REPRO)
     return effective
 
 
@@ -530,9 +566,13 @@ def select_mapper(
                 print("Using QubitMapSABRE2 mapper (small-scale compatibility path for V7)")
                 return QubitMapSABRE2(parse_obj, machine_obj)
 
+            if STRICT_REPRO.enabled:
+                raise StrictReproError(f"严格复现模式下禁止 mapper 因未知 scheduler version 回退：{sched_version}")
             print(f"Warning: Unknown scheduler version '{sched_version}', fallback to SABRE2")
             return QubitMapSABRE2(parse_obj, machine_obj)
 
+        if STRICT_REPRO.enabled:
+            raise StrictReproError("严格复现模式要求 MUSS 调度族与论文主线路径一致，禁止使用默认 SABRE2 非 MUSS 回退")
         print("Using default SABRE2 mapper (non-MUSS scheduler)")
         return QubitMapSABRE2(parse_obj, machine_obj)
 
@@ -627,6 +667,8 @@ def build_scheduler(
             f"Unsupported scheduler version '{sched_version}', supported: V2 / V3 / V4 / V5 / V6 / V7"
         )
 
+    if STRICT_REPRO.enabled:
+        raise StrictReproError("严格复现模式禁止回退到 EJF scheduler")
     print("Fallback to EJF scheduler")
     return EJFSchedule(
         ip.gate_graph, ip.all_gate_map, machine_obj, init_qubit_layout,
@@ -720,6 +762,7 @@ mpar.qccd_fiber_fidelity = 0.99
 mpar.swap_lookahead_k = 8
 mpar.swap_threshold_T = 4
 mpar.enable_cross_qccd_swap_insertion = True
+mpar.strict_repro = bool(STRICT_REPRO.enabled)
 
 # ---- 命令行控制 ----
 mpar.gate_type = gate_type
@@ -745,6 +788,8 @@ elif architecture_scale in ["LARGE", "L", "EML", "EML-QCCD"]:
     mpar.architecture_scale = "large"
     mpar.enable_partition = True
 else:
+    if STRICT_REPRO.enabled:
+        raise StrictReproError(f"严格复现模式不允许未知 architecture_scale：{architecture_scale}")
     print(f"Warning: unknown architecture_scale '{architecture_scale}', fallback SMALL")
     mpar.architecture_scale = "small"
     mpar.enable_partition = False
@@ -752,6 +797,13 @@ else:
 
 # large sweep 环境变量覆盖（仅在 large 模式生效）
 effective_large_env = apply_large_env_overrides(mpar, architecture_scale)
+validate_runtime_mode(
+    STRICT_REPRO,
+    architecture_scale=architecture_scale,
+    sched_family=sched_family,
+    sched_version=sched_version,
+    analyzer_mode=analyzer_mode,
+)
 
 # ions_per_region 对 small 路径保留历史含义；large 路径若给了 MUSS_TRAP_CAPACITY，优先使用它。
 effective_capacity = int(num_ions_per_region)
@@ -780,6 +832,7 @@ print("Scheduler Family: ", sched_family)
 print("Scheduler Version:", sched_version)
 print("Analyzer Mode:    ", analyzer_mode)
 print("Arch Scale:       ", architecture_scale)
+print("Strict Repro:     ", STRICT_REPRO.enabled)
 print("Large.Env.K:      ", effective_large_env.get("lookahead_k"))
 print("Large.Env.T:      ", effective_large_env.get("swap_threshold"))
 print("Large.Env.MaxQCCD:", effective_large_env.get("max_qubits_per_qccd"))
@@ -804,6 +857,17 @@ except Exception as exc:
     sys.exit(1)
 
 m.print_machine_stats()
+# 只有 EML 系列机器才检查“每个 QCCD 的 optical zone 数量是否等于环境变量期望值”
+# G3x4 / G4x5 属于单体 QCCD 基线，不应用 EML 的 optical-zone 参数化口径去约束。
+expected_optical_zones = None
+if machine_type.upper() in ["EML", "EML2Z", "EML-QCCD"]:
+    expected_optical_zones = effective_large_env.get("num_optical_zones")
+
+validate_machine_topology(
+    m,
+    expected_optical_zones=expected_optical_zones,
+    strict_cfg=STRICT_REPRO,
+)
 print("Parse object map:")
 print(ip.cx_gate_map)
 print("Parse object graph:")
@@ -915,6 +979,8 @@ use_aggregate = has_shuttle_id_annotations(scheduler)
 if use_aggregate:
     print("Analyzer shuttle mode: aggregate (detected shuttle_id annotations)")
 else:
+    if STRICT_REPRO.enabled:
+        raise StrictReproError("严格复现模式要求 shuttle 事件全部带 shuttle_id，禁止 per_event 回退")
     print("Analyzer shuttle mode: per_event (no shuttle_id detected; compatibility fallback)")
 
 analyzer_ts = time.perf_counter()
@@ -1039,5 +1105,6 @@ add_optional_summary_fields(
     ],
 )
 
+validate_summary_payload(STRICT_REPRO, summary_fields)
 summary_line = "SUMMARY|" + "|".join(f"{k}={v}" for k, v in summary_fields.items())
 print(summary_line)

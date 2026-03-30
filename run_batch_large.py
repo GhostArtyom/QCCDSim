@@ -38,7 +38,7 @@ import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
-
+os.environ["MUSS_STRICT_REPRO"] = "1"#开启严格复现
 
 # ============================================================
 # 目录配置
