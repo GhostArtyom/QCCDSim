@@ -55,52 +55,60 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
 
-from analyzer import Analyzer, AnalyzerKnobs
+from src.analyze import Analyzer, AnalyzerKnobs
 
 # V7 论文专用 analyzer：若文件不存在，则自动回退到旧 analyzer。
 try:
-    from analyzer_v7 import AnalyzerV7, AnalyzerV7Knobs
+    from src.analyze import AnalyzerV7, AnalyzerV7Knobs
 except Exception:
     AnalyzerV7 = None
     AnalyzerV7Knobs = None
-from ejf_schedule import EJFSchedule, Schedule
-from machine import MachineParams
-from mappers import *
-from parse import InputParse
-from test_machines import *
+from src.schedule import EJFSchedule, Schedule
+from src.machine import MachineParams
+from src.machine.topologies.large import build_machine_by_type
+from src.mapping import *
+from src.parse import InputParse
 
 # ------------------------------
-# 旧版 / 小规模 MUSS 调度器
+# 旧版 / 小规模 MUSS 调度器 (muss_schedule2-5 已迁移到 src/schedule/muss/)
+# 此处尝试导入仅用于向后兼容，若文件不存在则置为 None
 # ------------------------------
-from muss_schedule2 import MUSSSchedule as MUSSScheduleV2
+try:
+    from src.schedule.muss import MUSSScheduleV2
+except Exception:
+    MUSSScheduleV2 = None
 
 try:
-    from muss_schedule3 import MUSSSchedule as MUSSScheduleV3
+    from src.schedule.muss import MUSSScheduleV3
 except Exception:
     MUSSScheduleV3 = None
 
 try:
-    from muss_schedule4 import MUSSSchedule as MUSSScheduleV4
+    from src.schedule.muss import MUSSScheduleV4
 except Exception:
     MUSSScheduleV4 = None
 
 try:
-    from muss_schedule5 import MUSSSchedule as MUSSScheduleV5
+    from src.schedule.muss import MUSSScheduleV5
 except Exception:
     MUSSScheduleV5 = None
 
-try:
-    from muss_schedule6 import MUSSSchedule as MUSSScheduleV6
-except Exception:
-    MUSSScheduleV6 = None
-
 # ------------------------------
-# 新增：large-scale MUSS V7
+# MUSS V6/V7 schedulers (迁移到 src.schedule.muss)
 # ------------------------------
 try:
-    from muss_schedule7 import MUSSSchedule as MUSSScheduleV7
-except Exception:
-    MUSSScheduleV7 = None
+    from src.schedule.muss import MUSSScheduleV6, MUSSScheduleV7
+except Exception as e:
+    print(f"Warning: Could not import from src.schedule.muss: {e}")
+    # Fallback to old files
+    try:
+        from muss_schedule6 import MUSSSchedule as MUSSScheduleV6
+    except Exception:
+        MUSSScheduleV6 = None
+    try:
+        from muss_schedule7 import MUSSSchedule as MUSSScheduleV7
+    except Exception:
+        MUSSScheduleV7 = None
 
 np.random.seed(12345)
 

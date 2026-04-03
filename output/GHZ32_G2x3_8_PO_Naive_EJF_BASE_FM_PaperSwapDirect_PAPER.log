@@ -1,0 +1,58 @@
+========== Gate Set Summary ==========
+cx: 31
+h: 1
+======================================
+Simulation
+Program:           programs\GHZ32.qasm
+Machine:           G2x3
+Model:             MUSS_Params
+Program Qubits:    32
+Ions/Region(arg):  8
+Effective Cap:     8
+Mapper:            PO
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  EJF
+Scheduler Version: 
+Analyzer Mode:     PAPER
+Arch Scale:        SMALL
+Strict Repro:      False
+Large.Env.K:       None
+Large.Env.T:       None
+Large.Env.MaxQCCD: 32
+Large.Env.OptZone: 1
+Large.Env.SWAP:    False
+#Traps=6 #Junctions=3 #Segments=8
+TrapCapacity(default)=8
+Parse object map:
+{1: [0, 1], 2: [1, 2], 3: [2, 3], 4: [3, 4], 5: [4, 5], 6: [5, 6], 7: [6, 7], 8: [7, 8], 9: [8, 9], 10: [9, 10], 11: [10, 11], 12: [11, 12], 13: [12, 13], 14: [13, 14], 15: [14, 15], 16: [15, 16], 17: [16, 17], 18: [17, 18], 19: [18, 19], 20: [19, 20], 21: [20, 21], 22: [21, 22], 23: [22, 23], 24: [23, 24], 25: [24, 25], 26: [25, 26], 27: [26, 27], 28: [27, 28], 29: [28, 29], 30: [29, 30], 31: [30, 31]}
+Parse object graph:
+DiGraph with 32 nodes and 31 edges
+Raw mapping:
+{0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 13: 1, 14: 1, 15: 1, 16: 2, 17: 2, 18: 2, 19: 2, 20: 2, 21: 2, 22: 2, 23: 2, 24: 3, 25: 3, 26: 3, 27: 3, 28: 3, 29: 3, 30: 3, 31: 3}
+Initial layout policy: mapping + qubit_ordering(Naive)
+Apply qubit ordering for mapper 'PO' with mode 'Naive'
+Initial qubit layout:
+{0: [0, 1, 2, 3, 4, 5, 6, 7], 1: [8, 9, 10, 11, 12, 13, 14, 15], 2: [16, 17, 18, 19, 20, 21, 22, 23], 3: [24, 25, 26, 27, 28, 29, 30, 31], 4: [], 5: []}
+Using EJF Scheduler () with PO Mapping
+Fallback to EJF scheduler
+Scheduler object construction time: 0.000031s
+Did not find: type
+Traceback (most recent call last):
+  File "D:\A-zhangguangyu\The_first_project\MUSS\QCCDSim\run.py", line 977, in <module>
+    scheduler.run()
+    ~~~~~~~~~~~~~^^
+  File "D:\A-zhangguangyu\The_first_project\MUSS\QCCDSim\src\schedule\ejf.py", line 193, in run
+    self.schedule_gate(gate, gate_ready_clock)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\A-zhangguangyu\The_first_project\MUSS\QCCDSim\src\schedule\ejf.py", line 145, in schedule_gate
+    ion1_ready_time, ion1_trap = self.ion_ready_info(ion1)
+                                 ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "D:\A-zhangguangyu\The_first_project\MUSS\QCCDSim\src\schedule\ejf.py", line 78, in ion_ready_info
+    assert did_not_find == False
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError

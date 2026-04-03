@@ -1,0 +1,113 @@
+========== Gate Set Summary ==========
+cx: 128
+h: 32
+rx: 64
+rz: 64
+======================================
+Simulation
+Program:           programs\QAOA32.qasm
+Machine:           G2x3
+Model:             MUSS_Params
+Program Qubits:    32
+Ions/Region(arg):  8
+Effective Cap:     8
+Mapper:            SABRE
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  MUSS
+Scheduler Version: V2
+Analyzer Mode:     PAPER
+Arch Scale:        SMALL
+Strict Repro:      False
+Large.Env.K:       None
+Large.Env.T:       None
+Large.Env.MaxQCCD: 32
+Large.Env.OptZone: 1
+Large.Env.SWAP:    False
+#Traps=6 #Junctions=3 #Segments=8
+TrapCapacity(default)=8
+Parse object map:
+{32: [0, 1], 34: [0, 1], 35: [2, 3], 37: [2, 3], 38: [4, 5], 40: [4, 5], 41: [6, 7], 43: [6, 7], 44: [8, 9], 46: [8, 9], 47: [10, 11], 49: [10, 11], 50: [12, 13], 52: [12, 13], 53: [14, 15], 55: [14, 15], 56: [16, 17], 58: [16, 17], 59: [18, 19], 61: [18, 19], 62: [20, 21], 64: [20, 21], 65: [22, 23], 67: [22, 23], 68: [24, 25], 70: [24, 25], 71: [26, 27], 73: [26, 27], 74: [28, 29], 76: [28, 29], 77: [30, 31], 79: [30, 31], 80: [1, 2], 82: [1, 2], 83: [3, 4], 85: [3, 4], 86: [5, 6], 88: [5, 6], 89: [7, 8], 91: [7, 8], 92: [9, 10], 94: [9, 10], 95: [11, 12], 97: [11, 12], 98: [13, 14], 100: [13, 14], 101: [15, 16], 103: [15, 16], 104: [17, 18], 106: [17, 18], 107: [19, 20], 109: [19, 20], 110: [21, 22], 112: [21, 22], 113: [23, 24], 115: [23, 24], 116: [25, 26], 118: [25, 26], 119: [27, 28], 121: [27, 28], 122: [29, 30], 124: [29, 30], 125: [31, 0], 127: [31, 0], 160: [0, 1], 162: [0, 1], 163: [2, 3], 165: [2, 3], 166: [4, 5], 168: [4, 5], 169: [6, 7], 171: [6, 7], 172: [8, 9], 174: [8, 9], 175: [10, 11], 177: [10, 11], 178: [12, 13], 180: [12, 13], 181: [14, 15], 183: [14, 15], 184: [16, 17], 186: [16, 17], 187: [18, 19], 189: [18, 19], 190: [20, 21], 192: [20, 21], 193: [22, 23], 195: [22, 23], 196: [24, 25], 198: [24, 25], 199: [26, 27], 201: [26, 27], 202: [28, 29], 204: [28, 29], 205: [30, 31], 207: [30, 31], 208: [1, 2], 210: [1, 2], 211: [3, 4], 213: [3, 4], 214: [5, 6], 216: [5, 6], 217: [7, 8], 219: [7, 8], 220: [9, 10], 222: [9, 10], 223: [11, 12], 225: [11, 12], 226: [13, 14], 228: [13, 14], 229: [15, 16], 231: [15, 16], 232: [17, 18], 234: [17, 18], 235: [19, 20], 237: [19, 20], 238: [21, 22], 240: [21, 22], 241: [23, 24], 243: [23, 24], 244: [25, 26], 246: [25, 26], 247: [27, 28], 249: [27, 28], 250: [29, 30], 252: [29, 30], 253: [31, 0], 255: [31, 0]}
+Parse object graph:
+DiGraph with 288 nodes and 384 edges
+Using QubitMapSABRE2 mapper (matches muss_schedule2 paper version)
+Raw mapping:
+{'layout': {0: 3, 1: 3, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 13: 1, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2, 19: 2, 20: 2, 21: 2, 22: 1, 23: 1, 24: 0, 25: 0, 26: 3, 27: 3, 28: 3, 29: 3, 30: 3, 31: 3}, 'trap_to_qubits': {0: [2, 3, 4, 5, 6, 24, 25, 7], 1: [8, 9, 10, 11, 12, 13, 23, 22], 2: [15, 16, 17, 18, 19, 20, 21, 14], 3: [0, 26, 27, 28, 29, 30, 31, 1], 4: [], 5: []}}
+Initial layout policy: mapping_bundle(layout + trap_to_qubits_from_mapper)
+Note: reorder_choice='Naive' is ignored because mapper already provides ordered trap layout
+Use mapper-provided ordered trap layout for mapper 'SABRE'
+Initial qubit layout:
+{0: [2, 3, 4, 5, 6, 24, 25, 7], 1: [8, 9, 10, 11, 12, 13, 23, 22], 2: [15, 16, 17, 18, 19, 20, 21, 14], 3: [0, 26, 27, 28, 29, 30, 31, 1], 4: [], 5: []}
+Using MUSS Scheduler (V2) with SABRE Mapping
+Using muss_schedule2.py paper-faithful fixed version
+Scheduler object construction time: 0.000774s
+Scheduler run time: 0.064832s
+Analyzer shuttle mode: aggregate (detected shuttle_id annotations)
+Using legacy analyzer.py
+Analyzer parameter wiring: alpha_bg=0.0, T1=600000000.0, k_heating=0.001, epsilon_2q=3.90625e-05, strict_paper_mainline=True
+Analyzer mode: paper
+Program Finish Time: 2207 us
+OPCOUNTS Gate: 288 Split: 7 Move: 13 Merge: 7
+
+Two-qubit gate chain statistics
+Mean: 7.8125 Max: 8.0
+Fidelity: 0.7072600739012795
+
+Shuttle count summary
+  logical_shuttle_count      = 7   # High-level shuttle count aggregated by shuttle_id
+  physical_shuttle_leg_count = 7   # Paper-facing count: each complete trap-to-trap split+move+merge leg
+  split_count                = 7
+  merge_count                = 7
+  move_count                 = 13
+[DBG SUMMARY] gates=288  gate_mult=0.721074  avg_gate_nbar=0.0000
+[DBG SUMMARY] logical_shuttles=7  shuttle_mult=0.980843  min_shuttle=0.9949
+[DBG SUMMARY] worst_B: Trap 0 -> 1.000000 (heat_state=0.000000, alpha_bg=0.0, move_bg_fraction=0.0, model=exp, strict_paper_mainline=True)
+Analyzer time: 0.001083s
+
+========== ANALYSIS RESULT ==========
+{'fidelity': 0.7072600739012795, 'total_shuttle': 7, 'logical_shuttle_count': 7, 'physical_shuttle_leg_count': 7, 'split_count': 7, 'merge_count': 7, 'move_count': 13, 'time': 2207}
+
+========== SHUTTLE TRACE ==========
+[SHUTTLE 0] ion=1  T3 -> T4  route=T3->J0->J1->T4
+    - SPLIT  (320 -> 440)  ion 1: T3 -> Seg3 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=1, i2=0)
+    - MOVE   (440 -> 454)  ion 1: Seg3 -> Seg6 via J0
+    - MOVE   (454 -> 468)  ion 1: Seg6 -> Seg4 via J1
+    - MERGE  (468 -> 548)  ion 1: Seg4 -> T4
+[SHUTTLE 1] ion=2  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (548 -> 668)  ion 2: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=2, i2=7)
+    - MOVE   (668 -> 682)  ion 2: Seg0 -> Seg6 via J0
+    - MOVE   (682 -> 696)  ion 2: Seg6 -> Seg4 via J1
+    - MERGE  (696 -> 776)  ion 2: Seg4 -> T4
+[SHUTTLE 2] ion=8  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (776 -> 896)  ion 8: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=8, i2=22)
+    - MOVE   (896 -> 910)  ion 8: Seg1 -> Seg6 via J1
+    - MOVE   (910 -> 924)  ion 8: Seg6 -> Seg0 via J0
+    - MERGE  (924 -> 1004)  ion 8: Seg0 -> T0
+[SHUTTLE 3] ion=14  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (1004 -> 1084)  ion 14: T2 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (1084 -> 1098)  ion 14: Seg2 -> Seg7 via J2
+    - MOVE   (1098 -> 1112)  ion 14: Seg7 -> Seg1 via J1
+    - MERGE  (1112 -> 1192)  ion 14: Seg1 -> T1
+[SHUTTLE 4] ion=22  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (1352 -> 1472)  ion 22: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=22, i2=14)
+    - MOVE   (1472 -> 1486)  ion 22: Seg1 -> Seg7 via J1
+    - MOVE   (1486 -> 1500)  ion 22: Seg7 -> Seg2 via J2
+    - MERGE  (1500 -> 1580)  ion 22: Seg2 -> T2
+[SHUTTLE 5] ion=24  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (1580 -> 1700)  ion 24: T0 -> Seg0 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=24, i2=8)
+    - MOVE   (1700 -> 1714)  ion 24: Seg0 -> Seg6 via J0
+    - MOVE   (1714 -> 1728)  ion 24: Seg6 -> Seg1 via J1
+    - MERGE  (1728 -> 1808)  ion 24: Seg1 -> T1
+[SHUTTLE 6] ion=26  T3 -> T0  route=T3->J0->T0
+    - SPLIT  (1808 -> 1928)  ion 26: T3 -> Seg3 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=26, i2=0)
+    - MOVE   (1928 -> 1942)  ion 26: Seg3 -> Seg0 via J0
+    - MERGE  (1942 -> 2022)  ion 26: Seg0 -> T0
+SplitSWAP: 6
+SchedulerFiredShuttle: 7
+ReportedTotalShuttle: 7
+----------------
+SUMMARY|program=programs\QAOA32|machine=G2x3|version=V2|mapper=SABRE2|scale=SMALL|total_shuttle=7|execution_time_us=2207|fidelity=0.7072600739012795|trap_capacity=8|lookahead_k=None|swap_threshold=None|num_optical_zones=1|max_qubits_per_qccd=32|enable_swap_insert=0|num_modules=0|remote_gate_count=None|compile_time_s=0.066689|logical_shuttle_count=7|physical_shuttle_leg_count=7|split_count=7|merge_count=7|move_count=13

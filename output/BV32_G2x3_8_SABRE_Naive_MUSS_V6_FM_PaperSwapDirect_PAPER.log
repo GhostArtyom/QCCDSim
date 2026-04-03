@@ -1,0 +1,141 @@
+========== Gate Set Summary ==========
+cx: 32
+h: 66
+x: 1
+======================================
+Simulation
+Program:           programs\BV32.qasm
+Machine:           G2x3
+Model:             MUSS_Params
+Program Qubits:    33
+Ions/Region(arg):  8
+Effective Cap:     8
+Mapper:            SABRE
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  MUSS
+Scheduler Version: V6
+Analyzer Mode:     PAPER
+Arch Scale:        SMALL
+Strict Repro:      False
+Large.Env.K:       None
+Large.Env.T:       None
+Large.Env.MaxQCCD: 32
+Large.Env.OptZone: 1
+Large.Env.SWAP:    False
+#Traps=6 #Junctions=3 #Segments=8
+TrapCapacity(default)=8
+Parse object map:
+{34: [0, 32], 35: [1, 32], 36: [2, 32], 37: [3, 32], 38: [4, 32], 39: [5, 32], 40: [6, 32], 41: [7, 32], 42: [8, 32], 43: [9, 32], 44: [10, 32], 45: [11, 32], 46: [12, 32], 47: [13, 32], 48: [14, 32], 49: [15, 32], 50: [16, 32], 51: [17, 32], 52: [18, 32], 53: [19, 32], 54: [20, 32], 55: [21, 32], 56: [22, 32], 57: [23, 32], 58: [24, 32], 59: [25, 32], 60: [26, 32], 61: [27, 32], 62: [28, 32], 63: [29, 32], 64: [30, 32], 65: [31, 32]}
+Parse object graph:
+DiGraph with 99 nodes and 98 edges
+Using QubitMapSABRE2 mapper (matches muss_schedule6 improved version)
+Raw mapping:
+{'layout': {0: 0, 1: 0, 2: 4, 3: 4, 4: 4, 5: 4, 6: 4, 7: 4, 8: 4, 9: 1, 10: 1, 11: 1, 12: 1, 13: 1, 14: 1, 15: 1, 16: 2, 17: 2, 18: 2, 19: 2, 20: 2, 21: 2, 22: 2, 23: 2, 24: 3, 25: 3, 26: 3, 27: 3, 28: 3, 29: 3, 30: 3, 31: 3, 32: 0}, 'trap_to_qubits': {0: [0, 1, 32], 1: [15, 14, 13, 12, 11, 10, 9], 2: [16, 17, 18, 19, 23, 22, 21, 20], 3: [25, 26, 27, 28, 29, 30, 31, 24], 4: [2, 3, 4, 5, 6, 7, 8], 5: []}}
+Initial layout policy: mapping_bundle(layout + trap_to_qubits_from_mapper)
+Note: reorder_choice='Naive' is ignored because mapper already provides ordered trap layout
+Use mapper-provided ordered trap layout for mapper 'SABRE'
+Initial qubit layout:
+{0: [0, 1, 32], 1: [15, 14, 13, 12, 11, 10, 9], 2: [16, 17, 18, 19, 23, 22, 21, 20], 3: [25, 26, 27, 28, 29, 30, 31, 24], 4: [2, 3, 4, 5, 6, 7, 8], 5: []}
+Using MUSS Scheduler (V6) with SABRE Mapping
+Using muss_schedule6.py new_vision
+Scheduler object construction time: 0.000252s
+Scheduler run time: 0.008648s
+Analyzer shuttle mode: aggregate (detected shuttle_id annotations)
+Using legacy analyzer.py
+Analyzer parameter wiring: alpha_bg=0.0, T1=600000000.0, k_heating=0.001, epsilon_2q=3.90625e-05, strict_paper_mainline=True
+Analyzer mode: paper
+Program Finish Time: 3831 us
+OPCOUNTS Gate: 99 Split: 13 Move: 24 Merge: 13
+
+Two-qubit gate chain statistics
+Mean: 6.84375 Max: 8.0
+Fidelity: 0.8777875012968096
+
+Shuttle count summary
+  logical_shuttle_count      = 13   # High-level shuttle count aggregated by shuttle_id
+  physical_shuttle_leg_count = 13   # Paper-facing count: each complete trap-to-trap split+move+merge leg
+  split_count                = 13
+  merge_count                = 13
+  move_count                 = 24
+[DBG SUMMARY] gates=99  gate_mult=0.93267  avg_gate_nbar=0.0000
+[DBG SUMMARY] logical_shuttles=13  shuttle_mult=0.941155  min_shuttle=0.9949
+[DBG SUMMARY] worst_B: Trap 0 -> 1.000000 (heat_state=0.000000, alpha_bg=0.0, move_bg_fraction=0.0, model=exp, strict_paper_mainline=True)
+Analyzer time: 0.000706s
+
+========== ANALYSIS RESULT ==========
+{'fidelity': 0.8777875012968096, 'total_shuttle': 13, 'logical_shuttle_count': 13, 'physical_shuttle_leg_count': 13, 'split_count': 13, 'merge_count': 13, 'move_count': 24, 'time': 3831}
+
+========== SHUTTLE TRACE ==========
+[SHUTTLE 0] ion=2  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (80 -> 160)  ion 2: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (160 -> 174)  ion 2: Seg4 -> Seg6 via J1
+    - MOVE   (174 -> 188)  ion 2: Seg6 -> Seg0 via J0
+    - MERGE  (188 -> 268)  ion 2: Seg0 -> T0
+[SHUTTLE 1] ion=3  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (308 -> 388)  ion 3: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (388 -> 402)  ion 3: Seg4 -> Seg6 via J1
+    - MOVE   (402 -> 416)  ion 3: Seg6 -> Seg0 via J0
+    - MERGE  (416 -> 496)  ion 3: Seg0 -> T0
+[SHUTTLE 2] ion=4  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (536 -> 616)  ion 4: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (616 -> 630)  ion 4: Seg4 -> Seg6 via J1
+    - MOVE   (630 -> 644)  ion 4: Seg6 -> Seg0 via J0
+    - MERGE  (644 -> 724)  ion 4: Seg0 -> T0
+[SHUTTLE 3] ion=5  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (764 -> 844)  ion 5: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (844 -> 858)  ion 5: Seg4 -> Seg6 via J1
+    - MOVE   (858 -> 872)  ion 5: Seg6 -> Seg0 via J0
+    - MERGE  (872 -> 952)  ion 5: Seg0 -> T0
+[SHUTTLE 4] ion=6  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (992 -> 1072)  ion 6: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (1072 -> 1086)  ion 6: Seg4 -> Seg6 via J1
+    - MOVE   (1086 -> 1100)  ion 6: Seg6 -> Seg0 via J0
+    - MERGE  (1100 -> 1180)  ion 6: Seg0 -> T0
+[SHUTTLE 5] ion=32  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (1220 -> 1340)  ion 32: T0 -> Seg0 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=32, i2=6)
+    - MOVE   (1340 -> 1354)  ion 32: Seg0 -> Seg6 via J0
+    - MOVE   (1354 -> 1368)  ion 32: Seg6 -> Seg4 via J1
+    - MERGE  (1368 -> 1448)  ion 32: Seg4 -> T4
+[SHUTTLE 6] ion=32  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (1528 -> 1608)  ion 32: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (1608 -> 1622)  ion 32: Seg4 -> Seg1 via J1
+    - MERGE  (1622 -> 1702)  ion 32: Seg1 -> T1
+[SHUTTLE 7] ion=16  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (1982 -> 2102)  ion 16: T2 -> Seg2 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=16, i2=20)
+    - MOVE   (2102 -> 2116)  ion 16: Seg2 -> Seg7 via J2
+    - MOVE   (2116 -> 2130)  ion 16: Seg7 -> Seg4 via J1
+    - MERGE  (2130 -> 2210)  ion 16: Seg4 -> T4
+[SHUTTLE 8] ion=32  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (2210 -> 2290)  ion 32: T1 -> Seg1 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (2290 -> 2304)  ion 32: Seg1 -> Seg4 via J1
+    - MERGE  (2304 -> 2384)  ion 32: Seg4 -> T4
+[SHUTTLE 9] ion=32  T4 -> T2  route=T4->J1->J2->T2
+    - SPLIT  (2424 -> 2504)  ion 32: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (2504 -> 2518)  ion 32: Seg4 -> Seg7 via J1
+    - MOVE   (2518 -> 2532)  ion 32: Seg7 -> Seg2 via J2
+    - MERGE  (2532 -> 2612)  ion 32: Seg2 -> T2
+[SHUTTLE 10] ion=24  T3 -> T4  route=T3->J0->J1->T4
+    - SPLIT  (2892 -> 3012)  ion 24: T3 -> Seg3 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=24, i2=25)
+    - MOVE   (3012 -> 3026)  ion 24: Seg3 -> Seg6 via J0
+    - MOVE   (3026 -> 3040)  ion 24: Seg6 -> Seg4 via J1
+    - MERGE  (3040 -> 3120)  ion 24: Seg4 -> T4
+[SHUTTLE 11] ion=32  T2 -> T4  route=T2->J2->J1->T4
+    - SPLIT  (3120 -> 3200)  ion 32: T2 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (3200 -> 3214)  ion 32: Seg2 -> Seg7 via J2
+    - MOVE   (3214 -> 3228)  ion 32: Seg7 -> Seg4 via J1
+    - MERGE  (3228 -> 3308)  ion 32: Seg4 -> T4
+[SHUTTLE 12] ion=32  T4 -> T3  route=T4->J1->J0->T3
+    - SPLIT  (3348 -> 3428)  ion 32: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (3428 -> 3442)  ion 32: Seg4 -> Seg6 via J1
+    - MOVE   (3442 -> 3456)  ion 32: Seg6 -> Seg3 via J0
+    - MERGE  (3456 -> 3536)  ion 32: Seg3 -> T3
+SplitSWAP: 3
+SchedulerFiredShuttle: 13
+ReportedTotalShuttle: 13
+----------------
+SUMMARY|program=programs\BV32|machine=G2x3|version=V6|mapper=SABRE2|scale=SMALL|total_shuttle=13|execution_time_us=3831|fidelity=0.8777875012968096|trap_capacity=8|lookahead_k=None|swap_threshold=None|num_optical_zones=1|max_qubits_per_qccd=32|enable_swap_insert=0|num_modules=0|remote_gate_count=None|compile_time_s=0.009606|logical_shuttle_count=13|physical_shuttle_leg_count=13|split_count=13|merge_count=13|move_count=24
