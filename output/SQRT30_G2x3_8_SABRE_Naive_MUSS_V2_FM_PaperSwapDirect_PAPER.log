@@ -1,0 +1,301 @@
+========== Gate Set Summary ==========
+cx: 337
+h: 112
+measure: 5
+t: 168
+tdg: 126
+x: 48
+z: 6
+======================================
+Simulation
+Program:           programs\SQRT30.qasm
+Machine:           G2x3
+Model:             MUSS_Params
+Program Qubits:    30
+Ions/Region(arg):  8
+Effective Cap:     8
+Mapper:            SABRE
+Reorder:           Naive
+SerialTrap:        1
+SerialComm:        1
+SerialAll:         1
+GateType:          FM
+SwapType:          PaperSwapDirect
+Scheduler Family:  MUSS
+Scheduler Version: V2
+Analyzer Mode:     PAPER
+Arch Scale:        SMALL
+Strict Repro:      False
+Large.Env.K:       None
+Large.Env.T:       None
+Large.Env.MaxQCCD: 32
+Large.Env.OptZone: 1
+Large.Env.SWAP:    False
+#Traps=6 #Junctions=3 #Segments=8
+TrapCapacity(default)=8
+Parse object map:
+{4: [21, 25], 5: [22, 27], 6: [23, 25], 7: [23, 26], 8: [24, 27], 9: [24, 28], 17: [25, 26], 18: [0, 25], 19: [26, 0], 22: [26, 25], 25: [0, 25], 26: [26, 0], 27: [25, 26], 33: [27, 0], 34: [1, 27], 35: [0, 1], 38: [0, 27], 41: [1, 27], 42: [0, 1], 43: [27, 0], 49: [28, 1], 50: [2, 28], 51: [1, 2], 54: [1, 28], 57: [2, 28], 58: [1, 2], 59: [28, 1], 66: [28, 1], 67: [2, 28], 68: [1, 2], 71: [1, 28], 74: [2, 28], 75: [1, 2], 76: [28, 1], 82: [27, 0], 83: [1, 27], 84: [0, 1], 87: [0, 27], 90: [1, 27], 91: [0, 1], 92: [27, 0], 98: [25, 26], 99: [0, 25], 100: [26, 0], 103: [26, 25], 106: [0, 25], 107: [26, 0], 108: [25, 26], 113: [21, 25], 114: [22, 27], 115: [23, 25], 116: [23, 26], 117: [24, 27], 118: [24, 28], 131: [21, 22], 132: [9, 21], 133: [22, 9], 136: [22, 21], 139: [9, 21], 140: [22, 9], 141: [21, 22], 147: [23, 9], 148: [10, 23], 149: [9, 10], 152: [9, 23], 155: [10, 23], 156: [9, 10], 157: [23, 9], 163: [24, 10], 164: [11, 24], 165: [10, 11], 168: [10, 24], 171: [11, 24], 172: [10, 11], 173: [24, 10], 180: [24, 10], 181: [11, 24], 182: [10, 11], 185: [10, 24], 188: [11, 24], 189: [10, 11], 190: [24, 10], 196: [23, 9], 197: [10, 23], 198: [9, 10], 201: [9, 23], 204: [10, 23], 205: [9, 10], 206: [23, 9], 212: [21, 22], 213: [9, 21], 214: [22, 9], 217: [22, 21], 220: [9, 21], 221: [22, 9], 222: [21, 22], 232: [21, 25], 233: [22, 27], 234: [23, 25], 235: [23, 26], 236: [24, 27], 237: [24, 28], 245: [25, 26], 246: [3, 25], 247: [26, 3], 250: [26, 25], 253: [3, 25], 254: [26, 3], 255: [25, 26], 261: [27, 3], 262: [4, 27], 263: [3, 4], 266: [3, 27], 269: [4, 27], 270: [3, 4], 271: [27, 3], 277: [28, 4], 278: [5, 28], 279: [4, 5], 282: [4, 28], 285: [5, 28], 286: [4, 5], 287: [28, 4], 294: [28, 4], 295: [5, 28], 296: [4, 5], 299: [4, 28], 302: [5, 28], 303: [4, 5], 304: [28, 4], 310: [27, 3], 311: [4, 27], 312: [3, 4], 315: [3, 27], 318: [4, 27], 319: [3, 4], 320: [27, 3], 326: [25, 26], 327: [3, 25], 328: [26, 3], 331: [26, 25], 334: [3, 25], 335: [26, 3], 336: [25, 26], 341: [21, 25], 342: [22, 27], 343: [23, 25], 344: [23, 26], 345: [24, 27], 346: [24, 28], 359: [21, 22], 360: [12, 21], 361: [22, 12], 364: [22, 21], 367: [12, 21], 368: [22, 12], 369: [21, 22], 375: [23, 12], 376: [13, 23], 377: [12, 13], 380: [12, 23], 383: [13, 23], 384: [12, 13], 385: [23, 12], 391: [24, 13], 392: [14, 24], 393: [13, 14], 396: [13, 24], 399: [14, 24], 400: [13, 14], 401: [24, 13], 408: [24, 13], 409: [14, 24], 410: [13, 14], 413: [13, 24], 416: [14, 24], 417: [13, 14], 418: [24, 13], 424: [23, 12], 425: [13, 23], 426: [12, 13], 429: [12, 23], 432: [13, 23], 433: [12, 13], 434: [23, 12], 440: [21, 22], 441: [12, 21], 442: [22, 12], 445: [22, 21], 448: [12, 21], 449: [22, 12], 450: [21, 22], 460: [21, 25], 461: [22, 27], 462: [23, 25], 463: [23, 26], 464: [24, 27], 465: [24, 28], 473: [25, 26], 474: [6, 25], 475: [26, 6], 478: [26, 25], 481: [6, 25], 482: [26, 6], 483: [25, 26], 489: [27, 6], 490: [7, 27], 491: [6, 7], 494: [6, 27], 497: [7, 27], 498: [6, 7], 499: [27, 6], 505: [28, 7], 506: [8, 28], 507: [7, 8], 510: [7, 28], 513: [8, 28], 514: [7, 8], 515: [28, 7], 522: [28, 7], 523: [8, 28], 524: [7, 8], 527: [7, 28], 530: [8, 28], 531: [7, 8], 532: [28, 7], 538: [27, 6], 539: [7, 27], 540: [6, 7], 543: [6, 27], 546: [7, 27], 547: [6, 7], 548: [27, 6], 554: [25, 26], 555: [6, 25], 556: [26, 6], 559: [26, 25], 562: [6, 25], 563: [26, 6], 564: [25, 26], 569: [21, 25], 570: [22, 27], 571: [23, 25], 572: [23, 26], 573: [24, 27], 574: [24, 28], 587: [21, 22], 588: [15, 21], 589: [22, 15], 592: [22, 21], 595: [15, 21], 596: [22, 15], 597: [21, 22], 603: [23, 15], 604: [16, 23], 605: [15, 16], 608: [15, 23], 611: [16, 23], 612: [15, 16], 613: [23, 15], 619: [24, 16], 620: [17, 24], 621: [16, 17], 624: [16, 24], 627: [17, 24], 628: [16, 17], 629: [24, 16], 636: [24, 16], 637: [17, 24], 638: [16, 17], 641: [16, 24], 644: [17, 24], 645: [16, 17], 646: [24, 16], 652: [23, 15], 653: [16, 23], 654: [15, 16], 657: [15, 23], 660: [16, 23], 661: [15, 16], 662: [23, 15], 668: [21, 22], 669: [15, 21], 670: [22, 15], 673: [22, 21], 676: [15, 21], 677: [22, 15], 678: [21, 22], 688: [21, 25], 689: [22, 27], 690: [23, 25], 691: [23, 26], 692: [24, 27], 693: [24, 28], 701: [25, 26], 702: [18, 25], 703: [26, 18], 706: [26, 25], 709: [18, 25], 710: [26, 18], 711: [25, 26], 717: [27, 18], 718: [19, 27], 719: [18, 19], 722: [18, 27], 725: [19, 27], 726: [18, 19], 727: [27, 18], 733: [28, 19], 734: [20, 28], 735: [19, 20], 738: [19, 28], 741: [20, 28], 742: [19, 20], 743: [28, 19], 745: [20, 29], 750: [28, 19], 751: [20, 28], 752: [19, 20], 755: [19, 28], 758: [20, 28], 759: [19, 20], 760: [28, 19], 766: [27, 18], 767: [19, 27], 768: [18, 19], 771: [18, 27], 774: [19, 27], 775: [18, 19], 776: [27, 18], 782: [25, 26], 783: [18, 25], 784: [26, 18], 787: [26, 25], 790: [18, 25], 791: [26, 18], 792: [25, 26]}
+Parse object graph:
+DiGraph with 802 nodes and 1109 edges
+Using QubitMapSABRE2 mapper (matches muss_schedule2 paper version)
+Raw mapping:
+{'layout': {0: 0, 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 0, 7: 0, 8: 3, 9: 2, 10: 2, 11: 2, 12: 1, 13: 2, 14: 2, 15: 1, 16: 1, 17: 1, 18: 0, 19: 0, 20: 0, 21: 1, 22: 1, 23: 1, 24: 2, 25: 3, 26: 3, 27: 0, 28: 0, 29: 2}, 'trap_to_qubits': {0: [7, 28, 0, 27, 6, 19, 20, 18], 1: [22, 23, 12, 15, 21, 16, 17], 2: [11, 29, 10, 9, 14, 13, 24], 3: [3, 4, 26, 25, 5, 2, 8, 1], 4: [], 5: []}}
+Initial layout policy: mapping_bundle(layout + trap_to_qubits_from_mapper)
+Note: reorder_choice='Naive' is ignored because mapper already provides ordered trap layout
+Use mapper-provided ordered trap layout for mapper 'SABRE'
+Initial qubit layout:
+{0: [7, 28, 0, 27, 6, 19, 20, 18], 1: [22, 23, 12, 15, 21, 16, 17], 2: [11, 29, 10, 9, 14, 13, 24], 3: [3, 4, 26, 25, 5, 2, 8, 1], 4: [], 5: []}
+Using MUSS Scheduler (V2) with SABRE Mapping
+Using muss_schedule2.py paper-faithful fixed version
+Scheduler object construction time: 0.002782s
+Scheduler run time: 0.780248s
+Analyzer shuttle mode: aggregate (detected shuttle_id annotations)
+Using legacy analyzer.py
+Analyzer parameter wiring: alpha_bg=0.0, T1=600000000.0, k_heating=0.001, epsilon_2q=3.90625e-05, strict_paper_mainline=True
+Analyzer mode: paper
+Program Finish Time: 13954 us
+OPCOUNTS Gate: 802 Split: 45 Move: 84 Merge: 45
+
+Two-qubit gate chain statistics
+Mean: 7.456973293768546 Max: 8.0
+Fidelity: 0.3960187508241154
+
+Shuttle count summary
+  logical_shuttle_count      = 35   # High-level shuttle count aggregated by shuttle_id
+  physical_shuttle_leg_count = 45   # Paper-facing count: each complete trap-to-trap split+move+merge leg
+  split_count                = 45
+  merge_count                = 45
+  move_count                 = 84
+[DBG SUMMARY] gates=802  gate_mult=0.4524  avg_gate_nbar=0.0000
+[DBG SUMMARY] logical_shuttles=35  shuttle_mult=0.875374  min_shuttle=0.9935
+[DBG SUMMARY] worst_B: Trap 0 -> 1.000000 (heat_state=0.000000, alpha_bg=0.0, move_bg_fraction=0.0, model=exp, strict_paper_mainline=True)
+Analyzer time: 0.002539s
+
+========== ANALYSIS RESULT ==========
+{'fidelity': 0.3960187508241154, 'total_shuttle': 45, 'logical_shuttle_count': 35, 'physical_shuttle_leg_count': 45, 'split_count': 45, 'merge_count': 45, 'move_count': 84, 'time': 13954}
+
+========== SHUTTLE TRACE ==========
+[SHUTTLE 0] ion=25  T3 -> T1  route=T3->J0->J1->T1
+    - SPLIT  (1520 -> 1640)  ion 25: T3 -> Seg3 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=25, i2=3)
+    - MOVE   (1640 -> 1654)  ion 25: Seg3 -> Seg6 via J0
+    - MOVE   (1654 -> 1668)  ion 25: Seg6 -> Seg1 via J1
+    - MERGE  (1668 -> 1748)  ion 25: Seg1 -> T1
+[SHUTTLE 1] ion=27  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (1748 -> 1868)  ion 27: T0 -> Seg0 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=27, i2=18)
+    - MOVE   (1868 -> 1882)  ion 27: Seg0 -> Seg6 via J0
+    - MOVE   (1882 -> 1896)  ion 27: Seg6 -> Seg4 via J1
+    - MERGE  (1896 -> 1976)  ion 27: Seg4 -> T4
+[SHUTTLE 2] ion=22  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (1976 -> 2096)  ion 22: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=22, i2=25)
+    - MOVE   (2096 -> 2110)  ion 22: Seg1 -> Seg4 via J1
+    - MERGE  (2110 -> 2190)  ion 22: Seg4 -> T4
+[SHUTTLE 3] ion=25  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (2190 -> 2270)  ion 25: T1 -> Seg1 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (2270 -> 2284)  ion 25: Seg1 -> Seg6 via J1
+    - MOVE   (2284 -> 2298)  ion 25: Seg6 -> Seg0 via J0
+    - MERGE  (2298 -> 2378)  ion 25: Seg0 -> T0
+[SHUTTLE 4] ion=27  T4 -> T3  route=T4->J1->J0->T3
+    - SPLIT  (2378 -> 2498)  ion 27: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=27, i2=22)
+    - MOVE   (2498 -> 2512)  ion 27: Seg4 -> Seg6 via J1
+    - MOVE   (2512 -> 2526)  ion 27: Seg6 -> Seg3 via J0
+    - MERGE  (2526 -> 2606)  ion 27: Seg3 -> T3
+[SHUTTLE 5] ion=28  T0 -> T1  route=T0->J0->J1->T1
+    - SPLIT  (2926 -> 3046)  ion 28: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=28, i2=25)
+    - MOVE   (3046 -> 3060)  ion 28: Seg0 -> Seg6 via J0
+    - MOVE   (3060 -> 3074)  ion 28: Seg6 -> Seg1 via J1
+    - MERGE  (3074 -> 3154)  ion 28: Seg1 -> T1
+[SHUTTLE 6] ion=1  T3 -> T1  route=T3->J0->J1->T1
+    - SPLIT  (3326 -> 3446)  ion 1: T3 -> Seg3 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=1, i2=27)
+    - MOVE   (3446 -> 3460)  ion 1: Seg3 -> Seg6 via J0
+    - MOVE   (3460 -> 3474)  ion 1: Seg6 -> Seg1 via J1
+    - MERGE  (3474 -> 3554)  ion 1: Seg1 -> T1
+[SHUTTLE 7] ion=28  T1 -> T3  route=T1->J1->J0->T3
+    - SPLIT  (3634 -> 3754)  ion 28: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=28, i2=1)
+    - MOVE   (3754 -> 3768)  ion 28: Seg1 -> Seg6 via J1
+    - MOVE   (3768 -> 3782)  ion 28: Seg6 -> Seg3 via J0
+    - MERGE  (3782 -> 3862)  ion 28: Seg3 -> T3
+[SHUTTLE 8] ion=9  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (3862 -> 3982)  ion 9: T2 -> Seg2 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=9, i2=24)
+    - MOVE   (3982 -> 3996)  ion 9: Seg2 -> Seg7 via J2
+    - MOVE   (3996 -> 4010)  ion 9: Seg7 -> Seg1 via J1
+    - MERGE  (4010 -> 4090)  ion 9: Seg1 -> T1
+[SHUTTLE 9] ion=23  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (4330 -> 4450)  ion 23: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=23, i2=9)
+    - MOVE   (4450 -> 4464)  ion 23: Seg1 -> Seg7 via J1
+    - MOVE   (4464 -> 4478)  ion 23: Seg7 -> Seg2 via J2
+    - MERGE  (4478 -> 4558)  ion 23: Seg2 -> T2
+[SHUTTLE 10] ion=24  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (4878 -> 4998)  ion 24: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=24, i2=23)
+    - MOVE   (4998 -> 5012)  ion 24: Seg2 -> Seg7 via J2
+    - MOVE   (5012 -> 5026)  ion 24: Seg7 -> Seg1 via J1
+    - MERGE  (5026 -> 5106)  ion 24: Seg1 -> T1
+[SHUTTLE 11] ion=29  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (5106 -> 5226)  ion 29: T2 -> Seg2 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=29, i2=23)
+    - MOVE   (5226 -> 5240)  ion 29: Seg2 -> Seg7 via J2
+    - MOVE   (5240 -> 5254)  ion 29: Seg7 -> Seg6 via J1
+    - MOVE   (5254 -> 5268)  ion 29: Seg6 -> Seg0 via J0
+    - MERGE  (5268 -> 5348)  ion 29: Seg0 -> T0
+[SHUTTLE 12] ion=26  T3 -> T2  route=T3->J0->J1->J2->T2
+    - SPLIT  (5348 -> 5468)  ion 26: T3 -> Seg3 (swap_cnt=1, swap_hops=4, ion_hops=0, i1=26, i2=28)
+    - MOVE   (5468 -> 5482)  ion 26: Seg3 -> Seg6 via J0
+    - MOVE   (5482 -> 5496)  ion 26: Seg6 -> Seg7 via J1
+    - MOVE   (5496 -> 5510)  ion 26: Seg7 -> Seg2 via J2
+    - MERGE  (5510 -> 5590)  ion 26: Seg2 -> T2
+[SHUTTLE 13] ion=24  T1 -> T3  route=T1->J1->J0->T3
+    - SPLIT  (5666 -> 5746)  ion 24: T1 -> Seg1 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (5746 -> 5760)  ion 24: Seg1 -> Seg6 via J1
+    - MOVE   (5760 -> 5774)  ion 24: Seg6 -> Seg3 via J0
+    - MERGE  (5774 -> 5854)  ion 24: Seg3 -> T3
+[SHUTTLE 14] ion=0  T0 -> T2  route=T0->J0->J1->J2->T2
+    - SPLIT  (5854 -> 5974)  ion 0: T0 -> Seg0 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=0, i2=29)
+    - MOVE   (5974 -> 5988)  ion 0: Seg0 -> Seg6 via J0
+    - MOVE   (5988 -> 6002)  ion 0: Seg6 -> Seg7 via J1
+    - MOVE   (6002 -> 6016)  ion 0: Seg7 -> Seg2 via J2
+    - MERGE  (6016 -> 6096)  ion 0: Seg2 -> T2
+[SHUTTLE 15] ion=26  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (6256 -> 6376)  ion 26: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=26, i2=0)
+    - MOVE   (6376 -> 6390)  ion 26: Seg2 -> Seg7 via J2
+    - MOVE   (6390 -> 6404)  ion 26: Seg7 -> Seg6 via J1
+    - MOVE   (6404 -> 6418)  ion 26: Seg6 -> Seg0 via J0
+    - MERGE  (6418 -> 6498)  ion 26: Seg0 -> T0
+[SHUTTLE 16] ion=0  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (6498 -> 6578)  ion 0: T2 -> Seg2 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (6578 -> 6592)  ion 0: Seg2 -> Seg7 via J2
+    - MOVE   (6592 -> 6606)  ion 0: Seg7 -> Seg1 via J1
+    - MERGE  (6606 -> 6686)  ion 0: Seg1 -> T1
+[SHUTTLE 17] ion=2  T3 -> T4  route=T3->J0->J1->T4
+    - SPLIT  (6846 -> 6966)  ion 2: T3 -> Seg3 (swap_cnt=1, swap_hops=6, ion_hops=0, i1=2, i2=24)
+    - MOVE   (6966 -> 6980)  ion 2: Seg3 -> Seg6 via J0
+    - MOVE   (6980 -> 6994)  ion 2: Seg6 -> Seg4 via J1
+    - MERGE  (6994 -> 7074)  ion 2: Seg4 -> T4
+[SHUTTLE 18] ion=1  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (7074 -> 7194)  ion 1: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=1, i2=0)
+    - MOVE   (7194 -> 7208)  ion 1: Seg1 -> Seg4 via J1
+    - MERGE  (7208 -> 7288)  ion 1: Seg4 -> T4
+[SHUTTLE 19] ion=7  T0 -> T3  route=T0->J0->T3
+    - SPLIT  (7298 -> 7418)  ion 7: T0 -> Seg0 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=7, i2=26)
+    - MOVE   (7418 -> 7432)  ion 7: Seg0 -> Seg3 via J0
+    - MERGE  (7432 -> 7512)  ion 7: Seg3 -> T3
+[SHUTTLE 20] ion=22  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (7512 -> 7632)  ion 22: T4 -> Seg4 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=22, i2=1)
+    - MOVE   (7632 -> 7646)  ion 22: Seg4 -> Seg1 via J1
+    - MERGE  (7646 -> 7726)  ion 22: Seg1 -> T1
+[SHUTTLE 21] ion=9  T1 -> T2  route=T1->J1->J2->T2
+    - SPLIT  (8046 -> 8166)  ion 9: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=9, i2=22)
+    - MOVE   (8166 -> 8180)  ion 9: Seg1 -> Seg7 via J1
+    - MOVE   (8180 -> 8194)  ion 9: Seg7 -> Seg2 via J2
+    - MERGE  (8194 -> 8274)  ion 9: Seg2 -> T2
+[SHUTTLE 22] ion=13  T2 -> T1  route=T2->J2->J1->T1
+    - SPLIT  (8594 -> 8714)  ion 13: T2 -> Seg2 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=13, i2=9)
+    - MOVE   (8714 -> 8728)  ion 13: Seg2 -> Seg7 via J2
+    - MOVE   (8728 -> 8742)  ion 13: Seg7 -> Seg1 via J1
+    - MERGE  (8742 -> 8822)  ion 13: Seg1 -> T1
+[SHUTTLE 23] ion=23  T2 -> T0  route=T2->J2->J1->J0->T0
+    - SPLIT  (8822 -> 8942)  ion 23: T2 -> Seg2 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=23, i2=9)
+    - MOVE   (8942 -> 8956)  ion 23: Seg2 -> Seg7 via J2
+    - MOVE   (8956 -> 8970)  ion 23: Seg7 -> Seg6 via J1
+    - MOVE   (8970 -> 8984)  ion 23: Seg6 -> Seg0 via J0
+    - MERGE  (8984 -> 9064)  ion 23: Seg0 -> T0
+[SHUTTLE 24] ion=27  T3 -> T4  route=T3->J0->J1->T4
+    - SPLIT  (9064 -> 9184)  ion 27: T3 -> Seg3 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=27, i2=7)
+    - MOVE   (9184 -> 9198)  ion 27: Seg3 -> Seg6 via J0
+    - MOVE   (9198 -> 9212)  ion 27: Seg6 -> Seg4 via J1
+    - MERGE  (9212 -> 9292)  ion 27: Seg4 -> T4
+[SHUTTLE 25] ion=22  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (9292 -> 9412)  ion 22: T1 -> Seg1 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=22, i2=13)
+    - MOVE   (9412 -> 9426)  ion 22: Seg1 -> Seg4 via J1
+    - MERGE  (9426 -> 9506)  ion 22: Seg4 -> T4
+[SHUTTLE 26] ion=27  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (9586 -> 9706)  ion 27: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=27, i2=22)
+    - MOVE   (9706 -> 9720)  ion 27: Seg4 -> Seg1 via J1
+    - MERGE  (9720 -> 9800)  ion 27: Seg1 -> T1
+[SHUTTLE 27] ion=1  T4 -> T3  route=T4->J1->J0->T3
+    - SPLIT  (9800 -> 9920)  ion 1: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=1, i2=22)
+    - MOVE   (9920 -> 9934)  ion 1: Seg4 -> Seg6 via J1
+    - MOVE   (9934 -> 9948)  ion 1: Seg6 -> Seg3 via J0
+    - MERGE  (9948 -> 10028)  ion 1: Seg3 -> T3
+[SHUTTLE 28] ion=12  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (10028 -> 10148)  ion 12: T1 -> Seg1 (swap_cnt=1, swap_hops=7, ion_hops=0, i1=12, i2=27)
+    - MOVE   (10148 -> 10162)  ion 12: Seg1 -> Seg4 via J1
+    - MERGE  (10162 -> 10242)  ion 12: Seg4 -> T4
+[SHUTTLE 29] ion=23  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (10242 -> 10322)  ion 23: T0 -> Seg0 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (10322 -> 10336)  ion 23: Seg0 -> Seg6 via J0
+    - MOVE   (10336 -> 10350)  ion 23: Seg6 -> Seg4 via J1
+    - MERGE  (10350 -> 10430)  ion 23: Seg4 -> T4
+[SHUTTLE 30] ion=21  T1 -> T0  route=T1->J1->J0->T0
+    - SPLIT  (10430 -> 10550)  ion 21: T1 -> Seg1 (swap_cnt=1, swap_hops=5, ion_hops=0, i1=21, i2=27)
+    - MOVE   (10550 -> 10564)  ion 21: Seg1 -> Seg6 via J1
+    - MOVE   (10564 -> 10578)  ion 21: Seg6 -> Seg0 via J0
+    - MERGE  (10578 -> 10658)  ion 21: Seg0 -> T0
+[SHUTTLE 31] ion=24  T3 -> T1  route=T3->J0->J1->T1
+    - SPLIT  (10658 -> 10778)  ion 24: T3 -> Seg3 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=24, i2=1)
+    - MOVE   (10778 -> 10792)  ion 24: Seg3 -> Seg6 via J0
+    - MOVE   (10792 -> 10806)  ion 24: Seg6 -> Seg1 via J1
+    - MERGE  (10806 -> 10886)  ion 24: Seg1 -> T1
+[SHUTTLE 32] ion=25  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (10886 -> 11006)  ion 25: T0 -> Seg0 (swap_cnt=1, swap_hops=3, ion_hops=0, i1=25, i2=21)
+    - MOVE   (11006 -> 11020)  ion 25: Seg0 -> Seg6 via J0
+    - MOVE   (11020 -> 11034)  ion 25: Seg6 -> Seg4 via J1
+    - MERGE  (11034 -> 11114)  ion 25: Seg4 -> T4
+[SHUTTLE 33] ion=28  T3 -> T1  route=T3->J0->J1->T1
+    - SPLIT  (11114 -> 11234)  ion 28: T3 -> Seg3 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=28, i2=1)
+    - MOVE   (11234 -> 11248)  ion 28: Seg3 -> Seg6 via J0
+    - MOVE   (11248 -> 11262)  ion 28: Seg6 -> Seg1 via J1
+    - MERGE  (11262 -> 11342)  ion 28: Seg1 -> T1
+[SHUTTLE 34] ion=23  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (11342 -> 11462)  ion 23: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=23, i2=25)
+    - MOVE   (11462 -> 11476)  ion 23: Seg4 -> Seg6 via J1
+    - MOVE   (11476 -> 11490)  ion 23: Seg6 -> Seg0 via J0
+    - MERGE  (11490 -> 11570)  ion 23: Seg0 -> T0
+[SHUTTLE 35] ion=27  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (11570 -> 11690)  ion 27: T1 -> Seg1 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=27, i2=28)
+    - MOVE   (11690 -> 11704)  ion 27: Seg1 -> Seg4 via J1
+    - MERGE  (11704 -> 11784)  ion 27: Seg4 -> T4
+[SHUTTLE 36] ion=23  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (11784 -> 11864)  ion 23: T0 -> Seg0 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (11864 -> 11878)  ion 23: Seg0 -> Seg6 via J0
+    - MOVE   (11878 -> 11892)  ion 23: Seg6 -> Seg4 via J1
+    - MERGE  (11892 -> 11972)  ion 23: Seg4 -> T4
+[SHUTTLE 37] ion=27  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (12012 -> 12132)  ion 27: T4 -> Seg4 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=27, i2=23)
+    - MOVE   (12132 -> 12146)  ion 27: Seg4 -> Seg1 via J1
+    - MERGE  (12146 -> 12226)  ion 27: Seg1 -> T1
+[SHUTTLE 38] ion=23  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (12226 -> 12306)  ion 23: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (12306 -> 12320)  ion 23: Seg4 -> Seg6 via J1
+    - MOVE   (12320 -> 12334)  ion 23: Seg6 -> Seg0 via J0
+    - MERGE  (12334 -> 12414)  ion 23: Seg0 -> T0
+[SHUTTLE 39] ion=21  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (12454 -> 12574)  ion 21: T0 -> Seg0 (swap_cnt=1, swap_hops=1, ion_hops=0, i1=21, i2=23)
+    - MOVE   (12574 -> 12588)  ion 21: Seg0 -> Seg6 via J0
+    - MOVE   (12588 -> 12602)  ion 21: Seg6 -> Seg4 via J1
+    - MERGE  (12602 -> 12682)  ion 21: Seg4 -> T4
+[SHUTTLE 40] ion=27  T1 -> T4  route=T1->J1->T4
+    - SPLIT  (12682 -> 12762)  ion 27: T1 -> Seg1 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (12762 -> 12776)  ion 27: Seg1 -> Seg4 via J1
+    - MERGE  (12776 -> 12856)  ion 27: Seg4 -> T4
+[SHUTTLE 41] ion=25  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (12896 -> 13016)  ion 25: T4 -> Seg4 (swap_cnt=1, swap_hops=2, ion_hops=0, i1=25, i2=27)
+    - MOVE   (13016 -> 13030)  ion 25: Seg4 -> Seg6 via J1
+    - MOVE   (13030 -> 13044)  ion 25: Seg6 -> Seg0 via J0
+    - MERGE  (13044 -> 13124)  ion 25: Seg0 -> T0
+[SHUTTLE 42] ion=27  T4 -> T1  route=T4->J1->T1
+    - SPLIT  (13124 -> 13204)  ion 27: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (13204 -> 13218)  ion 27: Seg4 -> Seg1 via J1
+    - MERGE  (13218 -> 13298)  ion 27: Seg1 -> T1
+[SHUTTLE 43] ion=25  T0 -> T4  route=T0->J0->J1->T4
+    - SPLIT  (13298 -> 13378)  ion 25: T0 -> Seg0 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (13378 -> 13392)  ion 25: Seg0 -> Seg6 via J0
+    - MOVE   (13392 -> 13406)  ion 25: Seg6 -> Seg4 via J1
+    - MERGE  (13406 -> 13486)  ion 25: Seg4 -> T4
+[SHUTTLE 44] ion=25  T4 -> T0  route=T4->J1->J0->T0
+    - SPLIT  (13526 -> 13606)  ion 25: T4 -> Seg4 (swap_cnt=0, swap_hops=0, ion_hops=0, i1=0, i2=0)
+    - MOVE   (13606 -> 13620)  ion 25: Seg4 -> Seg6 via J1
+    - MOVE   (13620 -> 13634)  ion 25: Seg6 -> Seg0 via J0
+    - MERGE  (13634 -> 13714)  ion 25: Seg0 -> T0
+SplitSWAP: 35
+SchedulerFiredShuttle: 45
+ReportedTotalShuttle: 45
+----------------
+SUMMARY|program=programs\SQRT30|machine=G2x3|version=V2|mapper=SABRE2|scale=SMALL|total_shuttle=45|execution_time_us=13954|fidelity=0.3960187508241154|trap_capacity=8|lookahead_k=None|swap_threshold=None|num_optical_zones=1|max_qubits_per_qccd=32|enable_swap_insert=0|num_modules=0|remote_gate_count=None|compile_time_s=0.785569|logical_shuttle_count=35|physical_shuttle_leg_count=45|split_count=45|merge_count=45|move_count=84
